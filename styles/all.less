@@ -8,9 +8,11 @@ body {
 
 @import './candidate.less';
 
-.off + .off { margin-left: 10px; }
+.off(@factor: 1) { margin-top: @factor * 10px; margin-left: @factor * 10px; }
+.off { .off(); }
 
 .app {
+    padding-bottom: 50%;
 }
 .toolbar {
     position: sticky;
