@@ -6,7 +6,6 @@ body {
 }
 
 
-@import './candidate.less';
 
 @off: 7px;
 @look-through: 0.5;
@@ -15,12 +14,23 @@ body {
 .off(@factor: 1) { margin-top: @factor * @off; margin-left: @factor * @off; }
 .off { .off(); }
 
-.app {
-    padding-bottom: 50%;
+.items() {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 
-.app.as-no-scope-ranks .candidate .candidate-rank { display: none; }
-.app.as-no-scope-ranks .candidate.as-out-of-rank .candidate-rank { display: initial; }
+.item() {
+    .off();
+    border: solid 2px transparent;
+    padding: 0px 4px 4px 4px;
+    position: relative;
+}
+
+@import './app.less';
+@import './candidate.less';
+@import './tagger.less';
+
 
 .wall {
     .off();
