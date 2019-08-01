@@ -15,7 +15,7 @@
     "@tensorflow/tfjs-node-gpu": "1.2.3",
     "less": "3.9.0",
     "tslint": "5.18.0",
-    "typescript": "3.6.0-dev.20190629",
+    "typescript": "3.6.0-dev.20190730",
     "typescript-tslint-plugin": "0.3.1"
   }
 }
