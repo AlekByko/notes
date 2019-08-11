@@ -19,6 +19,10 @@ body {
 @welcome-color: #080;
 .off(@factor: 1) { margin-top: @factor * @off; margin-left: @factor * @off; }
 .off { .off(); }
+.wall {
+    .off();
+    border-left: solid 1px gray;
+}
 
 .items() {
     display: flex;
@@ -41,18 +45,5 @@ body {
 @import './pickerlist.less';
 @import './bioscope.less';
 @import './sheet.less';
+@import './toolbar.less';
 
-
-.wall {
-    .off();
-    border-left: solid 1px gray;
-}
-
-.toolbar {
-    .off();
-    position: sticky;
-    top: 0px;
-    background-color: white;
-    z-index: 1;
-    padding-bottom: @off;
-}
