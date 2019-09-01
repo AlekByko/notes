@@ -4,6 +4,7 @@
         "node_modules": true,
         "scripts": true,
         "bundled": true,
+        "recorded": true,
         "**/*.css": true
     },
     "editor.codeActionsOnSave": {
