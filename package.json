@@ -19,7 +19,7 @@
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "tslint": "5.18.0",
-    "typescript": "3.8.0-dev.20200101",
+    "typescript": "^3.9.0-dev.20200404",
     "typescript-tslint-plugin": "0.3.1"
   }
 }
