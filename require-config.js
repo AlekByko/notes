@@ -1,4 +1,4 @@
-var require  = {
+var require = {
     baseUrl: './',
     paths: {
         'text': './node_modules/requirejs-plugins/lib/text',
@@ -6,11 +6,15 @@ var require  = {
         'react': './node_modules/react/umd/react.development',
         'react-dom': './node_modules/react-dom/umd/react-dom.development',
         '@tensorflow/tfjs': './node_modules/@tensorflow/tfjs/dist/tf.min',
+        '@tensorflow/tfjs-vis': './node_modules/@tensorflow/tfjs-vis/dist/tfjs-vis.umd.min'
     },
-    shims: {
+    map: {
+        '*': {
+            'tf': '@tensorflow/tfjs'
+        }
     },
     packages: [
-	{ name: 'saving', location: './scripts/saving', main: 'configs' },
+        { name: 'saving', location: './scripts/saving', main: 'configs' },
         { name: 'configs', location: './configs', main: 'configs' }
     ]
 };
