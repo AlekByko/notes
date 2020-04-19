@@ -4,11 +4,12 @@
     "fluent-ffmpeg": "2.1.2",
     "ml5": "0.4.3",
     "p5": "0.10.2",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
     "requirejs": "2.3.6",
     "requirejs-plugins": "1.0.2",
     "tfjs": "0.6.0",
-    "react": "16.13.1",
-    "react-dom": "16.13.1"
+    "wrtc": "0.4.4"
   },
   "devDependencies": {
     "@tensorflow/tfjs": "1.2.2",
