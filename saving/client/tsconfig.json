@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "outDir": "../../client",
+        "lib": [
+            "ESNext",
+            "dom"
+        ],
+        "module": "amd",
+        "target": "esnext",
+        "rootDir": "./",
+        "jsx": "react",
+        "strictNullChecks": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitThis": true,
+        "noImplicitReturns": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "strictFunctionTypes": true,
+        "noStrictGenericChecks": false,
+        "esModuleInterop": true
+    }
+}

@@ -1,0 +1,111 @@
+import { diffFrom, HomoDiff } from './diffs';
+
+export function toBucketMapFromArray<T, K, V, B>(
+    items: T[],
+    toKey: (value: T, index: number) => K,
+    toValue: (item: T, key: K, index: number) => V,
+    toBucket: (value: V, key: K, item: T, index: number) => B,
+    add: (bucket: B, value: V) => B,
+): Map<K, B> {
+    const result = new Map<K, B>();
+    const { length } = items;
+    for (let index = 0; index < length; index++) {
+        const item = items[index];
+        const key = toKey(item, index);
+        const value = toValue(item, key, index);
+        if (result.has(key)) {
+            const olderBucket = result.get(key)!;
+            const newerBucket = add(olderBucket, value);
+            if (olderBucket !== newerBucket) {
+                result.set(key, newerBucket);
+            }
+        } else {
+            const bucket = toBucket(value, key, item, index);
+            result.set(key, bucket);
+        }
+    }
+    return result;
+}
+
+export function toMapFromArray<T, K, V>(
+    items: T[],
+    toKey: (value: T, index: number) => K,
+    toValue: (item: T, key: K, index: number) => V,
+    resolve: (newer: V, older: V, key: K) => V,
+): Map<K, V> {
+    const result = new Map<K, V>();
+    const { length } = items;
+    for (let index = 0; index < length; index++) {
+        const item = items[index];
+        const key = toKey(item, index);
+        const value = toValue(item, key, index);
+        if (result.has(key)) {
+            const olderValue = result.get(key)!;
+            if (olderValue !== value) {
+                const resolvedValue = resolve(value, olderValue, key);
+                result.set(key, resolvedValue);
+            }
+        } else {
+            result.set(key, value);
+        }
+    }
+    return result;
+}
+
+export function toMapFromArrayByKeys<T, K, V>(
+    items: T[],
+    toKeys: (value: T, index: number) => K[],
+    toValue: (item: T, key: K, index: number) => V,
+    resolve: (newer: V, older: V, key: K) => V,
+): Map<K, V> {
+    const result = new Map<K, V>();
+    const { length } = items;
+    for (let index = 0; index < length; index++) {
+        const item = items[index];
+        const keys = toKeys(item, index);
+        for (const key of keys) {
+            const value = toValue(item, key, index);
+            if (result.has(key)) {
+                const olderValue = result.get(key)!;
+                if (olderValue !== value) {
+                    const resolvedValue = resolve(value, olderValue, key);
+                    result.set(key, resolvedValue);
+                }
+            } else {
+                result.set(key, value);
+            }
+        }
+    }
+    return result;
+}
+
+export function diffMapsViaKeys<K, V>(older: Map<K, V>, newer: Map<K, V>): HomoDiff<V[]> {
+    const entered: V[] = [];
+    newer.forEach((value, key) => {
+        if (older.has(key)) return;
+        entered.push(value);
+    });
+    const exited: V[] = [];
+    older.forEach((value, key) => {
+        if (newer.has(key)) return;
+        exited.push(value);
+    });
+    return diffFrom(exited, entered);
+}
+
+export function atMapOr<K, V, Or>(values: Map<K, V>, key: K, or: Or): V | Or {
+    if (!values.has(key)) return or;
+    return values.get(key)!;
+}
+
+export function atMapInsteadOr<K, V, T, Or>(
+    values: Map<K, V>,
+    key: K,
+    toValue: (value: V) => T,
+    or: Or,
+): T | Or {
+    if (!values.has(key)) return or;
+    const found = values.get(key)!;
+    const result = toValue(found);
+    return result;
+}

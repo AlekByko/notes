@@ -1,0 +1,46 @@
+import * as React from 'react';
+import * as ReactDom from 'react-dom';
+import { Point, pointFrom } from './geometry';
+
+export type Regarding<Concern> = (concern: Concern) => void;
+export function addClassIf(shouldAdd: boolean, className: string): string {
+    return shouldAdd ? ' ' + className : '';
+}
+let lastKey = 0;
+export function toNextKey(): string {
+    return 'key#' + (lastKey++);
+}
+
+export function atBottomLeft(element: HTMLElement): Point {
+    const { left: x, bottom: y } = element.getBoundingClientRect();
+    return pointFrom(x, y);
+}
+
+export function atTopRight(element: HTMLElement): Point {
+    const { right: x, top: y } = element.getBoundingClientRect();
+    return pointFrom(x, y);
+}
+
+export const atZero: Point = { x: 0, y: 0 };
+
+export type PropsOf<C> = C extends React.ComponentClass<infer Props> ? Props : never;
+export type ReactConstructor<Props> = new (props: Props) => React.Component<Props>;
+export type Rendered = JSX.Element | null;
+
+export function willRerenderOver<Props>(Root: ReactConstructor<Props>, rootElement: HTMLElement) {
+    return function willRender(props: Props): Promise<Props> {
+        return new Promise<Props>(resolve => {
+            ReactDom.render(
+                <Root { ...props } />, rootElement,
+                () => resolve(props),
+            );
+        });
+    };
+}
+
+export function openLink(url: string) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = 'hidden';
+    link.click();
+}
