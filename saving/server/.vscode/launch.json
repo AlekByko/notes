@@ -9,7 +9,7 @@
             "type": "node",
             "request": "launch",
             "name": "server",
-            "program": "${workspaceFolder}\\node_modules\\server\\server.js",
+            "program": "${workspaceFolder}\\node_modules\\saving-server\\server.js",
             "outFiles": [
                 "${workspaceFolder}/node_modules/server/*.js"
             ]

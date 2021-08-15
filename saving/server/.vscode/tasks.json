@@ -4,22 +4,22 @@
         {
             "type": "shell",
             "group": "build",
-            "label": "build-client-watch",
-            "command": "cmd /C build-client-watch.bat",
+            "label": "build-server",
+            "options": {
+                "cwd": "../../"
+            },
+            "command": "cmd /C build-server.bat",
             "problemMatcher": "$tsc-watch"
         },
         {
             "type": "shell",
             "group": "build",
             "label": "build-server-watch",
+            "options": {
+                "cwd": "../../",
+            },
             "command": "cmd /C build-server-watch.bat",
             "problemMatcher": "$tsc-watch"
-        },
-        {
-            "type": "shell",
-            "group": "build",
-            "label": "build-styles",
-            "command": "cmd /C build-styles.bat"
         }
     ]
 }

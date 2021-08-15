@@ -12,6 +12,6 @@ wss.on('connection', ws => {
         const message = bytes.toString("utf-8");
         console.log('now serving: ' + message);
         // https://stackoverflow.com/questions/27688804/how-do-i-debug-error-spawn-enoent-on-node-js
-        await willRunChild('cmd.exe /C start /min node.exe ./node_modules/server/cli.js ' + message, true);
+        await willRunChild('cmd.exe /C start /min node.exe ./node_modules/saving-server/cli.js ' + message, true);
     });
 });
