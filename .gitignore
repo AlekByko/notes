@@ -1,5 +1,8 @@
 node_modules
-scripts
+client
+server
+!saving/client
+!saving/server
 *.css
 *.reg
 *.log
