@@ -1,17 +1,15 @@
 
 .toolbar {
-    .off();
     position: sticky;
     top: 0px;
     background-color: white;
     z-index: 1;
-    padding-bottom: @off;
 }
-.toolbar-label {
-    .off();
-}
-.toolbar-label.as-current {
+.off.as-current {
     font-weight: bold;
+}
+.off + .off {
+    .off();
 }
 .toolbar-separator {
     .wall();
