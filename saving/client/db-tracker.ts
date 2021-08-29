@@ -1,6 +1,6 @@
-import { fail, isUndefined, same } from './core';
+import { fail, isUndefined, same } from '../shared/core';
+import { StoreName } from '../shared/identities';
 import { willFindAllInStoreOf, willPutAllToStoreOf } from './databasing';
-import { StoreName } from './identities';
 
 export function thusDbTracker<Config, Key>(
     storeName: StoreName,

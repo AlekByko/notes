@@ -1,4 +1,4 @@
-import { isNull } from './core';
+import { isNull } from '../shared/core';
 import { eoffedFrom, jammedFrom, passedFrom, Read, Tried } from './parsed';
 
 export function toWholeSubstring(_matched: string[], start: number, index: number, text: string): string {

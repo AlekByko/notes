@@ -1,4 +1,4 @@
-import { As } from "./core";
+import { As } from '../shared/core';
 
 export type FileSystemEntryName = string & As<'file-system-entry-name'>;
 export interface FileSystemEntry {

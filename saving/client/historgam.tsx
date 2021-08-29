@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { isNull } from './core';
+import { isNull } from '../shared/core';
 import { toLoadedImageBytes } from './imaging';
 
 export interface HistogrammerProps {

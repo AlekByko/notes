@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { isNull } from './core';
+import { isNull } from '../shared/core';
 import { insteadEach } from './each';
 import { Point } from './geometry';
 

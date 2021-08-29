@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { same } from './core';
+import { same } from '../shared/core';
 import { Regarding } from './reacting';
 
 export type ValuePickerConcern<T> =

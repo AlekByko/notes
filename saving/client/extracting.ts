@@ -1,4 +1,4 @@
-import { isNonNull, isNull, isUndefined } from "./core";
+import { isNonNull, isNull, isUndefined } from '../shared/core';
 
 export function extractMany<T>(
     regexp: RegExp,

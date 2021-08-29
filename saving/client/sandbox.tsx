@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
-import { isNull } from './core';
+import { isNull } from '../shared/core';
 import { Regarding } from './reacting';
 import { EntryInfo, willReadDir } from "./reading-files-from-browser-index-page";
 
