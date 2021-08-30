@@ -101,7 +101,9 @@ export declare class As<S extends string> {
 }
 
 export type Compare<T> = (one: T, another: T) => number;
-
+export function compareRandom(): number {
+    return Math.random() - 0.5;
+}
 export function compareStrings(one: string, another: string): number {
     return one > another ? 1 : another > one ? -1 : 0;
 }
