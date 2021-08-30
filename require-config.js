@@ -1,5 +1,5 @@
 var require = {
-    baseUrl: './client',
+    baseUrl: './built/client',
     paths: {
         'text': '../node_modules/requirejs-plugins/lib/text',
         'json': '../node_modules/requirejs-plugins/src/json',

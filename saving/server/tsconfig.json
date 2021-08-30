@@ -1,10 +1,11 @@
 {
     "compilerOptions": {
-        "outDir": "../../server",
+        "outDir": "../../built/server",
         "lib": ["es6", "dom"],
         "module": "commonjs",
         "target": "esnext",
-        "rootDir": "./",
+        "rootDirs": ["."],
+        "baseUrl": ".",
         "jsx": "react",
         "moduleResolution": "node",
         "strict": true,

@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'fs';
 import { createServer, IncomingMessage, ServerOptions, ServerResponse } from 'http';
 import { extname, join } from 'path';
 import { parse } from 'url';
-import { asDefinedOr, isNull } from '../shared/core';
+import { asDefinedOr, isNull } from './shared/core';
 
 const port = 8081;
 const options: ServerOptions = {

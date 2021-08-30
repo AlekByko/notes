@@ -1,4 +1,4 @@
-call cd .\server
+call cd .\built
 call npm link
 call cd ..\
 call npm link saving-server
