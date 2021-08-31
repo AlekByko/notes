@@ -12,7 +12,6 @@ const server = createServer(options, async (req, res) => {
     const url = parse(req.url!, true);
     let path = asDefinedOr(url.pathname, '/index.html');
     path = path === '/' ? '/index.html' : path;
-    if (path === '/favicon.ico') return tooBad(404, req, res, 'Favicon.');
 
     const filepath = join(process.cwd(), path);
     console.log(path, filepath);
