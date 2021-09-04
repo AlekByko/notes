@@ -1,0 +1,133 @@
+module arrays {
+    export function foldArray<T, R>(values: T[], result: R, fold: (result: R, value: T, index: number) => R): R {
+        return values.reduce(fold, result);
+    }
+    export function times(count: number, initial = 0): number[] {
+        const result: number[] = [];
+        for (let index = 0; index < count; index++) {
+            result.push(initial + index);
+        }
+        return result;
+    }
+
+    export function countThoseThat<T>(
+        values: ReadonlyArray<T>,
+        isThat: (value: T, index: number) => boolean,
+    ): number {
+        let count = 0;
+        for (let index = 0; index < values.length; index++) {
+            if (isThat(values[index], index)) {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
+    export function checkIfAllSomeOrNone<T>(
+        items: ReadonlyArray<T>,
+        isIt: (value: T) => boolean,
+    ): 'all' | 'some' | 'none' {
+        const count = countThoseThat(items, isIt);
+        if (count === items.length) return 'all';
+        if (count === 0) return 'none';
+        return 'some';
+    }
+
+    export const becauseNoValues = 'No values.';
+
+
+    export function chunkHorizontally<T>(values: ReadonlyArray<T>, count: number): T[][] {
+        const rows: T[][] = [];
+        let row: T[] = [];
+        for (const value of values) {
+            if (row.length >= count) {
+                rows.push(row);
+                row = [];
+            }
+            row.push(value);
+        }
+        if (row.length > 0) {
+            rows.push(row);
+        }
+        return rows;
+    }
+
+    export function chunkVertically<T>(values: ReadonlyArray<T>, count: number): T[][] {
+        const rows: T[][] = [];
+        let column: T[] = [];
+        for (const value of values) {
+            if (column.length >= count) {
+                rows.push(column);
+                column = [];
+            }
+            column.push(value);
+        }
+        if (column.length > 0) {
+            rows.push(column);
+        }
+        return rows;
+    }
+
+    export function takeAtMost<T>(values: T[], count: number): T[] {
+        return values.length >= count
+            ? values.slice(0, count)
+            : values;
+    }
+
+    export function maybeAcrossArrayAlong<T, A>(older: T[], along: A, across: (value: T, along: A) => T): T[] {
+        return foldArray(older, older, (result, olderAspect, index) => {
+            const newerAspect = across(olderAspect, along);
+            if (olderAspect === newerAspect) return result;
+            const before = result.slice(0, index);
+            const after = result.slice(index + 1);
+            return [...before, newerAspect, ...after];
+        });
+    }
+
+    export interface ForEachful<T> {
+        forEach(use: (value: T) => void): void;
+    }
+
+    export function hasAnyThatOr<T, Or>(values: T[], isThat: (value: T) => boolean, or: Or): boolean | Or {
+        return values.length > 0 ? values.some(isThat) : or;
+    }
+
+    export function hasAllThatOr<T, Or>(values: T[], isThat: (value: T) => boolean, or: Or): boolean | Or {
+        if (values.length <= 0) return or;
+        for (let index = 0; index < values.length; index++) { // <-- must be from first to last, because used for boolean operations, where this very order is a must
+            if (isThat(values[index])) continue;
+            return false;
+        }
+        return true;
+    }
+
+    export function countAllThat<T>(values: T[], isThat: (value: T) => boolean): number {
+        let count = 0;
+        for (let index = values.length - 1; index >= 0; index--) {
+            if (isThat(values[index])) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    export function append<T>(result: T[], value: T): T[] {
+        result.push(value);
+        return result;
+    }
+
+    export function firstOr<T, Or>(values: T[], or: Or): T | Or {
+        return values.length > 0 ? values[0] : or;
+    }
+
+    export function* chop<T>(values: T[], size: number): Generator<T[], void, unknown> {
+        while (values.length > 0) {
+            const chunk = values.splice(0, size);
+            yield chunk;
+        }
+    }
+
+
+
+}
+export = arrays;
