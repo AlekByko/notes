@@ -40,7 +40,7 @@ export async function willPickAndSaveTaggedImagesDirectory(
     return handle;
 }
 
-export async function checkIfPermitted(handle: FileSystemHandleBase, mode: FileSystemPermissionMode) {
+export async function willCheckIfPermitted(handle: FileSystemHandleBase, mode: FileSystemPermissionMode) {
     let permission = await handle.queryPermission({ mode });
     if (permission === 'granted') return true;
     permission = await handle.requestPermission({ mode });
@@ -61,11 +61,11 @@ export async function willTryGetDirDeep(baseDir: FileSystemDirectoryHandle | nul
 }
 export async function tryGetDir(baseDir: FileSystemDirectoryHandle | null, name: string): Promise<FileSystemDirectoryHandle | null> {
     if (isNull(baseDir)) return null;
-    if (!await checkIfPermitted(baseDir, 'readwrite')) return null;
+    if (!await willCheckIfPermitted(baseDir, 'readwrite')) return null;
 
     const handle = await baseDir.getDirectoryHandle(name);
     if (isNull(handle)) return null;
-    if (!await checkIfPermitted(handle, 'readwrite')) return null;
+    if (!await willCheckIfPermitted(handle, 'readwrite')) return null;
 
     return handle;
 }
@@ -78,11 +78,11 @@ export async function willTrySaveFile(
     shouldCreate: boolean
 ): Promise<'ok' | null> {
     if (isNull(baseDir)) return null;
-    if (!await checkIfPermitted(baseDir, 'readwrite')) return null;
+    if (!await willCheckIfPermitted(baseDir, 'readwrite')) return null;
 
     const file = await baseDir.getFileHandle(name, shouldCreate ? createOption : undefined);
     if (isNull(file)) return null;
-    if (!await checkIfPermitted(file, 'readwrite')) return null;
+    if (!await willCheckIfPermitted(file, 'readwrite')) return null;
 
     const writable = await file.createWritable();
     await writable.write(text);
