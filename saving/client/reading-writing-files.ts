@@ -1,18 +1,9 @@
 import { willFindAllInStoreOf, willPutAllToStoreOf } from "./databasing";
 import { FileSystemEntry, FileSystemEntryName } from "./file-system-entries";
 import { knownDbStores } from "./known-settings";
-import { isNonNull, isNull } from './shared/core';
+import { isNull } from './shared/core';
 
 // https://web.dev/file-system-access/
-
-export async function willLoadOrPickAndSaveTaggedImagesDirectory(
-    db: IDBDatabase, name: FileSystemEntryName,
-): Promise<FileSystemDirectoryHandle | null> {
-    const loaded = await willTryLoadTaggedImagesDirectory(db, name);
-    if (isNonNull(loaded)) return loaded;
-    const picked = await willPickAndSaveTaggedImagesDirectory(db, name);
-    return picked;
-}
 
 export async function willTryLoadTaggedImagesDirectory(
     db: IDBDatabase, name: FileSystemEntryName,

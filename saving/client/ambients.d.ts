@@ -32,6 +32,7 @@ interface FileSystemHandleBase {
 interface GetFileHandleOptions { create: boolean; }
 interface RemoveEntryOptions { recursive: boolean; }
 interface FileSystemDirectoryHandle extends FileSystemHandleBase {
+    [Symbol.asyncIterator](): AsyncIterableIterator<[string, FileSystemFileHandle]>;
     kind: 'directory';
     name: string;
     getDirectoryHandle(name: string, options?: GetFileHandleOptions): Promise<FileSystemDirectoryHandle | null>;
