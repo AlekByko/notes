@@ -17,5 +17,11 @@ export function stripEndOrFail(text: string, end: string, failure: string): stri
     return fail(failure + `Text "${text}" does not end in "${end}".`);
 }
 
+export function quantify(value: number, none: string, singular: string, plural: string): string {
+    return value > 0
+        ? value === 1 ? singular : plural
+        : none;
+}
+
 declare const EmptyString: unique symbol;
 export type EmptyString = typeof EmptyString;

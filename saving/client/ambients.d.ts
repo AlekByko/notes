@@ -49,7 +49,7 @@ interface FileSystemWritableFileStream {
 interface FileSystemFileHandle extends FileSystemHandleBase {
     kind: 'file';
     name: string;
-    getFile(): any;
+    getFile(): Promise<File>;
     createWritable(): FileSystemWritableFileStream;
 }
 interface FileSystemGetFileOptions {
