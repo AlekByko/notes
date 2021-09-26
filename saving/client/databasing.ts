@@ -30,6 +30,29 @@ export function willFindAllInStoreOf<T>(
     });
 }
 
+export function willFindOneInStoreOf<T>(
+    db: IDBDatabase,
+    storeName: StoreName,
+    key: string,
+): Promise<T | null> {
+    const transaction = db.transaction([storeName], 'readonly');
+    const store = transaction.objectStore(storeName);
+    const request = store.get<T>(key);
+    return new Promise<T | null>((resolve, reject) => {
+        transaction.onerror = reject;
+        transaction.onabort = reject;
+        request.onerror = reject;
+        request.onsuccess = function () {
+            var value = this.result;
+            if (value) {
+                resolve(value);
+            } else {
+                resolve(null);
+            }
+        };
+    });
+}
+
 export async function willPutAllToStoreOf<T>(
     db: IDBDatabase, values: T[], storeName: StoreName
 ): Promise<void> {
