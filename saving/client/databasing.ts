@@ -30,15 +30,16 @@ export function willFindAllInStoreOf<T>(
     });
 }
 
-export function willFindOneInStoreOf<T>(
+export function willFindOneInStoreOf<T, Or>(
     db: IDBDatabase,
     storeName: StoreName,
     key: string,
-): Promise<T | null> {
+    or: Or,
+): Promise<T | Or> {
     const transaction = db.transaction([storeName], 'readonly');
     const store = transaction.objectStore(storeName);
     const request = store.get<T>(key);
-    return new Promise<T | null>((resolve, reject) => {
+    return new Promise<T | Or>((resolve, reject) => {
         transaction.onerror = reject;
         transaction.onabort = reject;
         request.onerror = reject;
@@ -47,7 +48,7 @@ export function willFindOneInStoreOf<T>(
             if (value) {
                 resolve(value);
             } else {
-                resolve(null);
+                resolve(or);
             }
         };
     });

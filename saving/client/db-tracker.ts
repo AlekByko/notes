@@ -1,8 +1,8 @@
-import { willFindAllInStoreOf, willPutAllToStoreOf } from './databasing';
+import { willFindAllInStoreOf, willFindOneInStoreOf, willPutAllToStoreOf } from './databasing';
 import { fail, isUndefined, same } from './shared/core';
 import { StoreName } from './shared/identities';
 
-export function thusDbTracker<Config, Key>(
+export function thusDbTracker<Config, Key extends string>(
     storeName: StoreName,
     delay: number,
     keyOf: (config: Config) => Key,
@@ -13,7 +13,7 @@ export function thusDbTracker<Config, Key>(
 
         constructor(private db: IDBDatabase) {}
 
-        public async willUpdate(keys: Set<Key>): Promise<void> {
+        public async willUpdateAll(keys: Set<Key>): Promise<void> {
             this.saveNow();
             const configs = await willFindAllInStoreOf<Config>(
                 this.db, storeName, config => keys.has(keyOf(config)),
@@ -21,6 +21,15 @@ export function thusDbTracker<Config, Key>(
             configs.forEach(config => {
                 this.all.set(keyOf(config), config);
             });
+        }
+
+        public async willUpdateOneOr<Or>(key: Key, or: Or): Promise<Config | Or> {
+            const found = await willFindOneInStoreOf<Config, Or>(this.db, storeName, key, or);
+            if (found !== or) {
+                const config = found as Config;
+                this.all.set(keyOf(config), config);
+            }
+            return found;
         }
 
         public atOr<Or>(key: Key, or: Or): Config | Or {
@@ -37,35 +46,6 @@ export function thusDbTracker<Config, Key>(
                 return or;
             }
         }
-        /** Gets config as JSON. */
-        // #MIGRATION-TO-DB
-        // public give(): string | null {
-        //     const json = storage.getItem(storageKey);
-        //     return json;
-        // }
-        // public take(json: string): void {
-        //     storage.setItem(storageKey, json);
-        //     this.init(json);
-        // }
-
-        // public clear(): void {
-        //     storage.removeItem(storageKey);
-        // }
-
-        // public has(key: Key): boolean {
-        //     return this.all.has(key);
-        // }
-
-        // public claim(key: Key, toConfig: (key: Key) => Config): Config {
-        //     if (this.all.has(key)) {
-        //         return this.all.get(key)!;
-        //     } else {
-        //         const config = toConfig(key);
-        //         this.all.set(key, config);
-        //         this.storeLater();
-        //         return config;
-        //     }
-        // }
 
         // TODO: rename
         public there(
