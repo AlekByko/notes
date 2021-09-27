@@ -11,7 +11,7 @@ export function thusDbTracker<Config, Key extends string>(
         private dirty = new Set<Key>();
         private all = new Map<Key, Config>();
 
-        constructor(private db: IDBDatabase) {}
+        constructor(private db: IDBDatabase) { }
 
         public async willUpdateAll(keys: Set<Key>): Promise<void> {
             this.saveNow();
@@ -85,6 +85,13 @@ export function thusDbTracker<Config, Key extends string>(
                 }
                 this.scheduleSaving();
             }
+        }
+
+        public put(config: Config): void {
+            const key = keyOf(config);
+            this.dirty.add(key);
+            this.all.set(key, config);
+            this.scheduleSaving();
         }
 
         public forEach(use: (config: Config) => void): void {
