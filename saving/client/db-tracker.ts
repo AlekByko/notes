@@ -13,7 +13,7 @@ export function thusDbTracker<Config, Key extends string>(
 
         constructor(private db: IDBDatabase) { }
 
-        public async willUpdateAll(keys: Set<Key>): Promise<void> {
+        public async willPullAll(keys: Set<Key>): Promise<void> {
             this.saveNow();
             const configs = await willFindAllInStoreOf<Config>(
                 this.db, storeName, config => keys.has(keyOf(config)),
@@ -23,7 +23,7 @@ export function thusDbTracker<Config, Key extends string>(
             });
         }
 
-        public async willUpdateOneOr<Or>(key: Key, or: Or): Promise<Config | Or> {
+        public async willPullOneOr<Or>(key: Key, or: Or): Promise<Config | Or> {
             const found = await willFindOneInStoreOf<Config, Or>(this.db, storeName, key, or);
             if (found !== or) {
                 const config = found as Config;
@@ -91,7 +91,7 @@ export function thusDbTracker<Config, Key extends string>(
             const key = keyOf(config);
             this.dirty.add(key);
             this.all.set(key, config);
-            this.scheduleSaving();
+            this.saveNow();
         }
 
         public forEach(use: (config: Config) => void): void {
