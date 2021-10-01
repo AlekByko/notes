@@ -39,22 +39,28 @@ export async function willCheckIfPermitted(handle: FileSystemHandleBase, mode: F
     return true;
 }
 
-export async function willTryGetDirDeep(baseDir: FileSystemDirectoryHandle | null, names: string[]): Promise<FileSystemDirectoryHandle | null> {
+export async function willTryGetDirDeep(
+    baseDir: FileSystemDirectoryHandle | null,
+    path: string[]
+): Promise<FileSystemDirectoryHandle | null> {
     let at = baseDir;
     if (isNull(at)) return null;
 
-    for (const name of names) {
+    for (const name of path) {
         at = await tryGetDir(at, name);
         if (isNull(at)) return null;
     }
 
     return at;
 }
-export async function tryGetDir(baseDir: FileSystemDirectoryHandle | null, name: string): Promise<FileSystemDirectoryHandle | null> {
+export async function tryGetDir(
+    baseDir: FileSystemDirectoryHandle | null,
+    name: string,
+): Promise<FileSystemDirectoryHandle | null> {
     if (isNull(baseDir)) return null;
     if (!await willCheckIfPermitted(baseDir, 'readwrite')) return null;
 
-    const handle = await baseDir.getDirectoryHandle(name);
+    const handle = await baseDir.getDirectoryHandle(name, createOption);
     if (isNull(handle)) return null;
     if (!await willCheckIfPermitted(handle, 'readwrite')) return null;
 
