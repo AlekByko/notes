@@ -1,12 +1,13 @@
 import { willFindAllInStoreOf, willPutAllToStoreOf } from "./databasing";
-import { FileSystemEntry, FileSystemEntryName } from "./file-system-entries";
+import { FileSystemEntry, KnownPickedDirRef } from "./file-system-entries";
 import { knownDbStores } from "./known-settings";
 import { isNull } from './shared/core';
 
 // https://web.dev/file-system-access/
 
-export async function willTryLoadTaggedImagesDirectory(
-    db: IDBDatabase, name: FileSystemEntryName,
+export async function willTryGetDirectory(
+    db: IDBDatabase,
+    name: KnownPickedDirRef,
 ): Promise<FileSystemDirectoryHandle | null> {
     const { fs } = knownDbStores;
     const found = await willFindAllInStoreOf<typeof fs.T>(
@@ -21,7 +22,8 @@ export async function willTryLoadTaggedImagesDirectory(
 }
 
 export async function willPickAndSaveTaggedImagesDirectory(
-    db: IDBDatabase, name: FileSystemEntryName,
+    db: IDBDatabase,
+    name: KnownPickedDirRef,
 ): Promise<FileSystemDirectoryHandle> {
     const handle = await window.showDirectoryPicker();
     const { fs } = knownDbStores;

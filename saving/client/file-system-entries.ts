@@ -1,9 +1,11 @@
 import { As } from './shared/core';
 
-export type FileSystemEntryName = string & As<'file-system-entry-name'>;
+export type KnownPickedDirRef = string & As<'known-picked-dir-ref'>;
+
 export interface FileSystemEntry {
-    name: FileSystemEntryName;
-    handle: FileSystemHandle;
+    name: KnownPickedDirRef;
+    handle: FileSystemDirectoryHandle;
 }
-export const knownBaseDirEntryName = 'base-dir' as FileSystemEntryName;
-export const knownSnapsDirEntryName = 'recorded-dir' as FileSystemEntryName;
+
+export const knownBaseDirEntryName = 'base-dir' as KnownPickedDirRef;
+export const knownSnapsDirEntryName = 'recorded-dir' as KnownPickedDirRef;
