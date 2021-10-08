@@ -3,6 +3,7 @@ import { createServer, IncomingMessage, ServerOptions, ServerResponse } from 'ht
 import { extname, join } from 'path';
 import { parse } from 'url';
 import { asNonNullOr, isNull } from './shared/core';
+import { setConsoleTitle } from './utils';
 
 const port = 8081;
 const options: ServerOptions = {
@@ -23,6 +24,7 @@ const server = createServer(options, async (req, res) => {
     res.end();
 });
 
+setConsoleTitle(`http://localhost:${port}`)
 console.log(`listening at ${port}`);
 console.log(`http://localhost:${port}`);
 server.listen(port);
