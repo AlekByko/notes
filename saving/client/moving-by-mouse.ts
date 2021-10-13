@@ -1,6 +1,6 @@
 import { ignore, isNull } from './shared/core';
 
-export function enableMouseTracking(handleElement: HTMLElement | null, rootElementOrNull: HTMLElement | null): () => void {
+export function enableMouseMoving(handleElement: HTMLElement | null, rootElementOrNull: HTMLElement | null): () => void {
     if (isNull(handleElement) || isNull(rootElementOrNull)) return ignore;
     const rootElement = rootElementOrNull;
 
@@ -55,14 +55,14 @@ export function enableMoving() {
             if (isNull(element)) return;
             handleElement = element;
             stopListening();
-            stopListening = enableMouseTracking(handleElement, rootElement);
+            stopListening = enableMouseMoving(handleElement, rootElement);
         },
         whenRootElement(element: HTMLElement | null): void {
             if (rootElement === element) return;
             if (isNull(element)) return;
             rootElement = element;
             stopListening();
-            stopListening = enableMouseTracking(handleElement, rootElement);
+            stopListening = enableMouseMoving(handleElement, rootElement);
         },
     };
 }
