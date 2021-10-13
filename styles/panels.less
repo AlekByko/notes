@@ -1,0 +1,30 @@
+.t-panel(@height) {
+    user-select: none;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    height: @height;
+}
+.b-panel(@top) {
+    user-select: none;
+    position: absolute;
+    top: @top;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+}
+.divider {
+    user-select: none;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    height: 2px;
+    background-color: black;
+    opacity: 0.0;
+    cursor: ns-resize;
+    &:hover {
+        opacity: 1.0;
+    }
+}
