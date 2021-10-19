@@ -106,3 +106,9 @@ export function willRunChildAttached(text: string): Promise<number | null> {
 
     });
 }
+
+export function killProcess(pid: number): void {
+    // https://stackoverflow.com/questions/23706055/why-can-i-not-kill-my-child-process-in-nodejs-on-windows
+    // this is the only way to kill a process under windows, because nodejs sucks
+    spawn("taskkill", ["/pid", pid.toString(), '/f', '/t']);
+}
