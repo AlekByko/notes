@@ -1,8 +1,9 @@
 import { wait } from './promises';
 import { isNonNull, isUndefined } from './shared/core';
 import { Timestamp, toTimestamp } from './shared/time-stamping';
-export type Job<State> = (state: State) => Promise<State>
 
+export type JobStep<State> = (state: State) => Promise<State>;
+export type Job<State> = (state: State) => JobStep<State>[];
 export interface JobController { shouldFinish: boolean; }
 export async function willBeWorking<State>(
     state: State,
@@ -16,47 +17,50 @@ export async function willBeWorking<State>(
     while (true) {
         if (shouldWait) await wait(100);
         if (controller.shouldFinish) return lastState;
-        let willDo = jobs.shift();
-        if (isUndefined(willDo)) {
+        let job = jobs.shift();
+        if (isUndefined(job)) {
             shouldWait = true;
             refill(jobs);
-            willDo = jobs.shift();
-            if (isUndefined(willDo)) return lastState; // <-- no jobs
+            job = jobs.shift();
+            if (isUndefined(job)) return lastState; // <-- no jobs
         }
-        const newerState = await willDo(lastState);
-        if (newerState === lastState) continue;
-        await willDigest(newerState);
-        lastState = newerState;
-        shouldWait = false;
+        const steps = job(lastState);
+        for (const step of steps) {
+            const newerState = await step(lastState);
+            if (newerState === lastState) continue;
+            await willDigest(newerState);
+            lastState = newerState;
+            shouldWait = false;
+        }
     }
 }
 
-export function willRunIfOver<State>(
+export function stepsIfOver<State>(
     seeIfShouldRun: (state: State) => boolean,
-    willRun: (state: State) => Promise<State>,
+    job: Job<State>,
 ) {
-    return async function willRunIf(state: State) {
+    return function stepsIf(state: State): JobStep<State>[] {
         const shouldRun = seeIfShouldRun(state);
         return shouldRun
-            ? willRun(state)
-            : state;
+            ? job(state)
+            : [];
     };
 }
 
-export function willRunEveryOver<State>(
+export function stepsEveryOver<State>(
     delay: number,
-    willRun: (state: State) => Promise<State>,
+    job: Job<State>,
 ) {
     let lastRunAt: Timestamp | null = null;
-    return async function willRunEvery(state: State) {
+    return function stepsEvery(state: State): JobStep<State>[] {
         if (isNonNull(lastRunAt)) {
             let now = toTimestamp();
             const ago = now - lastRunAt;
-            if (ago < delay) return state;
+            if (ago < delay) return [];
         }
-        state = await willRun(state);
+        const steps = job(state);
         lastRunAt = toTimestamp();
-        return state;
+        return steps;
     };
 }
 
@@ -64,35 +68,42 @@ export function willRunEmitApplyOver<State, Stuff>(
     willEmit: () => Promise<Stuff>,
     willApply: (state: State, stuff: Stuff) => Promise<State>,
 ) {
-    return async function willRunEmitApply(state: State) {
-        const stuff = await willEmit();
-        state = await willApply(state, stuff);
-        return state;
+    return function willRunEmitApply(_state: State): JobStep<State>[] {
+        async function step(state: State): Promise<State> {
+            const stuff = await willEmit();
+            state = await willApply(state, stuff);
+            return state;
+        }
+        return [step];
     };
 }
 export function jobFor<State>(
-    willDo: (state: State) => Promise<State> = async state => state,
+    willDo: Job<State> = _state => [],
 ) {
     return new JobBuilder<State>(willDo);
 }
 export class JobBuilder<State> {
     constructor(
-        public willDo: (state: State) => Promise<State>,
+        public job: Job<State>,
     ) {
     }
     emit<Stuff>(
         willEmit: () => Promise<Stuff>,
         willApply: (state: State, stuff: Stuff) => Promise<State>
     ) {
-        this.willDo = willRunEmitApplyOver(willEmit, willApply);
+        this.job = willRunEmitApplyOver(willEmit, willApply);
+        return this;
+    }
+    step(step: JobStep<State>) {
+        this.job = () => [step];
         return this;
     }
     runIf(seeIfShouldRun: (state: State) => boolean) {
-        this.willDo = willRunIfOver(seeIfShouldRun, this.willDo);
+        this.job = stepsIfOver(seeIfShouldRun, this.job);
         return this;
     }
     runEvery(delay: number) {
-        this.willDo = willRunEveryOver(delay, this.willDo);
+        this.job = stepsEveryOver(delay, this.job);
         return this;
     }
 }
