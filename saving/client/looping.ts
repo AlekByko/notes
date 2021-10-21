@@ -77,7 +77,7 @@ export function willRunEmitApplyOver<State, Stuff>(
         return [task];
     };
 }
-export function jobFor<State>() {
+export function jobingFor<State>() {
     return {
         task(task: Task<State>) {
             return new JobBuilder<State>(_state => [task]);
