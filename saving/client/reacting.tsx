@@ -28,11 +28,11 @@ export type ReactConstructor<Props> = new (props: Props) => React.Component<Prop
 export type Rendered = JSX.Element | null;
 
 export function willRerenderOver<Props>(Root: ReactConstructor<Props>, rootElement: HTMLElement) {
-    return function willRender(props: Props): Promise<Props> {
-        return new Promise<Props>(resolve => {
+    return function willRender(props: Props): Promise<void> {
+        return new Promise<void>(resolve => {
             ReactDom.render(
                 <Root { ...props } />, rootElement,
-                () => resolve(props),
+                () => resolve(),
             );
         });
     };
