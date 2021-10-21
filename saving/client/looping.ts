@@ -4,23 +4,25 @@ import { Timestamp, toTimestamp } from './shared/time-stamping';
 
 export type Task<State> = (state: State) => Promise<State>;
 export type Job<State> = (state: State) => Task<State>[];
-export interface JobController { shouldFinish: boolean; }
+export interface JobController { shouldFinish: boolean; dontWait: () => void; }
+
 export async function willBeWorking<State>(
     state: State,
     willDigest: (state: State) => Promise<void>,
     jobs: Job<State>[],
     controller: JobController,
     refill: (jobs: Job<State>[]) => void,
+    delay: number,
 ): Promise<State> {
     let lastState = state;
     let shouldWait = false;
     while (true) {
-        if (shouldWait) await wait(100);
         if (controller.shouldFinish) return lastState;
         let job = jobs.shift();
         if (isUndefined(job)) {
-            shouldWait = true;
+            if (shouldWait) await wait(delay, controller);
             refill(jobs);
+            shouldWait = true; // <-- assuming the worse
             job = jobs.shift();
             if (isUndefined(job)) return lastState; // <-- no jobs
         }
@@ -30,16 +32,16 @@ export async function willBeWorking<State>(
             if (newerState === lastState) continue;
             await willDigest(newerState);
             lastState = newerState;
-            shouldWait = false;
+            shouldWait = false; // <-- we had at least one async operation resulting into state change, so no need to add a pause before refilling jobs
         }
     }
 }
 
-export function stepsIfOver<State>(
+export function jobIfOver<State>(
     seeIfShouldRun: (state: State) => boolean,
     job: Job<State>,
 ) {
-    return function stepsIf(state: State): Task<State>[] {
+    return function jobIf(state: State): Task<State>[] {
         const shouldRun = seeIfShouldRun(state);
         return shouldRun
             ? job(state)
@@ -47,12 +49,12 @@ export function stepsIfOver<State>(
     };
 }
 
-export function stepsEveryOver<State>(
+export function jobEveryOver<State>(
     delay: number,
     job: Job<State>,
 ) {
     let lastRunAt: Timestamp | null = null;
-    return function stepsEvery(state: State): Task<State>[] {
+    return function jobEvery(state: State): Task<State>[] {
         if (isNonNull(lastRunAt)) {
             let now = toTimestamp();
             const ago = now - lastRunAt;
@@ -64,11 +66,11 @@ export function stepsEveryOver<State>(
     };
 }
 
-export function willRunEmitApplyOver<State, Stuff>(
+export function emitJobOver<State, Stuff>(
     willEmit: () => Promise<Stuff>,
     willApply: (state: State, stuff: Stuff) => Promise<State>,
 ) {
-    return function willRunEmitApply(_state: State): Task<State>[] {
+    return function emitJob(_state: State): Task<State>[] {
         async function task(state: State): Promise<State> {
             const stuff = await willEmit();
             state = await willApply(state, stuff);
@@ -86,7 +88,7 @@ export function jobingFor<State>() {
             willEmit: () => Promise<Stuff>,
             willApply: (state: State, stuff: Stuff) => Promise<State>
         ) {
-            return new JobBuilder<State>(willRunEmitApplyOver(willEmit, willApply));
+            return new JobBuilder<State>(emitJobOver(willEmit, willApply));
         }
     };
 }
@@ -96,11 +98,28 @@ export class JobBuilder<State> {
     ) {
     }
     runIf(seeIfShouldRun: (state: State) => boolean) {
-        this.job = stepsIfOver(seeIfShouldRun, this.job);
+        this.job = jobIfOver(seeIfShouldRun, this.job);
         return this;
     }
     runEvery(delay: number) {
-        this.job = stepsEveryOver(delay, this.job);
+        this.job = jobEveryOver(delay, this.job);
         return this;
     }
+    alter(alter: (tasks: Task<State>[]) => Task<State>[]) {
+        this.job = alterOver(this.job, alter);
+        return this;
+    }
+    overTo<R>(over: (builder: JobBuilder<State>) => R): R {
+        return over(this);
+    }
 }
+function alterOver<State>(
+    job: Job<State>,
+    alter: (tasks: Task<State>[]) => Task<State>[],
+): Job<State> {
+    return function alterUnder(state: State): Task<State>[] {
+        const tasks = job(state);
+        return alter(tasks);
+    };
+}
+

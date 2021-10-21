@@ -1,4 +1,4 @@
-import { isUndefined } from './shared/core';
+import { isDefined, isUndefined } from './shared/core';
 
 export const noChange = Symbol('no-change');
 export type NoChange = typeof noChange;
@@ -110,8 +110,14 @@ async function willNeverStopExecuting<State>(
     }
 }
 
-export async function wait(delay: number): Promise<void> {
+export async function wait(delay: number, controller?: { dontWait: () => void }): Promise<void> {
     return new Promise<void>(resolve => {
-        setTimeout(resolve, delay);
+        const scheduled = window.setTimeout(resolve, delay);
+        if (isDefined(controller)) {
+            controller.dontWait = () => {
+                clearTimeout(scheduled);
+                resolve();
+            };
+        }
     });
 }
