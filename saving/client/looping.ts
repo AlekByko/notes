@@ -16,6 +16,7 @@ export async function willBeWorking<State>(
 ): Promise<State> {
     let lastState = state;
     let shouldWait = false;
+    await willDigest(lastState); // <-- first rerender
     while (true) {
         if (controller.shouldFinish) return lastState;
         let job = jobs.shift();
