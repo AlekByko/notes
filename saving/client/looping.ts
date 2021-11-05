@@ -2,9 +2,9 @@ import { wait } from './promises';
 import { isNonNull, isUndefined } from './shared/core';
 import { Timestamp, toTimestamp } from './shared/time-stamping';
 
-export type Context = unknown;
-export type TaskResult<State> = [State, Context];
-export type Task<State> = (state: State, context: Context) => Promise<TaskResult<State>>;
+export type DefaultCountext = unknown;
+export type TaskResult<State, Context = DefaultCountext> = [State, Context];
+export type Task<State, ContextIn = DefaultCountext, ContextOut = DefaultCountext> = (state: State, context: ContextIn) => Promise<TaskResult<State, ContextOut>>;
 export type Job<State> = (state: State) => Task<State>[];
 export interface JobController { shouldFinish: boolean; dontWait: () => void; }
 
@@ -34,7 +34,7 @@ export async function willBeWorking<State>(
             if (isUndefined(job)) return lastState; // <-- no jobs
         }
         const tasks = job(lastState);
-        let lastContext: Context = undefined;
+        let lastContext: DefaultCountext = undefined;
         for (const task of tasks) {
             const [nextState, nextContext] = await task(lastState, lastContext);
             lastContext = nextContext;
@@ -80,7 +80,7 @@ export function nowJobOver<State, Stuff>(
     willApply: (state: State, stuff: Stuff) => Promise<State>,
 ) {
     return function emitJob(_state: State): Task<State>[] {
-        async function task(state: State): Promise<[State, Context]> {
+        async function task(state: State): Promise<[State, DefaultCountext]> {
             const stuff = await willEmit();
             state = await willApply(state, stuff);
             return [state, undefined];
@@ -92,7 +92,7 @@ export function laterJobOver<State, Stuff>(
     willEmit: () => Promise<Stuff>,
 ) {
     return function emitJob(_state: State): Task<State>[] {
-        async function task(state: State): Promise<[State, Context]> {
+        async function task(state: State): Promise<[State, DefaultCountext]> {
             const stuff = await willEmit();
             return [state, stuff];
         }
@@ -146,6 +146,20 @@ export class JobBuilderLater<State> {
     }
     overTo<R>(over: (builder: JobBuilderLater<State>) => R): R {
         return over(this);
+    }
+    inContextOf<Context>() : TaskCollector<State, Context> {
+        return new TaskCollector<State, Context>([]);
+    }
+}
+
+export class TaskCollector<State, ContextIn> {
+    constructor(
+        public tasks: Task<State, ContextIn>[],
+    ) {
+    }
+    task<ContextOut>(task: Task<State, ContextIn, ContextOut>) : TaskCollector<State, ContextOut>{
+        this.tasks.push(task);
+        return this as any;
     }
 }
 function alterOver<State>(
