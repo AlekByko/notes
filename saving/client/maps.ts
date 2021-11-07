@@ -139,3 +139,13 @@ export function setAllInMap<K, V>(values: Map<K, V>, defaultValue: V): void {
         values.set(key, defaultValue);
     }
 }
+
+export function seeIfHasAnyInMap<K, V>(
+    values: Map<K, V>,
+    isThat: (value: V, key: K) => boolean
+): boolean {
+    for (const [key, value] of values) {
+        if (isThat(value, key)) return true;
+    }
+    return false;
+}
