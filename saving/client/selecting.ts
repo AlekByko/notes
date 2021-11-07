@@ -2,6 +2,8 @@ import { isNonNull } from './shared/core';
 
 export function enableSelecting<At, Item>(
     atOf: (item: Item) => At,
+    seeWhichComesFirst: (one: At, another: At) => At,
+    seeWhichComesLast: (one: At, another: At) => At,
 ) {
 
     let startAt: At | null = null;
@@ -15,15 +17,16 @@ export function enableSelecting<At, Item>(
     function whenShiftClickedCap(at: At, all: Item[], selected: Map<At, boolean>): void {
         const isSelected = selected.get(at)!;
         if (isNonNull(startAt)) {
-            const endAt = at;
+            const firstAt = seeWhichComesFirst(startAt, at);
+            const lastAt = seeWhichComesLast(startAt, at);
             const flipped = !isSelected;
             let isIn = false;
             for (const item of all) {
                 const at = atOf(item);
-                if (at === startAt) {
+                if (at === firstAt) {
                     isIn = true;
                     selected.set(at, flipped);
-                } else if (at === endAt) {
+                } else if (at === lastAt) {
                     isIn = false;
                     selected.set(at, flipped);
                 } else if (isIn) {
