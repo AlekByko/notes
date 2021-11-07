@@ -127,6 +127,10 @@ module arrays {
         }
     }
 
+    export function insteadLastInArrayOr<T, U, O>(values: T[], instead: (value: T) => U, or: O): U | O {
+        if (values.length < 1) return or;
+        return instead(values[values.length - 1]);
+    }
 
 
 }
