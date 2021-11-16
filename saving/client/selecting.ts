@@ -3,6 +3,7 @@ import { isNonNull } from './shared/core';
 export function enableSelecting<Order, Item>(
     orderOf: (item: Item) => Order,
     coordsOf: (item: Item) => [number, number],
+    isSetOf: (item: Item) => boolean,
     seeWhichComesFirst: (one: Order, another: Order) => Order,
     seeWhichComesLast: (one: Order, another: Order) => Order,
 ) {
@@ -56,18 +57,19 @@ export function enableSelecting<Order, Item>(
                 let isIn = false;
                 for (const nextItem of all) {
                     const order = orderOf(nextItem);
+                    const isSet = isSetOf(item)
                     if (order === firstOrder) {
                         isIn = true;
-                        if (!selected.get(order) || shouldForce) {
+                        if (!isSet || shouldForce) {
                             selected.set(order, flipped);
                         }
                     } else if (order === lastOrder) {
                         isIn = false;
-                        if (!selected.get(order) || shouldForce) {
+                        if (!isSet || shouldForce) {
                             selected.set(order, flipped);
                         }
                     } else if (isIn) {
-                        if (!selected.get(order) || shouldForce) {
+                        if (!isSet || shouldForce) {
                             selected.set(order, flipped);
                         }
                     } else {
