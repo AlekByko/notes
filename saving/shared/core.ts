@@ -192,11 +192,31 @@ export function seeIfArraysDifferent<T>(
     seeIfDifferent: (one: T, another: T) => boolean,
 ): boolean {
     if (ones.length !== anothers.length) return true;
-    for (let index = 0; index < ones.length; index ++) {
+    for (let index = 0; index < ones.length; index++) {
         const one = ones[index];
         const another = anothers[index];
         const areDifferent = seeIfDifferent(one, another);
         if (areDifferent) return true;
     }
     return false;
+}
+
+export const emptySet: Set<never> = {
+    // @ts-ignore
+    add() { },
+    clear() { },
+    // @ts-ignore
+    delete() { },
+    // @ts-ignore
+    entries() { },
+    forEach() { },
+    has() { return false; },
+    // @ts-ignore
+    keys() { },
+    // @ts-ignore
+    size() { },
+    // @ts-ignore
+    toArray() { },
+    // @ts-ignore
+    values() { }
 }
