@@ -129,11 +129,11 @@ export function compareUndefinables<T extends LikeUndefined<T>>(
 export function compareNullables<T extends LikeNull<T>>(
     one: T, another: T, compare: Compare<Exclude<T, null>>,
 ): number {
-    return isUndefined(one)
-        ? isUndefined(another)
+    return isNull(one)
+        ? isNull(another)
             ? 0
             : -1
-        : isUndefined(another)
+        : isNull(another)
             ? 1
             : compare(one, another);
 }
