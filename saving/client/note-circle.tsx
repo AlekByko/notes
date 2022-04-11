@@ -19,22 +19,24 @@ export interface NoteCircleProps {
     regarding: Regarding<NoteCircleConcern>;
 }
 
-export function thusNoteCircle(ns: string[]) {
-    const count = ns.length;
+export function thusNoteCircle(ns: string[], scale: number[], startFreq: number) {
+
     return class NoteCircle extends React.Component<NoteCircleProps> {
         render() {
             return <svg width={width + hpad * 2} height={height + vpad * 2}>
                 <g transform={`translate(${cx0} ${cy0})`}>
                     {ns.map((text, i) => {
-                        const alpha = alpha0 + twoPi * i / count;
+                        const alpha = alpha0 + twoPi * (scale[i] - 1);
                         const cy = Math.sin(alpha) * r;
                         const cx = Math.cos(alpha) * r;
+
+                        const freq = startFreq * scale[i];
                         return <g key={text} transform={`translate (${cx} ${cy})`}>
                             <circle r={5} onMouseEnter={() => {
                                 this.props.regarding({ about: 'be-sampled-note', i });
                             }} />
                             <g key={text} transform={`translate (${cx * 0.08 - 5} ${cy * 0.08 + 5})`}>
-                                <text>{text}</text>
+                                <text>{text}: {freq}</text>
                             </g>
                         </g>;
                     })}
