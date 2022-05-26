@@ -17,5 +17,5 @@
         "noImplicitReturns": true,
         "noUnusedParameters": true,
     },
-    "include": ["**/*.ts"]
+    "include": ["**/*.ts", "run-caps-analysis.tsx"]
 }
