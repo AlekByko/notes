@@ -1,4 +1,18 @@
+import { compareRandom } from './core';
+
 module arrays {
+
+    export function shuffleBetter<T>(values: T[]): T[] {
+        const random = values.map(value => ({ value, rand: Math.random() }));
+        random.sort(function (a, b) { return a.rand - b.rand; });
+        return random.map(x => x.value);
+    }
+
+    export function shuffleQuick<T>(values: T[]): void {
+        values.sort(compareRandom);
+    }
+
+
     export function foldArray<T, R>(values: T[], result: R, fold: (result: R, value: T, index: number) => R): R {
         return values.reduce(fold, result);
     }
@@ -102,7 +116,7 @@ module arrays {
     }
     export function countsOfThatInArray<T, U>(values: T[], of: (value: T) => U, isThat: (value: U) => boolean): number {
         let count = 0;
-        for (let index = 0; index < values.length; index ++) {
+        for (let index = 0; index < values.length; index++) {
             const value = values[index];
             const that = of(value);
             if (isThat(that)) {
@@ -147,7 +161,7 @@ module arrays {
         const result: T[] = [];
         let i = 0;
 
-        while(i < count) {
+        while (i < count) {
             const at = start + step * i;
             const value = make(at);
             result.push(value);
