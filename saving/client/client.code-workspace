@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "..\\..\\styles"
+		}
+	],
+    "settings": {
+        "emmet.showExpandedAbbreviation": "never",
+        "workbench.editor.enablePreview": false,
+        "workbench.editor.enablePreviewFromQuickOpen": false,
+        "typescript.tsdk": "../../node_modules/typescript/lib",
+        "workbench.colorTheme": "Default Light+"
+    }
+}

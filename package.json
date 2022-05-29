@@ -1,9 +1,9 @@
 {
   "dependencies": {
-    "@tensorflow/tfjs": "3.9.0",
-    "@tensorflow/tfjs-node": "^3.9.0",
-    "@tensorflow/tfjs-node-gpu": "3.9.0",
-    "@tensorflow/tfjs-vis": "1.5.1",
+    "@tensorflow/tfjs": "^3.18.0",
+    "@tensorflow/tfjs-node": "^3.18.0",
+    "@tensorflow/tfjs-node-gpu": "^3.18.0",
+    "@tensorflow/tfjs-vis": "^1.5.1",
     "ffi-napi": "4.0.3",
     "opencv4nodejs": "file:D:/c/utils/opencv4nodejs-5.6/package",
     "react": "16.13.1",
