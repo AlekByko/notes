@@ -14,6 +14,7 @@ export async function willTryGetDirectory(
     const found = await willFindAllInStoreOf<typeof dirs.T>(
         db, dirs.storeName,
         entry => entry.name === ref,
+        undefined,
     );
     if (found.length < 1) return null;
     const [first] = found;

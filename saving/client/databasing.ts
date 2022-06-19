@@ -1,20 +1,17 @@
-import { camConfigNames } from './shared/cam-config';
 import { isDefined } from './shared/core';
-import { CamRank, StoreName } from './shared/identities';
+import { StoreName } from './shared/identities';
 
 export function willFindAllInStoreOf<T>(
     db: IDBDatabase,
     storeName: StoreName,
     isIt: (value: T) => boolean,
-    rank?: CamRank | null,
+    setUpIndex?: (store: IDBObjectStore) => IDBRequest<IDBCursorWithValue | null>,
 ): Promise<T[]> {
     const transation = db.transaction([storeName], 'readonly');
     const store = transation.objectStore(storeName);
     let request: IDBRequest<IDBCursorWithValue | null>;
-    if (isDefined(rank)) {
-        const index = store.index(camConfigNames.rank);
-        const range = IDBKeyRange.only(rank);
-        request = index.openCursor(range);
+    if (isDefined(setUpIndex)) {
+        request = setUpIndex(store);
     } else {
         request = store.openCursor();
     }
