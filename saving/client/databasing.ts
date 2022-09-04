@@ -1,20 +1,15 @@
-import { isDefined } from './shared/core';
 import { StoreName } from './shared/identities';
 
-export function willFindAllInStoreOf<T>(
+export function willFindAllInStoreOf<T, Query>(
     db: IDBDatabase,
     storeName: StoreName,
     isIt: (value: T) => boolean,
-    setUpIndex?: (store: IDBObjectStore) => IDBRequest<IDBCursorWithValue | null>,
+    query: Query,
+    openCursor: (store: IDBObjectStore, query: Query) => IDBRequest<IDBCursorWithValue | null>,
 ): Promise<T[]> {
     const transation = db.transaction([storeName], 'readonly');
     const store = transation.objectStore(storeName);
-    let request: IDBRequest<IDBCursorWithValue | null>;
-    if (isDefined(setUpIndex)) {
-        request = setUpIndex(store);
-    } else {
-        request = store.openCursor();
-    }
+    const request = openCursor(store, query);
     const result: T[] = [];
     return new Promise<T[]>((resolve, reject) => {
         transation.onerror = reject;

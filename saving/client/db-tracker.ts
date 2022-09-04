@@ -1,28 +1,26 @@
 import { willFindAllInStoreOf, willFindOneInStoreOf, willPutAllToStoreOf } from './databasing';
-import { camConfigNames } from './shared/cam-config';
-import { fail, isDefined, isUndefined, same } from './shared/core';
-import { CamRank, StoreName } from './shared/identities';
+import { fail, isUndefined, same } from './shared/core';
+import { StoreName } from './shared/identities';
 
-export function thusDbTracker<Config, Key extends string>(
+export function thusDbTracker<Config, Key extends string, Query>(
     storeName: StoreName,
     delay: number,
     keyOf: (config: Config) => Key,
+    openCursor: (store: IDBObjectStore, query: Query) => IDBRequest<IDBCursorWithValue | null>,
 ) {
     return class DbTracker {
         private dirty = new Set<Key>();
         private all = new Map<Key, Config>();
 
-        constructor(private db: IDBDatabase) { }
+        constructor(
+            private db: IDBDatabase,
+        ) { }
 
-        public async willPullAll(keys: Set<Key>, rank: CamRank | null | undefined): Promise<void> {
+        public async willPullAll(keys: Set<Key>, query: Query): Promise<void> {
             this.saveNow();
-            const configs = await willFindAllInStoreOf<Config>(
+            const configs = await willFindAllInStoreOf<Config, Query>(
                 this.db, storeName, config => keys.has(keyOf(config)),
-                isDefined(rank) ? store => {
-                    const index = store.index(camConfigNames.rank);
-                    const range = IDBKeyRange.only(rank);
-                    return index.openCursor(range);
-                } : undefined,
+                query, openCursor,
             );
             configs.forEach(config => {
                 this.all.set(keyOf(config), config);

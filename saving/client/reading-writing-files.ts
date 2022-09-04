@@ -11,10 +11,12 @@ export async function willTryGetDirectory(
     ref: KnownPickedDirRef,
 ): Promise<FileSystemDirectoryHandle | null> {
     const { dirs } = knownDbStores;
-    const found = await willFindAllInStoreOf<typeof dirs.T>(
+    const found = await willFindAllInStoreOf<typeof dirs.T, {}>(
         db, dirs.storeName,
         entry => entry.name === ref,
-        undefined,
+        {}, store => {
+            return store.openCursor();
+        }
     );
     if (found.length < 1) return null;
     const [first] = found;

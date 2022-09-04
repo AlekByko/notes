@@ -43,6 +43,7 @@ export function willOpenKnownDb(): Promise<IDBDatabase> {
     });
 }
 
+
 function tryGetStore(transation: IDBTransaction, name: StoreName): IDBObjectStore | null {
     try {
         return transation.objectStore(name);
