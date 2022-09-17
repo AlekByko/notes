@@ -11,6 +11,9 @@
     "ref-napi": "3.0.3",
     "requirejs": "2.3.6",
     "requirejs-plugins": "1.0.2",
+    "tdl": "^7.0.0",
+    "tdl-tdlib-addon": "^1.2.1",
+    "telegraf": "^4.9.2",
     "tfjs": "0.6.0",
     "wrtc": "0.4.4",
     "ws": "8.0.0"
