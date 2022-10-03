@@ -10,6 +10,10 @@ export function enableSelecting<Order, Item>(
 
     let startItem: Item | null = null;
 
+    function setDefault(item: Item): void {
+        startItem = item;
+    }
+
     function whenClicked(item: Item, selected: Map<Order, boolean>) {
         startItem = item;
         const order = orderOf(item);
@@ -85,7 +89,7 @@ export function enableSelecting<Order, Item>(
         }
     }
 
-    return { whenClicked, whenShiftClicked };
+    return { whenClicked, whenShiftClicked, setDefault};
 }
 function seeIfCanSet(isSet: boolean, shouldForce: boolean): boolean {
     return !isSet || shouldForce;
