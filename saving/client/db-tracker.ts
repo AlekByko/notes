@@ -18,10 +18,21 @@ export function thusDbTracker<Config, Key extends string, Query>(
             private db: IDBDatabase,
         ) { }
 
-        public async willPullAll(keys: Set<Key>, query: Query): Promise<void> {
+        public async willPullByKeys(keys: Set<Key>, query: Query): Promise<void> {
             this.saveNow();
             const configs = await willFindAllInStoreOf<Config, Query>(
                 this.db, storeName, config => keys.has(keyOf(config)),
+                query, openCursor,
+            );
+            configs.forEach(config => {
+                this.all.set(keyOf(config), config);
+            });
+        }
+
+        public async willPullAll(query: Query): Promise<void> {
+            this.saveNow();
+            const configs = await willFindAllInStoreOf<Config, Query>(
+                this.db, storeName, _config => true,
                 query, openCursor,
             );
             configs.forEach(config => {
