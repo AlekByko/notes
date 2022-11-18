@@ -1,7 +1,7 @@
 import React from 'react';
 import { Regarding } from './reacting';
 import { to } from './shared/core';
-import { NounConfig, WordConfig } from './word-config';
+import { AdjectiveConfig, AdverbConfig, NounConfig, VerbConfig, WordConfig } from './word-config';
 
 export type WordEditorConcern =
     | { about: 'be-cancelled'; }
@@ -24,26 +24,29 @@ export class WordEditor extends React.PureComponent<WordEditorProps> {
         this.props.regarding({ about: 'be-cancelled' });
     }
 
-    private whenOk: React.MouseEventHandler<HTMLButtonElement> | undefined = _e => {
-        const { config } = this.state;
-        if (config.kind === 'unknown') return;
-        this.props.regarding({ about: 'be-configured', config });
-    }
-
     render() {
         const { config } = this.state;
-        const { text } = config;
+        let { text } = config;
+        text = text.toLowerCase();
         return <div>
             <div>{text}</div>
             <div>
                 <label><input type="radio" radioGroup="xxx" value="noun" onClick={() => {
                     const config: NounConfig = { kind: 'noun', text };
-                    this.setState({ config });
-                }} /> Noun</label>
+                    this.props.regarding({ about: 'be-configured', config });
+                }} /> Noun</label> <label><input type="radio" radioGroup="xxx" value="verb" onClick={() => {
+                    const config: VerbConfig = { kind: 'verb', text };
+                    this.props.regarding({ about: 'be-configured', config });
+                }} /> Verb</label> <label><input type="radio" radioGroup="xxx" value="adjective" onClick={() => {
+                    const config: AdjectiveConfig = { kind: 'adjective', text };
+                    this.props.regarding({ about: 'be-configured', config });
+                }} /> Ajective</label> <label><input type="radio" radioGroup="xxx" value="adverb" onClick={() => {
+                    const config: AdverbConfig = { kind: 'adverb', text };
+                    this.props.regarding({ about: 'be-configured', config });
+                }} /> Adverb</label>
             </div>
             <div>
                 <button onClick={this.whenCancelled}>Reset</button>
-                {config.kind !== 'unknown' && <button onClick={this.whenOk}>OK</button>}
             </div>
         </div>;
     }

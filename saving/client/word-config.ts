@@ -2,7 +2,8 @@ export type WordConfig =
     | UnknownConfig
     | NounConfig
     | VerbConfig
-    | AdjectiveConfig;
+    | AdjectiveConfig
+    | AdverbConfig;
 
 export interface NounConfig {
     kind: 'noun';
@@ -16,6 +17,11 @@ export interface VerbConfig {
 
 export interface AdjectiveConfig {
     kind: 'adjective';
+    text: string;
+}
+
+export interface AdverbConfig {
+    kind: 'adverb';
     text: string;
 }
 

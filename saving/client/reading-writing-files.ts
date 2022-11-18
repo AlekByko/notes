@@ -27,15 +27,21 @@ export async function willTryGetDirectory(
 
 
 
-export async function willSaveDirRef(ref: KnownPickedDirRef, handle: FileSystemDirectoryHandle, db: IDBDatabase) {
+export async function willSaveDirRef(
+    ref: KnownPickedDirRef,
+    handle: FileSystemDirectoryHandle,
+    db: IDBDatabase
+): Promise<void> {
     const { dirs } = knownDbStores;
     const entry: KnownPickedDirEntry = { name: ref, handle };
     const entries = [entry];
     await willPutAllToStoreOf<typeof dirs.T>(db, entries, dirs.storeName);
-    return handle;
 }
 
-export async function willCheckIfPermitted(handle: FileSystemHandleBase, mode: FileSystemPermissionMode) {
+export async function willCheckIfPermitted(
+    handle: FileSystemHandleBase,
+    mode: FileSystemPermissionMode
+): Promise<boolean> {
     let permission = await handle.queryPermission({ mode });
     if (permission === 'granted') return true;
     permission = await handle.requestPermission({ mode });
@@ -51,13 +57,13 @@ export async function willTryGetDirDeep(
     if (isNull(at)) return null;
 
     for (const name of path) {
-        at = await tryGetDir(at, name);
+        at = await willTryGetDir(at, name);
         if (isNull(at)) return null;
     }
 
     return at;
 }
-export async function tryGetDir(
+export async function willTryGetDir(
     baseDir: FileSystemDirectoryHandle | null,
     name: string,
 ): Promise<FileSystemDirectoryHandle | null> {
@@ -109,4 +115,13 @@ export async function willSaveFile(
     const writable = await file.createWritable();
     await writable.write(stuff);
     await writable.close();
+}
+
+export async function willPickAndSaveDirRef(
+    db: IDBDatabase,
+    ref: KnownPickedDirRef,
+): Promise<FileSystemDirectoryHandle> {
+    const handle = await window.showDirectoryPicker();
+    await willSaveDirRef(ref, handle, db);
+    return handle;
 }
