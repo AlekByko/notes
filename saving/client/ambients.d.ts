@@ -33,7 +33,7 @@ interface GetFileHandleOptions { create: boolean; }
 interface RemoveEntryOptions { recursive: boolean; }
 interface FileSystemDirectoryHandle extends FileSystemHandleBase {
     [Symbol.asyncIterator](): AsyncIterableIterator<[string, FileSystemHandle]>;
-    kind: 'directory';
+    readonly kind: 'directory';
     name: string;
     getDirectoryHandle(name: string, options?: GetFileHandleOptions): Promise<FileSystemDirectoryHandle | null>;
     getFileHandle(name: string, options?: GetFileHandleOptions): Promise<FileSystemFileHandle | null>;
@@ -47,7 +47,7 @@ interface FileSystemWritableFileStream {
     close(): Promise<void>;
 }
 interface FileSystemFileHandle extends FileSystemHandleBase {
-    kind: 'file';
+    readonly kind: 'file';
     name: string;
     getFile(): Promise<File>;
     createWritable(): Promise<FileSystemWritableFileStream>;

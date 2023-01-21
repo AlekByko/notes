@@ -35,6 +35,7 @@ export function willRerenderOver<Props>(Root: ReactConstructor<Props>, rootEleme
     return function willRender(props: Props): Promise<void> {
         return new Promise<void>(resolve => {
             ReactDom.render(
+                // @ts-expect-error
                 <Root {...props} />, rootElement,
                 () => resolve(),
             );

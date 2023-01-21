@@ -35,6 +35,7 @@ export function thusSurface<Defs extends LikeSurfaceDefs<Defs>>(defs: Defs) {
                 const { x, y } = at();
                 const styles: React.CSSProperties = { left: x - sx, top: y - sy };
                 return <div className="floaty" style={styles}>
+                    { /* @ts-expect-error */ }
                     <Component {...props} />
                 </div>;
             }

@@ -14,7 +14,7 @@ export function thusSheet<Defs extends LikeSheetDefs<Defs>>(defs: Defs, keys: (k
                 {keys.map(key => {
                     const Fact = defs[key];
                     const fact = this.props[key];
-                    return <Fact key={'' + key} {...fact as any} />;
+                    return <Fact key={String(key)} {...fact as any} />;
                 })}
             </div>;
         }
