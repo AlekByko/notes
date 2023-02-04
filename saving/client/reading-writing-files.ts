@@ -83,16 +83,16 @@ export async function willTrySaveFile(
     name: string,
     text: string | Blob,
     shouldCreate: boolean
-): Promise<'ok' | null> {
-    if (isNull(baseDir)) return null;
-    if (!await willCheckIfPermitted(baseDir, 'readwrite')) return null;
+): Promise<boolean> {
+    if (isNull(baseDir)) return false;
+    if (!await willCheckIfPermitted(baseDir, 'readwrite')) return false;
 
     const file = await willTryGetFile(baseDir, name, shouldCreate);
-    if (isNull(file)) return null;
-    if (!await willCheckIfPermitted(file, 'readwrite')) return null;
+    if (isNull(file)) return false;
+    if (!await willCheckIfPermitted(file, 'readwrite')) return false;
 
     await willSaveFile(file, text);
-    return 'ok';
+    return true;
 }
 
 export async function willTryGetFile(
