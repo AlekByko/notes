@@ -8,7 +8,7 @@ export interface TexterProps<Concern> {
     regarding: Regarding<Concern>;
 }
 
-export function thusTexter<Concern>(toConcern: (text: string) => Concern) {
+export function thusTexter<Concern>(placeholder: string, toConcern: (text: string) => Concern) {
     return class Texter extends React.Component<TexterProps<Concern>, State> {
         private whenChangedText: React.ChangeEventHandler<HTMLInputElement> = e => {
             const text = e.currentTarget.value;
@@ -20,7 +20,7 @@ export function thusTexter<Concern>(toConcern: (text: string) => Concern) {
             }
         }
         render() {
-            return <input onKeyDown={this.whenKeyDown} onChange={this.whenChangedText} />;
+            return <input placeholder={placeholder} onKeyDown={this.whenKeyDown} onChange={this.whenChangedText} />;
         }
     };
 }
