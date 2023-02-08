@@ -1,4 +1,4 @@
-import { willFindAllInStoreOf, willFindOneInStoreOf, willPutAllToStoreOf } from './databasing';
+import { willFindAllInStoreOf, willFindOneInStoreOr, willFindOneInStoreOrOtherwise, willPutAllToStoreOf } from './databasing';
 import { fail, isUndefined, same } from './shared/core';
 import { StoreName } from './shared/identities';
 import { Timestamp, toTimestamp } from './shared/time-stamping';
@@ -41,7 +41,15 @@ export function thusDbTracker<Config, Key extends string, Query>(
         }
 
         public async willPullOneOr<Or>(key: Key, or: Or): Promise<Config | Or> {
-            const found = await willFindOneInStoreOf<Config, Or>(this.db, storeName, key, or);
+            const found = await willFindOneInStoreOr<Config, Or>(this.db, storeName, key, or);
+            if (found !== or) {
+                const config = found as Config;
+                this.all.set(keyOf(config), config);
+            }
+            return found;
+        }
+        public async willPullOneOrOtherwise<Or, W>(key: Key, or: Or, otherwise: (or: Or) => W): Promise<Config | W> {
+            const found = await willFindOneInStoreOrOtherwise<Config, Or, W>(this.db, storeName, key, or, otherwise);
             if (found !== or) {
                 const config = found as Config;
                 this.all.set(keyOf(config), config);

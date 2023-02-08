@@ -32,7 +32,7 @@ export function willFindAllInStoreOf<T, Query>(
     });
 }
 
-export function willFindOneInStoreOf<T, Or>(
+export function willFindOneInStoreOr<T, Or>(
     db: IDBDatabase,
     storeName: StoreName,
     key: string,
@@ -55,6 +55,32 @@ export function willFindOneInStoreOf<T, Or>(
         };
     });
 }
+
+export function willFindOneInStoreOrOtherwise<T, Or, W>(
+    db: IDBDatabase,
+    storeName: StoreName,
+    key: string,
+    or: Or,
+    otherwise: (or: Or) => W,
+): Promise<T | W> {
+    const transaction = db.transaction([storeName], 'readonly');
+    const store = transaction.objectStore(storeName);
+    const request = store.get<T>(key);
+    return new Promise<T | W>((resolve, reject) => {
+        transaction.onerror = reject;
+        transaction.onabort = reject;
+        request.onerror = reject;
+        request.onsuccess = function () {
+            var value = this.result;
+            if (value) {
+                resolve(value);
+            } else {
+                resolve(otherwise(or));
+            }
+        };
+    });
+}
+
 
 export async function willPutAllToStoreOf<T>(
     db: IDBDatabase, values: T[], storeName: StoreName
