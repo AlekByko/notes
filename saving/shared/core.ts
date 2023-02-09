@@ -26,6 +26,9 @@ export type LikeUndefined<T> = undefined extends T ? any : never;
 export function asDefinedOr<T extends LikeUndefined<T>, Or>(value: T, or: Or): Or | Exclude<T, undefined> {
     return value === undefined ? or : value;
 }
+export function asDefinedOrOtherwise<T extends LikeUndefined<T>, W, Or>(value: T, or: Or, otherwise: (or: Or) => W): W | Exclude<T, undefined> {
+    return value === undefined ? otherwise(or) : value;
+}
 export function insteadDefinedOr<T extends LikeUndefined<T>, U, Or>(value: T, instead: (value: Exclude<T, undefined>) => U, or: Or): U | Or {
     return value === undefined ? or : instead(value as Exclude<T, undefined>);
 }
@@ -270,3 +273,5 @@ export function because<R>(message: string, also: unknown, result: R): R {
     console.log(also);
     return result;
 }
+
+export type OneOrFew<T> = T | T[];
