@@ -1,10 +1,11 @@
-export interface ElapsedSeconds {
+export interface ElapsedDays {
+    days: number;
     hours: number;
     minutes: number;
     seconds: number;
 }
 
-export interface ElapsedMiliseconds extends ElapsedSeconds {
+export interface ElapsedMiliseconds extends ElapsedDays {
     miliseconds: number;
 }
 
@@ -22,10 +23,11 @@ export function toElapsedOfMiliseconds(value: number): ElapsedMiliseconds {
 
     const hours = value % 24;
     value = (value - hours) / 24;
+    const days = value;
 
-    return { miliseconds, seconds, minutes, hours };
+    return { miliseconds, seconds, minutes, hours, days };
 }
-export function toElapsedSeconds(value: number): ElapsedSeconds {
+export function toElapsedDays(value: number): ElapsedDays {
 
     const seconds = value % 60;
     value = (value - seconds) / 60;
@@ -36,13 +38,15 @@ export function toElapsedSeconds(value: number): ElapsedSeconds {
     const hours = value % 24;
     value = (value - hours) / 24;
 
-    return { seconds, minutes, hours };
+    const days = value;
+
+    return { seconds, minutes, hours, days };
 }
 
 export function pad2(value: number): string {
     return value.toFixed(0).toString().padStart(2, '0');
 }
-export function formatElapsedSeconds({hours, minutes, seconds}: ElapsedSeconds): string {
+export function formatElapsedSeconds({hours, minutes, seconds}: ElapsedDays): string {
     return pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds);
 }
 
