@@ -173,5 +173,17 @@ module arrays {
         }
         return result;
     }
+
+
+    export function partition<T>(values: T[], isThat: (value: T, index: number) => boolean, thoseThatAre: T[], thoseThatAreNot: T[]): void {
+        for (let index = 0; index < values.length; index ++) {
+            const value = values[index];
+            if (isThat(value, index)) {
+                thoseThatAre.push(value);
+            } else {
+                thoseThatAreNot.push(value);
+            }
+        }
+    }
 }
 export = arrays;
