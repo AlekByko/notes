@@ -32,6 +32,7 @@ export function toRunnerOf<Concern, Props>(
                 render(context.props);
             }
             await wait(0);
+            context.isRunning = false;
             const next = context.waiting.pop();
             if (isUndefined(next)) return;
             run(context, next);
