@@ -3,7 +3,7 @@ import { to } from './shared/core';
 
 export interface InputProps {
     text: string;
-    timesSet: number;
+    timesReset: number;
     defaults: InputHTMLAttributes<unknown>;
     onText(text: string): void;
 }
@@ -14,12 +14,12 @@ interface State {
 }
 
 export class Input extends React.PureComponent<InputProps, State> {
-    state = to<State>({ text: this.props.text, timesSet: this.props.timesSet, isEdited: false });
+    state = to<State>({ text: this.props.text, timesSet: this.props.timesReset, isEdited: false });
 
     static getDerivedStateFromProps(props: InputProps, state: State): State | null {
         if (state.isEdited) return null;
-        if (props.timesSet === state.timesSet) return null;
-        return { text: props.text, timesSet: props.timesSet, isEdited: false };
+        if (props.timesReset === state.timesSet) return null;
+        return { text: props.text, timesSet: props.timesReset, isEdited: false };
     }
 
     whenFocused: FocusEventHandler<HTMLInputElement> = _e => {
