@@ -25,6 +25,7 @@ export class Input extends React.PureComponent<InputProps, State> {
     whenFocused: FocusEventHandler<HTMLInputElement> = _e => {
         this.setState({ isEdited: true });
     }
+
     whenBlurred: FocusEventHandler<HTMLInputElement> = _e => {
         this.setState({ isEdited: false });
     }
@@ -32,6 +33,7 @@ export class Input extends React.PureComponent<InputProps, State> {
     whenChanged: ChangeEventHandler<HTMLInputElement> = e => {
         this.setState({ text: e.currentTarget.value });
     }
+
     whenKeyDown: KeyboardEventHandler<HTMLInputElement> = e => {
         switch (e.key) {
             case 'Escape': {
