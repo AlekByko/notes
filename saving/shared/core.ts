@@ -102,9 +102,8 @@ export function same<T>(value: T): T {
     return value;
 }
 
-export declare class As<S extends string> {
-    private as: S;
-}
+export declare type As<S extends string> = { [P in S]: S; }
+
 
 export type Compare<T> = (one: T, another: T) => number;
 export function compareRandom(): number {
