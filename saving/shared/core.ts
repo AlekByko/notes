@@ -270,6 +270,7 @@ export function why(message: string): undefined {
     console.log(message);
     return undefined;
 }
+export type Because = <R>(message: string, also: unknown, result: R) => R;
 export function because<R>(message: string, also: unknown, result: R): R {
     console.log(message);
     console.log(also);
