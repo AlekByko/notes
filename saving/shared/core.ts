@@ -44,6 +44,9 @@ export function insteadNonNullableOr<T extends LikeNonNullable<T>, U, Or>(
 ): U | Or {
     return value != null ? instead(value as any) : or;
 }
+export function isNullable<T extends ([undefined] extends [T] ? any : [null] extends [T] ? any : never)>(value: T): value is T & (undefined | null) {
+    return value === undefined || value === null;
+}
 export function isUndefined<T extends ([undefined] extends [T] ? any : never)>(value: T): value is T & undefined {
     return value === undefined;
 }
