@@ -160,8 +160,18 @@ export function willRunChildAttachedExt1(command: string, args: string[]): Promi
     });
 }
 
-export function killProcess(pid: number): void {
+export function setoffKillingProcess(pid: number): void {
     // https://stackoverflow.com/questions/23706055/why-can-i-not-kill-my-child-process-in-nodejs-on-windows
     // this is the only way to kill a process under windows, because nodejs sucks
     spawn("taskkill", ["/pid", pid.toString(), '/f', '/t']);
+}
+
+export function willKillProcess(pid: number): Promise<void> {
+    // https://stackoverflow.com/questions/23706055/why-can-i-not-kill-my-child-process-in-nodejs-on-windows
+    // this is the only way to kill a process under windows, because nodejs sucks
+    const child = spawn("taskkill", ["/pid", pid.toString(), '/f', '/t']);
+    return new Promise<void>((resolve, reject) => {
+        child.once('exit', resolve);
+        child.once('error', reject);
+    });
 }

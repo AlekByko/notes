@@ -291,3 +291,11 @@ export function flipSign(sign: Sign): Sign {
 export function areNotSame<T, U extends T>(one: T, another: U): boolean {
     return one !== another;
 }
+
+export function keepScheduling(act: () => void, delay: number): void {
+    function schedule() {
+        act();
+        setTimeout(schedule, delay);
+    }
+    setTimeout(schedule, delay);
+}
