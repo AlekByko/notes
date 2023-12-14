@@ -26,8 +26,9 @@ export function toElapsed(value: number): Elapsed {
     return { milliseconds, seconds, minutes, hours, days };
 }
 
-export function formatElapsedSeconds({ hours, minutes, seconds }: Elapsed): string {
-    return padZero(2, hours) + ':' + padZero(2, minutes) + ':' + padZero(2, seconds);
+export function formatElapsedSeconds({ days, hours, minutes, seconds }: Elapsed): string {
+    const daysText = days > 0 ? days + ' ' : '';
+    return daysText + padZero(2, hours) + ':' + padZero(2, minutes) + ':' + padZero(2, seconds);
 }
 
 export function formatElapsed({ days, hours, minutes }: Elapsed): string {
@@ -57,7 +58,7 @@ export function formatTimestampAndElapsedDays(timestamp: Timestamp, now: Timesta
     const day = date.getDate();
     const hour = padZero(2, date.getHours());
     const minute = padZero(2, date.getMinutes());
-    const days = quantify(elapsed.days, 'today',  '1 d', `${elapsed.days} d`);
+    const days = quantify(elapsed.days, 'today', '1 d', `${elapsed.days} d`);
     const mon = knownMonths[month]
     return `${days}, ${mon} ${day}, ${year}, ${hour}:${minute}`;
 }
