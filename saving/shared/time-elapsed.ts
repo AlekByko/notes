@@ -9,7 +9,7 @@ export interface Elapsed {
     milliseconds: number;
 }
 
-export function toElapsed(value: number): Elapsed {
+export function toElapsedFromMiliseconds(value: number): Elapsed {
     const milliseconds = value % 1000;
     value = (value - milliseconds) / 1000; // without the remainder it can be divided by 1000 without the remainder... duh!
 
@@ -25,13 +25,28 @@ export function toElapsed(value: number): Elapsed {
     const days = value;
     return { milliseconds, seconds, minutes, hours, days };
 }
+export function toElapsedFromSeconds(value: number): Elapsed {
+    const milliseconds = 0
 
-export function formatElapsedSeconds({ days, hours, minutes, seconds }: Elapsed): string {
+    const seconds = value % 60;
+    value = (value - seconds) / 60;
+
+    const minutes = value % 60;
+    value = (value - minutes) / 60;
+
+    const hours = value % 24;
+    value = (value - hours) / 24;
+
+    const days = value;
+    return { milliseconds, seconds, minutes, hours, days };
+}
+
+export function formatElapsedUptoSeconds({ days, hours, minutes, seconds }: Elapsed): string {
     const daysText = days > 0 ? days + ' ' : '';
     return daysText + padZero(2, hours) + ':' + padZero(2, minutes) + ':' + padZero(2, seconds);
 }
 
-export function formatElapsed({ days, hours, minutes }: Elapsed): string {
+export function formatElapsedNaturally({ days, hours, minutes }: Elapsed): string {
     if (days > 0) {
         return 'forever';
     } else if (hours > 0) {
@@ -51,7 +66,7 @@ export function formatElapsed({ days, hours, minutes }: Elapsed): string {
 
 const knownMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 export function formatTimestampAndElapsedDays(timestamp: Timestamp, now: Timestamp): string {
-    const elapsed = toElapsed(now - timestamp);
+    const elapsed = toElapsedFromMiliseconds(now - timestamp);
     const date = new Date(timestamp);
     const year = date.getFullYear();
     const month = date.getMonth();
