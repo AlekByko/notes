@@ -177,9 +177,13 @@ declare global {
     interface Array<T> {
         toSet(): Set<T>;
         toSetInstead<U>(instead: (value: T) => U): Set<U>;
+        sortOf<V>(copy: (values: T[]) => T[], of: (value: T) => V, compare: (one: V, another: V) => number): T[];
     }
     interface Set<T> {
         toArray(): T[];
+    }
+    interface Map<K, V> {
+        toValues(): V[];
     }
 }
 Array.prototype.toSet = function <T>(this: Array<T>) {
@@ -192,8 +196,27 @@ Array.prototype.toSetInstead = function <T, U>(this: Array<T>, instead: (value: 
     }
     return result;
 }
+Array.prototype.sortOf = function <T, V>(
+    this: T[],
+    copy: (values: T[]) => T[],
+    of: (value: T) => V,
+    compare: (one: V, another: V) => number,
+): T[] {
+    const copied = copy(this);
+    const compareOf = function (one: T, another: T): number {
+        const left = of(one);
+        const right = of(another);
+        const compared = compare(left, right);
+        return compared;
+    };
+    copied.sort(compareOf);
+    return copied;
+}
 Set.prototype.toArray = function <T>(this: Set<T>) {
     return Array.from(this);
+}
+Map.prototype.toValues = function <K, V>(this: Map<K, V>) {
+    return Array.from(this.values());
 }
 export function toArray() {
     return [];
