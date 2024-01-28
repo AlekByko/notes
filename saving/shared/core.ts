@@ -326,3 +326,20 @@ export function keepScheduling(act: () => void, delay: number): void {
 export function seeIfObjectsSame<T extends object, U extends T>(one: T, another: U): boolean {
     return one === another;
 }
+
+
+interface Deferred<T> {
+    resolve: (value: T) => void;
+    reject: (error: any) => void;
+    once: Promise<T>;
+}
+export function toDeferredOf<T>(): Deferred<T> {
+    const result = {} as Deferred<T>;
+
+    result.once = new Promise<T>((resolve, reject) => {
+        result.reject = reject;
+        result.resolve = resolve;
+    });
+
+    return result;
+}
