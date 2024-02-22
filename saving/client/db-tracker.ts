@@ -18,6 +18,7 @@ export function thusDbTracker<Config, Key extends string, Query>(
             private db: IDBDatabase,
         ) { }
 
+        // #LAST
         public async willPullByKeys(keys: Set<Key>, query: Query): Promise<void> {
             this.saveNow();
             const configs = await willFindAllInStoreOf<Config, Query>(
