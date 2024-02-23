@@ -16,7 +16,6 @@ interface Window {
     showOpenFilePicker(): Promise<FileSystemFileHandle>;
 }
 
-type FileSystemHandle = FileSystemDirectoryHandle | FileSystemFileHandle;
 type FileSystemPermissionMode = 'read' | 'readwrite';
 interface QueryPemissionsOptions {
     mode: FileSystemPermissionMode;
@@ -24,14 +23,9 @@ interface QueryPemissionsOptions {
 type RequestPermissionsOptions = QueryPemissionsOptions;
 type QueryPermissionsResult = 'granted' | 'prompt';
 type RequestPermissionsResult = QueryPermissionsResult;
-interface FileSystemHandleBase {
-    isSameEntry(): any;
-    queryPermission(options: QueryPemissionsOptions): Promise<QueryPermissionsResult>;
-    requestPermission(options: RequestPermissionsOptions): Promise<RequestPermissionsResult>;
-}
 interface GetFileHandleOptions { create: boolean; }
 interface RemoveEntryOptions { recursive: boolean; }
-interface FileSystemDirectoryHandle extends FileSystemHandleBase {
+interface FileSystemDirectoryHandle {
     [Symbol.asyncIterator](): AsyncIterableIterator<[string, FileSystemHandle]>;
     readonly kind: 'directory';
     name: string;
@@ -41,16 +35,22 @@ interface FileSystemDirectoryHandle extends FileSystemHandleBase {
     values(): AsyncIterableIterator<FileSystemHandle>;
     removeEntry(name: string, options?: RemoveEntryOptions): any;
     resolve(): any;
+    isSameEntry(other: FileSystemHandle): Promise<boolean>;
+    queryPermission(options: QueryPemissionsOptions): Promise<QueryPermissionsResult>;
+    requestPermission(options: RequestPermissionsOptions): Promise<RequestPermissionsResult>;
 }
 interface FileSystemWritableFileStream {
     write(content: any): Promise<void>;
     close(): Promise<void>;
 }
-interface FileSystemFileHandle extends FileSystemHandleBase {
+interface FileSystemFileHandle {
     readonly kind: 'file';
     name: string;
     getFile(): Promise<File>;
     createWritable(): Promise<FileSystemWritableFileStream>;
+    isSameEntry(other: FileSystemHandle): Promise<boolean>;
+    queryPermission(options: QueryPemissionsOptions): Promise<QueryPermissionsResult>;
+    requestPermission(options: RequestPermissionsOptions): Promise<RequestPermissionsResult>;
 }
 interface FileSystemGetFileOptions {
     create?: boolean;
