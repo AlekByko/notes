@@ -343,3 +343,10 @@ export function toDeferredOf<T>(): Deferred<T> {
 
     return result;
 }
+
+declare global {
+    interface Object {
+        realKeys<T extends object>(obj: T): (keyof T)[];
+    }
+}
+Object.realKeys = Object.keys as any;
