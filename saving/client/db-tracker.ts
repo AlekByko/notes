@@ -1,61 +1,26 @@
-import { willFindAllInStoreOf, willFindOneInStoreOr, willFindOneInStoreOrOtherwise, willPutAllToStoreOf } from './databasing';
-import { fail, isUndefined, same } from './shared/core';
-import { StoreName } from './shared/identities';
+import { fail, isNull, isUndefined, same } from './shared/core';
 import { Timestamp, toTimestamp } from './shared/time-stamping';
 
-export function thusDbTracker<Config, Key extends string, Query>(
-    storeName: StoreName,
+export function thusDbTracker<Config, Key extends string, Context>(
     delay: number,
     keyOf: (config: Config) => Key,
-    openCursor: (store: IDBObjectStore, query: Query) => IDBRequest<IDBCursorWithValue | null>,
     setLastSaved: (config: Config, now: Timestamp) => void,
+    willPull: (context: Context, key: Key) => Promise<Config | null>,
+    willSave: (context:Context, configs: Config[]) => Promise<void>,
 ) {
     return class DbTracker {
         private dirty = new Set<Key>();
         private all = new Map<Key, Config>();
 
         constructor(
-            private db: IDBDatabase,
+            private context: Context,
         ) { }
 
-        // #SAVING-UNDONE
-        public async willPullByKeys(keys: Set<Key>, query: Query): Promise<void> {
-            this.saveNow();
-            const configs = await willFindAllInStoreOf<Config, Query>(
-                this.db, storeName, config => keys.has(keyOf(config)),
-                query, openCursor,
-            );
-            configs.forEach(config => {
-                this.all.set(keyOf(config), config);
-            });
-        }
-
-        public async willPullAll(query: Query): Promise<void> {
-            this.saveNow();
-            const configs = await willFindAllInStoreOf<Config, Query>(
-                this.db, storeName, _config => true,
-                query, openCursor,
-            );
-            configs.forEach(config => {
-                this.all.set(keyOf(config), config);
-            });
-        }
-
-        public async willPullOneOr<Or>(key: Key, or: Or): Promise<Config | Or> {
-            const found = await willFindOneInStoreOr<Config, Or>(this.db, storeName, key, or);
-            if (found !== or) {
-                const config = found as Config;
-                this.all.set(keyOf(config), config);
-            }
-            return found;
-        }
-        public async willPullOneOrOtherwise<Or, W>(key: Key, or: Or, otherwise: (or: Or) => W): Promise<Config | W> {
-            const found = await willFindOneInStoreOrOtherwise<Config, Or, W>(this.db, storeName, key, or, otherwise);
-            if (found !== or) {
-                const config = found as Config;
-                this.all.set(keyOf(config), config);
-            }
-            return found;
+        public async willPullOneOr<Or>(key: Key, or: Or): Promise<Config| Or> {
+            const config = await willPull(this.context, key);
+            if (isNull(config)) return or;
+            this.all.set(keyOf(config), config);
+            return config;
         }
 
         public atOr<Or>(key: Key, or: Or): Config | Or {
@@ -159,7 +124,7 @@ export function thusDbTracker<Config, Key extends string, Query>(
             configs.forEach(config => {
                 setLastSaved(config, now);
             });
-            await willPutAllToStoreOf(this.db, configs, storeName);
+            await willSave(this.context, configs);
             console.log('saved to db', configs);
             this.isSaving = false;
         }
