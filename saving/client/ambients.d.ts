@@ -35,22 +35,20 @@ interface FileSystemDirectoryHandle {
     values(): AsyncIterableIterator<FileSystemHandle>;
     removeEntry(name: string, options?: RemoveEntryOptions): any;
     resolve(): any;
-    isSameEntry(other: FileSystemHandle): Promise<boolean>;
-    queryPermission(options: QueryPemissionsOptions): Promise<QueryPermissionsResult>;
-    requestPermission(options: RequestPermissionsOptions): Promise<RequestPermissionsResult>;
 }
 interface FileSystemWritableFileStream {
     write(content: any): Promise<void>;
     close(): Promise<void>;
+}
+interface FileSystemHandle {
+    queryPermission(options: QueryPemissionsOptions): Promise<QueryPermissionsResult>;
+    requestPermission(options: RequestPermissionsOptions): Promise<RequestPermissionsResult>;
 }
 interface FileSystemFileHandle {
     readonly kind: 'file';
     name: string;
     getFile(): Promise<File>;
     createWritable(): Promise<FileSystemWritableFileStream>;
-    isSameEntry(other: FileSystemHandle): Promise<boolean>;
-    queryPermission(options: QueryPemissionsOptions): Promise<QueryPermissionsResult>;
-    requestPermission(options: RequestPermissionsOptions): Promise<RequestPermissionsResult>;
 }
 interface FileSystemGetFileOptions {
     create?: boolean;

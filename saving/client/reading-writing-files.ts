@@ -39,7 +39,7 @@ export async function willSaveDirRef(
 }
 
 export async function willCheckIfPermitted(
-    handle: FileSystemHandleBase,
+    handle: FileSystemHandle,
     mode: FileSystemPermissionMode
 ): Promise<boolean> {
     let permission = await handle.queryPermission({ mode });
