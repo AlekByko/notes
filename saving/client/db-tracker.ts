@@ -95,8 +95,8 @@ export function thusDbTracker<Config, Key extends string, Query>(
                 this.scheduleSaving();
             }
         }
-
-        public takeAll(configs: Config[]) {
+        // #SAVING-UNDONE
+        public takeAllWithoutSaving(configs: Config[]): void {
             configs.forEach(config => {
                 const key = keyOf(config);
                 this.all.set(key, config);
