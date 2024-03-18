@@ -71,11 +71,11 @@ async function run() {
                         // after deserializing from JSON we have _id as string
                         // but in order for update it has to be of type ObjectId
                         const _id = new ObjectId(config._id as any);
-                        config._id = _id;
+                        config._id = _id as any;
                         const replaced = await db.collection('cams').replaceOne({ '_id': _id }, config);
                         console.log('replaced', replaced);
                     } else {
-                        const inserted = await db.collection('cams').insertOne(config);
+                        const inserted = await db.collection('cams').insertOne(config as any);
                         console.log('inserted', inserted);
                         ids[config.name] = inserted.insertedId;
                     }
