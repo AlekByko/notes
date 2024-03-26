@@ -31,3 +31,4 @@ batch
 nodus/build
 caps.html
 venv
+__pycache__
