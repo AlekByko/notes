@@ -1,4 +1,3 @@
-import { diffFrom, HomoDiff } from './diffs';
 
 export function toBucketMapFromArray<T, K, V, B>(
     items: T[],
@@ -79,18 +78,25 @@ export function toMapFromArrayByKeys<T, K, V>(
     return result;
 }
 
-export function diffMapsViaKeys<K, V>(older: Map<K, V>, newer: Map<K, V>): HomoDiff<V[]> {
-    const entered: V[] = [];
+export function diffMapsViaKeys<K, V>(older: Map<K, V>, newer: Map<K, V>) {
+    const staying = new Map<K, V>();
+    const coming = new Map<K, V>();
     newer.forEach((value, key) => {
-        if (older.has(key)) return;
-        entered.push(value);
+        if (older.has(key)) {
+            staying.set(key, value);
+        } else {
+            coming.set(key, value);
+        }
     });
-    const exited: V[] = [];
+    const leaving = new Map<K, V>();
     older.forEach((value, key) => {
-        if (newer.has(key)) return;
-        exited.push(value);
+        if (newer.has(key)) {
+            staying.set(key, value);
+        } else {
+            leaving.set(key, value);
+        }
     });
-    return diffFrom(exited, entered);
+    return { leaving, staying, coming };
 }
 
 export function atMapOr<K, V, Or>(values: Map<K, V>, key: K, or: Or): V | Or {
