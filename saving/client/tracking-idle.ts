@@ -1,6 +1,9 @@
 import { toTimestamp } from './shared/time-stamping';
 
-export function startTrackingIdle(timeout: number, whenIdle: () => void) {
+export function startTrackingIdle(
+    timeout: number,
+    whenIdle: (left: number, readiness: number) => void
+) {
     let idlingSince = toTimestamp();
     window.document.addEventListener('mousemove', () => {
         idlingSince = toTimestamp();
@@ -10,9 +13,10 @@ export function startTrackingIdle(timeout: number, whenIdle: () => void) {
     });
     window.setInterval(() => {
         const now = toTimestamp();
-        const ago = now - idlingSince;
-        if (ago > timeout) {
-            whenIdle();
-        }
-    }, 500);
+        const since = now - idlingSince;
+        const ago = Math.min(since, timeout);
+        const ready = ago / timeout;
+        const left = timeout - ago;
+        whenIdle(ready, left);
+    }, 250);
 }
