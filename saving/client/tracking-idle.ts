@@ -5,12 +5,12 @@ export function startTrackingIdle(
     whenIdle: (left: number, readiness: number) => void
 ) {
     let idlingSince = toTimestamp();
-    window.document.addEventListener('mousemove', () => {
+    const resetIdling = () => {
         idlingSince = toTimestamp();
-    });
-    window.document.addEventListener('keydown', () => {
-        idlingSince = toTimestamp();
-    });
+    };
+    window.document.addEventListener('mousedown', resetIdling); // mouse held still can still be clicked
+    window.document.addEventListener('mousemove', resetIdling);
+    window.document.addEventListener('keydown', resetIdling);
     window.setInterval(() => {
         const now = toTimestamp();
         const since = now - idlingSince;
