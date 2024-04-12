@@ -14,6 +14,7 @@ interface PasswordGeneratorFamilyProps {
 }
 
 interface State {
+    key: string;
     weight: string;
     letters: string;
 }
@@ -21,6 +22,7 @@ interface State {
 class PasswordGeneratorFamily extends React.Component<PasswordGeneratorFamilyProps, State>{
 
     state = to<State>({
+        key: this.props.family.key,
         letters: this.props.family.letters,
         weight: this.props.family.weight.toString(),
     });
@@ -34,9 +36,9 @@ class PasswordGeneratorFamily extends React.Component<PasswordGeneratorFamilyPro
     }
 
     render() {
-        const { weight, letters } = this.state;
+        const { key, weight, letters } = this.state;
         return <div>
-            <input value={weight} onChange={this.whenChangedWeight} /> <input value={letters} onChange={this.whenChangedLetters} />
+            <input defaultValue={key} /> <input value={weight} onChange={this.whenChangedWeight} /> <input value={letters} onChange={this.whenChangedLetters} />
         </div>;
     }
 }
@@ -69,6 +71,10 @@ if (window.isSandbox) {
                 { key: 'punct', weight: 1, letters: '$@#!%^&*_' },
             ],
         });
+        render(){
+            const {families} = this.state;
+            return <PasswordGenerator families={families} />;
+        }
     }
     const element = document.createElement('div');
     document.body.appendChild(element);
