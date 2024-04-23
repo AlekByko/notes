@@ -16,5 +16,6 @@
         "noImplicitThis": true,
         "noImplicitReturns": true,
         "noUnusedParameters": true,
+        "skipLibCheck": true
     },
 }
