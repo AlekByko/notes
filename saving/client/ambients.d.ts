@@ -56,7 +56,7 @@ interface FileSystemGetFileOptions {
 type USVString = string;
 
 interface Window {
-    isSandbox: boolean;
+    sandbox: string;
 }
 interface ForEachable<T> {
     forEach(xx: (value: T) => void): void;

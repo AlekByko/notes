@@ -39,7 +39,7 @@ export class PasswordGenerator extends React.PureComponent<PasswordGeneratorProp
     }
 }
 
-if (window.isSandbox) {
+if (window.sandbox === 'password') {
     class App extends React.Component<{}, PasswordGeneratorProps> {
         state = to<PasswordGeneratorProps>({
             generated: '',

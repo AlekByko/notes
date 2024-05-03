@@ -4,12 +4,13 @@
     <link rel="stylesheet" type="text/css" href="./styles/all.css" />
     <script type="text/javascript">
         window.onload = function() {
-            window.isSandbox = true;
+            const path = window.location.search.replace('?', '');
+            window.sandbox = path;
             const element = document.createElement('script');
             element.src = './node_modules/requirejs/require.js';
-            element.setAttribute('data-main', window.location.search.replace('?', ''));
+            element.setAttribute('data-main', path);
             document.body.appendChild(element);
-        }        
+        }
     </script>
 </head>
 
