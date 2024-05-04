@@ -72,16 +72,16 @@ export function thusDbTracker<Config, Key extends string, Context>(
             key: Key,
             across: (found: Config) => Config,
         ): void {
-            if (this.all.has(key)) {
-                const older = this.all.get(key)!;
-                const newer = across(older);
-                this.dirty.add(key);
-                if (older !== newer) {
-                    // we only need to rewrite, if we got a new object, there is no need to rewrite an old (but mutated) object
-                    this.all.set(key, newer);
-                }
-                this.scheduleSaving();
+            if (!this.all.has(key)) return;
+
+            const older = this.all.get(key)!;
+            const newer = across(older);
+            this.dirty.add(key);
+            if (older !== newer) {
+                // we only need to rewrite, if we got a new object, there is no need to rewrite an old (but mutated) object
+                this.all.set(key, newer);
             }
+            this.scheduleSaving();
         }
 
         public async willPut(config: Config): Promise<void> {
