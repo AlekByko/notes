@@ -23,7 +23,11 @@ export function enableSelecting<Order, Item>(defaults: SelectingDefaults<Order, 
         const order = orderOf(item);
         const isSelected = selected.get(order)!;
         const flipped = !isSelected;
-        selected.set(order, flipped);
+        if (flipped === true) {
+            selected.set(order, flipped);
+        } else {
+            selected.delete(order);
+        }
     }
 
     function whenShiftClicked(
