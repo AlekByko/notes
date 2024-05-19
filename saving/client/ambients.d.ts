@@ -63,4 +63,5 @@ interface ForEachable<T> {
 }
 
 type Act =() => void;
+type Use<T> =(value: T) => void;
 type WillAct =() => Promise<void>;
