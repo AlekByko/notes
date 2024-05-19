@@ -61,3 +61,6 @@ interface Window {
 interface ForEachable<T> {
     forEach(xx: (value: T) => void): void;
 }
+
+type Act =() => void;
+type WillAct =() => Promise<void>;

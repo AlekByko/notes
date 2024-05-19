@@ -3,4 +3,5 @@ export interface FileSystemCustomization {
     handle: FileSystemDirectoryHandle;
 }
 
+
 export type Customization = FileSystemCustomization;
