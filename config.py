@@ -17,4 +17,4 @@ class Tile:
         self.row = config['row']
         self.width = config['width']
         self.height = config['height']
-        # self.grade = config['grade']
+        self.data = config
