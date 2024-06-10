@@ -6,6 +6,7 @@ def read_settings():
     parser.add_argument("--path", type=str)
     parser.add_argument("--mode", type=str)
     parser.add_argument("--sample-size", type=int)
+    parser.add_argument("--weights-path", type=str)
     args = parser.parse_args()
     settings = Settings(args)
     return settings
@@ -32,7 +33,10 @@ class Settings:
 
     @property
     def weights_path(self):
-        return self.path + '.hdf5'
+        weights_path = self.args.weights_path
+        if weights_path is None:
+            return self.path + '.hdf5'
+        return weights_path
 
     @property
     def mode(self) -> str:
