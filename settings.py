@@ -29,6 +29,10 @@ class Snap:
     def image_path(self):
         return self.path + ".jpg"
 
+    @property
+    def snap_path(self):
+        return self.path + ".png"
+
 def make_snaps(pattern: str) -> Generator[Any, Snap, None]:
     pathes: list[str] = glob.glob(pattern)
     # print(pattern)
