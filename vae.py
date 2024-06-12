@@ -3,16 +3,18 @@ import tensorflow as tf
 from keras import layers, models
 
 input_shape = (180, 320, 3)
-latent_dim = 32
+latent_dim = 64
 
 def make_encoder():
     encoder_input = layers.Input(shape=input_shape)
     x = layers.Conv2D(32, (3, 3), activation='relu', padding='same')(encoder_input)
     x = layers.MaxPooling2D((2, 2), padding='same')(x)
     x = layers.Conv2D(64, (3, 3), activation='relu', padding='same')(x)
+    x = layers.MaxPooling2D((3, 2), padding='same')(x)
+    x = layers.Conv2D(128, (3, 3), activation='relu', padding='same')(x)
     x = layers.MaxPooling2D((2, 2), padding='same')(x)
     x = layers.Flatten()(x)
-    x = layers.Dense(32, activation='relu')(x) # <-- 128 is arbitrary
+    x = layers.Dense(256, activation='relu')(x) # <-- 128 is arbitrary
 
     z_mean = layers.Dense(latent_dim, name='z_mean')(x)
     z_log_var = layers.Dense(latent_dim, name='z_log_var')(x)
@@ -27,20 +29,23 @@ def make_encoder():
     z = layers.Lambda(sampling, output_shape=(latent_dim,), name='z')([z_mean, z_log_var])
 
     encoder = models.Model(encoder_input, [z_mean, z_log_var, z], name='encoder')
+    encoder.summary()
     return encoder
 
 def make_decoder():
     decoder_input = layers.Input(shape=(latent_dim,), name='decoder_input')
-    x = layers.Dense(45 * 80 * 64, activation='relu')(decoder_input)
-    x = layers.Reshape((45, 80, 64))(x)
+    x = layers.Dense(15 * 40 * 128, activation='relu')(decoder_input)
+    x = layers.Reshape((15, 40, 128))(x)
     x = layers.Conv2DTranspose(64, (3, 3), activation='relu', padding='same')(x)
     x = layers.UpSampling2D((2, 2))(x)
+    x = layers.Conv2DTranspose(64, (3, 3), activation='relu', padding='same')(x)
+    x = layers.UpSampling2D((3, 2))(x)
     x = layers.Conv2DTranspose(32, (3, 3), activation='relu', padding='same')(x)
     x = layers.UpSampling2D((2, 2))(x)
 
     decoder_output = layers.Conv2DTranspose(3, (3, 3), activation='sigmoid', padding='same')(x)
     decoder = models.Model(decoder_input, decoder_output, name='decoder')
-
+    decoder.summary()
     return decoder
 
 class VAE(tf.keras.Model):
