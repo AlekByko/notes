@@ -4,6 +4,7 @@ from keras import layers, models
 
 input_shape = (180, 320, 3)
 latent_dim = 64
+dense_dim = 256
 
 def make_encoder():
     encoder_input = layers.Input(shape=input_shape)
@@ -14,7 +15,7 @@ def make_encoder():
     x = layers.Conv2D(128, (3, 3), activation='relu', padding='same')(x)
     x = layers.MaxPooling2D((2, 2), padding='same')(x)
     x = layers.Flatten()(x)
-    x = layers.Dense(256, activation='relu')(x) # <-- 128 is arbitrary
+    x = layers.Dense(dense_dim, activation='relu')(x) # <-- 128 is arbitrary
 
     z_mean = layers.Dense(latent_dim, name='z_mean')(x)
     z_log_var = layers.Dense(latent_dim, name='z_log_var')(x)
@@ -36,7 +37,7 @@ def make_decoder():
     decoder_input = layers.Input(shape=(latent_dim,), name='decoder_input')
     x = layers.Dense(15 * 40 * 128, activation='relu')(decoder_input)
     x = layers.Reshape((15, 40, 128))(x)
-    x = layers.Conv2DTranspose(64, (3, 3), activation='relu', padding='same')(x)
+    x = layers.Conv2DTranspose(128, (3, 3), activation='relu', padding='same')(x)
     x = layers.UpSampling2D((2, 2))(x)
     x = layers.Conv2DTranspose(64, (3, 3), activation='relu', padding='same')(x)
     x = layers.UpSampling2D((3, 2))(x)
@@ -57,9 +58,9 @@ class VAE(tf.keras.Model):
     def call(self, inputs):
         z_mean, z_log_var, z = self.encoder(inputs)
         reconstructed = self.decoder(z)
-        # kl_loss = -0.5 * tf.reduce_sum(z_log_var - tf.square(z_mean) - tf.exp(z_log_var) + 1)
+        kl_loss = -0.5 * tf.reduce_sum(z_log_var - tf.square(z_mean) - tf.exp(z_log_var) + 1)
         # kl_loss = tf.reduce_mean(kl_loss) * 0.1
-        # self.add_loss(kl_loss)
+        self.add_loss(kl_loss)
         return reconstructed
 
 def vae_loss(inputs, outputs):
