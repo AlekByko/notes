@@ -13,6 +13,7 @@ def read_settings():
     parser.add_argument("--snap-path", type=str)
     parser.add_argument("--config-path", type=str)
     parser.add_argument("--epochs", type=int)
+    parser.add_argument("--batch", type=int)
     args = parser.parse_args()
     settings = Settings(args)
     return settings
@@ -94,3 +95,10 @@ class Settings:
     @property
     def epochs(self) -> int:
         return self.args.epochs
+
+    @property
+    def batch(self) -> int:
+        value = self.args.batch
+        if value is None:
+            raise Exception("No batch size.")
+        return value
