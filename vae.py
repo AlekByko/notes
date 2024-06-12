@@ -57,8 +57,9 @@ class VAE(tf.keras.Model):
     def call(self, inputs):
         z_mean, z_log_var, z = self.encoder(inputs)
         reconstructed = self.decoder(z)
-        kl_loss = -0.5 * tf.reduce_sum(z_log_var - tf.square(z_mean) - tf.exp(z_log_var) + 1)
-        self.add_loss(kl_loss)
+        # kl_loss = -0.5 * tf.reduce_sum(z_log_var - tf.square(z_mean) - tf.exp(z_log_var) + 1)
+        # kl_loss = tf.reduce_mean(kl_loss) * 0.1
+        # self.add_loss(kl_loss)
         return reconstructed
 
 def vae_loss(inputs, outputs):
