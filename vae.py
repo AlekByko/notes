@@ -11,8 +11,11 @@ def make_encoder():
     x = layers.MaxPooling2D((2, 2), padding='same')(x)
     x = layers.Conv2D(64, (3, 3), activation='relu', padding='same')(x)
     x = layers.MaxPooling2D((3, 2), padding='same')(x)
+
+    # CNN 128 should stay:
     x = layers.Conv2D(128, (3, 3), activation='relu', padding='same')(x)
     x = layers.MaxPooling2D((2, 2), padding='same')(x)
+
     x = layers.Flatten()(x)
     x = layers.Dense(dense_dim, activation='relu')(x)
 
@@ -36,8 +39,11 @@ def make_decoder():
     decoder_input = layers.Input(shape=(latent_dim,), name='decoder_input')
     x = layers.Dense(15 * 40 * 128, activation='relu')(decoder_input)
     x = layers.Reshape((15, 40, 128))(x)
+
+    # CNN 128 should stay:
     x = layers.Conv2DTranspose(128, (3, 3), activation='relu', padding='same')(x)
     x = layers.UpSampling2D((2, 2))(x)
+
     x = layers.Conv2DTranspose(64, (3, 3), activation='relu', padding='same')(x)
     x = layers.UpSampling2D((3, 2))(x)
     x = layers.Conv2DTranspose(32, (3, 3), activation='relu', padding='same')(x)
