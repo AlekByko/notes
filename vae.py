@@ -1,4 +1,3 @@
-import numpy as np
 import tensorflow as tf
 from keras import layers, models
 
@@ -17,19 +16,19 @@ def make_encoder():
     x = layers.Flatten()(x)
     x = layers.Dense(dense_dim, activation='relu')(x)
 
-    z_mean = layers.Dense(latent_dim, name='z_mean')(x)
-    z_log_var = layers.Dense(latent_dim, name='z_log_var')(x)
+    encoder = tf.keras.models.Model(encoder_input, x, name='encoder')
 
-    def sampling(args):
-        z_mean, z_log_var = args
-        batch = tf.shape(z_mean)[0]
-        dim = tf.shape(z_mean)[1]
-        epsilon = tf.keras.backend.random_normal(shape=(batch, dim))
-        return z_mean + tf.exp(0.5 * z_log_var) * epsilon
+    # z_mean = layers.Dense(latent_dim, name='z_mean')(x)
+    # z_log_var = layers.Dense(latent_dim, name='z_log_var')(x)
+    # def sampling(args):
+    #     z_mean, z_log_var = args
+    #     batch = tf.shape(z_mean)[0]
+    #     dim = tf.shape(z_mean)[1]
+    #     epsilon = tf.keras.backend.random_normal(shape=(batch, dim))
+    #     return z_mean + tf.exp(0.5 * z_log_var) * epsilon
+    # z = layers.Lambda(sampling, output_shape=(latent_dim,), name='z')([z_mean, z_log_var])
+    # encoder = models.Model(encoder_input, [z_mean, z_log_var, z], name='encoder')
 
-    z = layers.Lambda(sampling, output_shape=(latent_dim,), name='z')([z_mean, z_log_var])
-
-    encoder = models.Model(encoder_input, [z_mean, z_log_var, z], name='encoder')
     encoder.summary()
     return encoder
 
@@ -56,11 +55,12 @@ class VAE(tf.keras.Model):
         self.decoder = decoder
 
     def call(self, inputs):
-        z_mean, z_log_var, z = self.encoder(inputs)
+        # z_mean, z_log_var, z = self.encoder(inputs)
+        z = self.encoder(inputs)
         reconstructed = self.decoder(z)
-        kl_loss = -0.5 * tf.reduce_sum(z_log_var - tf.square(z_mean) - tf.exp(z_log_var) + 1)
-        # kl_loss = tf.reduce_mean(kl_loss) * 0.1
-        self.add_loss(kl_loss)
+        # kl_loss = -0.5 * tf.reduce_sum(z_log_var - tf.square(z_mean) - tf.exp(z_log_var) + 1)
+        # # # kl_loss = tf.reduce_mean(kl_loss) * 0.1
+        # self.add_loss(kl_loss)
         return reconstructed
 
 def vae_loss(inputs, outputs):
