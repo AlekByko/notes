@@ -14,8 +14,11 @@ def read_settings():
     parser.add_argument("--config-path", type=str)
     parser.add_argument("--epochs", type=int)
     parser.add_argument("--batch", type=int)
+    parser.add_argument("--latent-dim", type=int)
+    parser.add_argument("--train-val-spit-at", type=float)
     args = parser.parse_args()
     settings = Settings(args)
+    print(settings)
     return settings
 
 class Snap:
@@ -97,8 +100,22 @@ class Settings:
         return self.args.epochs
 
     @property
+    def train_val_spit_at(self) -> float:
+        value = self.args.train_val_spit_at
+        if value is None:
+            raise Exception("No train/val split at.")
+        return value
+
+    @property
     def batch(self) -> int:
         value = self.args.batch
         if value is None:
             raise Exception("No batch size.")
+        return value
+
+    @property
+    def latent_dim(self) -> int:
+        value = self.args.latent_dim
+        if value is None:
+            raise Exception("No latent dimension.")
         return value

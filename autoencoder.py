@@ -2,12 +2,26 @@ import tensorflow as tf
 from keras import layers
 
 
-def make_coders():
+class Coders:
+    def __init__(self,
+                 autoencoder: tf.keras.models.Model,
+                 encoder:  tf.keras.models.Model,
+                 decoder:  tf.keras.models.Model
+                 ):
+        self.autoencoder = autoencoder
+        self.encoder = encoder
+        self.decoder = decoder
+
+def dump_coder_summaries(coders: Coders):
+    coders.encoder.summary()
+    coders.decoder.summary()
+
+def make_coders(latent_dim: int) ->  Coders:
 
     by2x2 = (2, 2)
     by3x2 = (3, 2)
     by3x3 = (3, 3)
-    latent_dim = 64 #  loss: 0.0025
+    # latent_dim = 64 #  loss: 0.0025
     # latent_dim = 128 #  loss: 0.0023
     # latent_dim = 256 #  loss: 0.0023
     # going 128, 64, 32 (instead of 32, 64, 128), at latent_dim 64 requires more time with loss: 0.0032
@@ -58,16 +72,3 @@ def make_coders():
 
     return Coders(autoencoder, encoder, decoder)
 
-class Coders:
-    def __init__(self,
-                 autoencoder: tf.keras.models.Model,
-                 encoder:  tf.keras.models.Model,
-                 decoder:  tf.keras.models.Model
-                 ):
-        self.autoencoder = autoencoder
-        self.encoder = encoder
-        self.decoder = decoder
-
-def dump_coder_summaries(coders: Coders):
-    coders.encoder.summary()
-    coders.decoder.summary()
