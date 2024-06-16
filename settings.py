@@ -16,6 +16,7 @@ def read_settings():
     parser.add_argument("--batch", type=int)
     parser.add_argument("--latent-dim", type=int)
     parser.add_argument("--train-val-spit-at", type=float)
+    parser.add_argument("--samples-dir", type=str)
     args = parser.parse_args()
     settings = Settings(args)
     print(settings)
@@ -118,4 +119,10 @@ class Settings:
         value = self.args.latent_dim
         if value is None:
             raise Exception("No latent dimension.")
+        return value
+    @property
+    def samples_dir(self) -> str:
+        value = self.args.samples_dir
+        if value is None:
+            raise Exception("No samples.")
         return value
