@@ -10,7 +10,7 @@ from settings import Settings
 
 def run_snapping_for_one(args: Settings):
     reset_gpu()
-    coders = make_coders()
+    coders = make_coders(args.latent_dim)
     dump_coder_summaries(coders)
     coders.autoencoder.load_weights(args.weights_path)
 
@@ -18,7 +18,7 @@ def run_snapping_for_one(args: Settings):
 
 def run_snapping_for_all(args: Settings):
     reset_gpu()
-    coders = make_coders()
+    coders = make_coders(args.latent_dim)
     dump_coder_summaries(coders)
     coders.autoencoder.load_weights(args.weights_path)
 
