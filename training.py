@@ -5,13 +5,13 @@ from autoencoder_one_conv import Coders
 from settings import Settings
 
 
-def train(args: Settings, tiles, coders: Coders):
+def train(args: Settings, samples, coders: Coders):
 
-    np.random.shuffle(tiles)
+    np.random.shuffle(samples)
 
-    split_at = None if args.train_val_spit_at is None else int(args.train_val_spit_at * len(tiles))
-    train_tiles = tiles if split_at is None else tiles[:split_at]
-    val_tiles = tiles if split_at is None else tiles[split_at:]
+    split_at = None if args.train_val_spit_at is None else int(args.train_val_spit_at * len(samples))
+    train_tiles = samples if split_at is None else samples[:split_at]
+    val_tiles = samples if split_at is None else samples[split_at:]
 
     print(f"batch size: {args.batch}")
     print(f"epochs: {args.epochs}")
