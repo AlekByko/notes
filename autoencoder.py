@@ -1,16 +1,8 @@
 import tensorflow as tf
 from keras import layers
 
+from coders import Coders
 
-class Coders:
-    def __init__(self,
-                 autoencoder: tf.keras.models.Model,
-                 encoder:  tf.keras.models.Model,
-                 decoder:  tf.keras.models.Model
-                 ):
-        self.autoencoder = autoencoder
-        self.encoder = encoder
-        self.decoder = decoder
 
 def dump_coder_summaries(coders: Coders):
     coders.encoder.summary()
