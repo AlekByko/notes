@@ -14,7 +14,6 @@ def read_settings():
     parser.add_argument("--config-path", type=str)
     parser.add_argument("--epochs", type=int)
     parser.add_argument("--batch", type=int)
-    parser.add_argument("--latent-dim", type=int)
     parser.add_argument("--train-val-spit-at", type=float)
     parser.add_argument("--samples-dir", type=str)
     parser.add_argument("--max-samples", type=int)
@@ -113,13 +112,6 @@ class Settings:
         value = self.args.batch
         if value is None:
             raise Exception("No batch size.")
-        return value
-
-    @property
-    def latent_dim(self) -> int:
-        value = self.args.latent_dim
-        if value is None:
-            raise Exception("No latent dimension.")
         return value
 
     @property
