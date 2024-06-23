@@ -3,6 +3,15 @@ import glob
 from typing import Any, Generator
 
 
+def parse_size(arg):
+    try:
+        parts = arg.split('x')
+        if len(parts) != 2:
+            raise ValueError("Expected a tuple of two elements")
+        return (int(parts[0]), int(parts[1]))
+    except Exception as e:
+        raise argparse.ArgumentTypeError(f"Invalid tuple of two integers: {arg}") from e
+
 def read_settings():
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str)
@@ -17,6 +26,8 @@ def read_settings():
     parser.add_argument("--train-val-spit-at", type=float)
     parser.add_argument("--samples-dir", type=str)
     parser.add_argument("--max-samples", type=int)
+    parser.add_argument("--input-size", type=parse_size)
+    parser.add_argument("--scale-factor", type=float)
     args = parser.parse_args()
     settings = Settings(args)
     print(settings)
@@ -124,5 +135,18 @@ class Settings:
     def max_samples(self) -> int:
         value = self.args.max_samples
         if value is None:
-            raise Exception("Max number of samples.")
+            raise Exception("No max number of samples.")
+        return value
+    @property
+    def input_size(self) -> tuple[int, int]:
+        value = self.args.input_size
+        if value is None:
+            raise Exception("No input size.")
+        return value
+    @property
+    def scale_factor(self) -> int:
+        value = self.args.scale_factor
+        if value is None:
+            raise Exception("No scale factor.")
+        return value
         return value

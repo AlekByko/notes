@@ -1,6 +1,7 @@
 import sys
 
 from sampling import run_sampling
+from scaling_images import run_scaling_images
 from settings import read_settings
 from snapping import run_snapping_for_all
 from sort_images import run_image_sorter
@@ -31,9 +32,12 @@ def run():
             run_vae_snapping_for_all(args)
         case "sort-images":
             run_image_sorter(args)
+        case "scale-images":
+            run_scaling_images(args)
         case _:
             raise Exception(f"Unexpected mode: {args.mode}")
 
 
 run()
+
 
