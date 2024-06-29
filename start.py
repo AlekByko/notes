@@ -1,5 +1,6 @@
 import sys
 
+from making_samples import run_making_samples
 from sampling import run_sampling
 from scaling_and_graying_images import run_scaling_and_graying_images
 from scaling_images import run_scaling_images
@@ -37,6 +38,8 @@ def run():
             run_scaling_images(args)
         case "scale-and-gray-images":
             run_scaling_and_graying_images(args)
+        case "make-samples":
+            run_making_samples(args)
         case _:
             raise Exception(f"Unexpected mode: {args.mode}")
 

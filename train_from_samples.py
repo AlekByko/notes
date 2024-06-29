@@ -1,12 +1,12 @@
 
 
 
-import tensorflow as tf
 from keras.callbacks import ModelCheckpoint
 
 from gpu import reset_gpu
 from loading_images import load_samples_as_list
 from making_ae import make_autoencoder
+from making_dataset import make_dataset
 from settings import Settings
 
 image_shape = (120, 160, 1)
@@ -45,8 +45,8 @@ def run_training_from_samples(args: Settings):
         period=1,
     )
 
-    train_dataset = make_dataset(args, train_samples)
-    val_dataset = make_dataset(args, val_samples)
+    train_dataset = make_dataset(args, train_samples, image_shape)
+    val_dataset = make_dataset(args, val_samples, image_shape)
 
     coders.autoencoder.fit(
         train_dataset,
@@ -57,26 +57,4 @@ def run_training_from_samples(args: Settings):
         callbacks=[checkpoint_callback],
     )
 
-    coders.autoencoder.save_weights(args.weights_path, overwrite=True)
 
-def make_dataset(args: Settings, samples):
-    # https://github.com/tensorflow/tensorflow/issues/35264#issuecomment-1363177995
-
-
-    def generator_samples():
-
-        # ADD SHUFFLING HERE?
-
-        for idx in range(len(samples)):
-            sample = samples[idx]
-            sample_tensor = tf.convert_to_tensor(sample, dtype=tf.float32)
-            yield sample_tensor, sample_tensor
-
-    dataset = tf.data.Dataset.from_generator(
-        generator_samples,
-        output_signature=(
-            tf.TensorSpec(shape=image_shape, dtype=tf.float32),
-            tf.TensorSpec(shape=image_shape, dtype=tf.float32)
-        )
-    )
-    return dataset.batch(args.batch)
