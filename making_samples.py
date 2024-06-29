@@ -3,7 +3,7 @@ from PIL import Image
 
 from gpu import reset_gpu
 from loading_images import load_samples_as_list
-from making_ae import make_autoencoder
+from making_ae_new_york import make_autoencoder
 from making_dataset import make_dataset
 from settings import Settings
 

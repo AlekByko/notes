@@ -5,15 +5,10 @@ from keras.callbacks import ModelCheckpoint
 
 from gpu import reset_gpu
 from loading_images import load_samples_as_list
-from making_ae import make_autoencoder
+from making_ae_new_york import image_shape, make_autoencoder_new_york
 from making_dataset import make_dataset
 from settings import Settings
 
-image_shape = (120, 160, 1)
-latent_dim = 1024
-filter_size = 16
-
-# also consider
 # https://stackoverflow.com/questions/58088560/high-loss-from-convolutional-autoencoder-keras
 
 def run_training_from_samples(args: Settings):
@@ -23,7 +18,7 @@ def run_training_from_samples(args: Settings):
     # needs at least 50 000 samples better 100 000
 
 
-    coders = make_autoencoder(image_shape, latent_dim, filter_size)
+    coders = make_autoencoder_new_york()
 
     samples = load_samples_as_list(args)
 

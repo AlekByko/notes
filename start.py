@@ -47,3 +47,26 @@ def run():
 run()
 
 
+
+
+"""
+Paris, France
+Tokyo, Japan
+London, England
+Sydney, Australia
+Rome, Italy
+Barcelona, Spain
+Beijing, China
+Dubai, UAE
+Los Angeles, USA
+Berlin, Germany
+Moscow, Russia
+Rio de Janeiro, Brazil
+Cairo, Egypt
+Istanbul, Turkey
+Hong Kong, China
+Bangkok, Thailand
+San Francisco, USA
+Mexico City, Mexico
+Toronto, Canada
+"""
