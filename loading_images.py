@@ -58,21 +58,25 @@ def load_samples_as_list(args: Settings) -> List[Any]:
     for i in range(length):
         path = paths[i]
         if i % 100 == 0:
-            print(f"Loading images: {i} {int(100*i/length)}% ")
+            print(
+                f"\rLoading images: {i} {int(100*i/length)}% ",
+                end="" if i < length - 1 else "\n",
+            )
         image = Image.open(path)
 
         bytes = np.array(image)
 
         bytes = np.expand_dims(bytes, axis=-1)
         if len(bytes.shape) != 3 or bytes.shape[2] != 1:
-            print(f"Bad shape: {bytes.shape}, skipping...")
+            print(f"Bad shape: {path} {bytes.shape}, skipping...")
             continue
-
 
         floats = bytes / 255.0
         floats = floats.astype(np.float32)
         samples.append(floats)
         image.close()
 
-    print(f"Loading images: {length} 100% ")
+    if i % 100 != 0:
+        print(f"\rLoading images: {length} 100% ", end="\n")
+
     return samples

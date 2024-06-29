@@ -10,7 +10,7 @@ from making_vae import make_vae
 from settings import Settings
 
 image_shape = (120, 160, 1)
-latent_dim = 512
+latent_dim = 4096
 filter_size = 16
 
 def run_training_from_samples(args: Settings):
