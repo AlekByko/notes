@@ -10,7 +10,8 @@ from loading_images import load_samples_as_list
 from settings import Settings
 
 image_shape = (120, 160, 1)
-latent_dim = 256
+latent_dim = 512
+filter_size = 16
 
 def run_training_from_samples(args: Settings):
 
@@ -19,7 +20,7 @@ def run_training_from_samples(args: Settings):
     # needs at least 50 000 samples better 100 000
 
 
-    coders = make_autoencoder(image_shape, latent_dim)
+    coders = make_autoencoder(image_shape, latent_dim, filter_size)
 
     samples = load_samples_as_list(args)
 
