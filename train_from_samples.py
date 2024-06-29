@@ -4,9 +4,9 @@
 import tensorflow as tf
 from keras.callbacks import ModelCheckpoint
 
-from autoencoder_160x120 import make_autoencoder
 from gpu import reset_gpu
 from loading_images import load_samples_as_list
+from making_vae import make_vae
 from settings import Settings
 
 image_shape = (120, 160, 1)
@@ -20,7 +20,7 @@ def run_training_from_samples(args: Settings):
     # needs at least 50 000 samples better 100 000
 
 
-    coders = make_autoencoder(image_shape, latent_dim, filter_size)
+    coders = make_vae(image_shape, latent_dim, filter_size)
 
     samples = load_samples_as_list(args)
 
@@ -39,7 +39,7 @@ def run_training_from_samples(args: Settings):
         save_weights_only=True,
         save_freq='epoch',
         monitor='val_loss',
-        period=5,
+        period=1,
     )
 
     train_dataset = make_dataset(args, train_samples)
