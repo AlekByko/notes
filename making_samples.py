@@ -3,7 +3,7 @@ from PIL import Image
 
 from gpu import reset_gpu
 from loading_images import load_samples_as_list
-from making_ae_new_york import make_autoencoder
+from making_ae_new_york import make_autoencoder_new_york
 from making_dataset import make_dataset
 from settings import Settings
 
@@ -16,7 +16,7 @@ def run_making_samples(args: Settings):
 
     reset_gpu()
 
-    coders = make_autoencoder(sample_shape, latent_dim, filter_size)
+    coders = make_autoencoder_new_york(sample_shape, latent_dim, filter_size)
     samples = load_samples_as_list(args)
 
     coders.autoencoder.load_weights(args.weights_path)
