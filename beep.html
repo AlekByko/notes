@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Heart Monitor Beep</title>
+    <style>
+        body {
+            transition: background-color 0.1s;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="startBeeping()">Start Beeping</button>
+    <script>
+        let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let interval = 1000; // Start with 1 second interval
+        let minInterval = 100; // Minimum interval of 100ms
+        let speedUpFactor = 0.9; // Speed up factor for each beep
+        let beepTimeout;
+
+        function beep() {
+            // Create oscillator node
+            let oscillator = audioCtx.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // Frequency in hertz (A4 note)
+
+            // Create gain node
+            let gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(1, audioCtx.currentTime); // Volume
+
+            // Connect nodes
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            // Start and stop the beep
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1); // Beep duration
+
+            // Flash background color
+            document.body.style.backgroundColor = 'red';
+            setTimeout(() => {
+                document.body.style.backgroundColor = 'white';
+            }, 100); // Flash duration
+
+            // Schedule next beep
+            interval = Math.max(minInterval, interval * speedUpFactor);
+            beepTimeout = setTimeout(beep, interval);
+        }
+
+        function startBeeping() {
+            // Reset interval for new session
+            interval = 1000;
+            clearTimeout(beepTimeout);
+            beep();
+        }
+    </script>
+</body>
+</html>
