@@ -16,6 +16,7 @@ export function startTrackingIdle(
     window.document.addEventListener('mousedown', resetIdling); // mouse held still can still be clicked
     window.document.addEventListener('mousemove', resetIdling);
     window.document.addEventListener('keydown', resetIdling);
+    window.document.addEventListener('wheel', resetIdling);
     window.setInterval(() => {
         const now = toTimestamp();
         const since = now - idlingSince;
