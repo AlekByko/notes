@@ -1,4 +1,4 @@
-import { lstatSync, readdirSync } from 'fs';
+import { closeSync, lstatSync, openSync, readdirSync } from 'fs';
 import { join } from 'path';
 
 export interface DirFile {
@@ -34,4 +34,18 @@ export function removeFileExtension(fileName: string) {
 
 export function combinePath(path1: string, path2: string): string {
     return join(path1, path2).replace(/\\/g, '/')
+}
+
+export function seeIfBeingWrittenTo(path: string): boolean {
+    try {
+        const fd = openSync(path, 'r+');
+        closeSync(fd);
+        return false;
+    } catch (err: any) {
+        if (err.code === 'EBUSY' || err.code === 'EACCES' || err.code === 'EPERM') {
+            return true;
+        } else {
+            return true;
+        }
+    }
 }
