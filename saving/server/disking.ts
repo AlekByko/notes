@@ -31,3 +31,7 @@ export function filterFilesInDir(dir: string): DirFile[] {
 export function removeFileExtension(fileName: string) {
     return fileName.replace(/\.[^/.]+$/, '');
 }
+
+export function combinePath(path1: string, path2: string): string {
+    return join(path1, path2).replace(/\\/g, '/')
+}
