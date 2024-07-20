@@ -368,5 +368,11 @@ declare global {
     interface Object {
         realKeys<T extends object>(obj: T): (keyof T)[];
     }
+    interface String {
+        over<T>(this: string, over: (value: string) => T): T;
+    }
 }
 Object.realKeys = Object.keys as any;
+String.prototype.over = function<T>(this: string, over: (value: string) => T): T {
+    return over(this);
+}
