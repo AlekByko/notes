@@ -9,7 +9,7 @@ function xxx(x: number): number {
     x = x * 100;
     return x;
 }
-function RGBtoXYZ(r: number, g: number, b: number): XYZ {
+export function RGBtoXYZ(r: number, g: number, b: number): XYZ {
     const var_R = xxx(r);
     const var_G = xxx(g);
     const var_B = xxx(b);
@@ -47,7 +47,7 @@ const ref_X = 95.047;
 const ref_Y = 100.000;
 const ref_Z = 108.883;
 
-function XYZtoLAB([x, y, z]: XYZ): LAB {
+export function XYZtoLAB([x, y, z]: XYZ): LAB {
     const [var_X, var_Y, var_Z] = [x / ref_X, y / ref_Y, z / ref_Z]
         .map(a => a > 0.008856
             ? Math.pow(a, 1 / 3)
