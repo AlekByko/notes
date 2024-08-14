@@ -1,4 +1,9 @@
 export type Xyz = [number, number, number] & As<'xyz'>;
+
+export function makeXyz(): Xyz {
+    return [0, 0, 0] as Xyz;
+}
+
 export type Lab = [number, number, number] & As<'lab'>;
 
 export function makeLab(): Lab {
@@ -14,7 +19,7 @@ function xxx(x: number): number {
     return x;
 }
 
-export function rgbToXyz(r: number, g: number, b: number): Xyz {
+export function setXyzByRgb(r: number, g: number, b: number, xyz: Xyz): void {
     const var_R = xxx(r);
     const var_G = xxx(g);
     const var_B = xxx(b);
@@ -23,8 +28,9 @@ export function rgbToXyz(r: number, g: number, b: number): Xyz {
     const x = var_R * 0.4124 + var_G * 0.3576 + var_B * 0.1805;
     const y = var_R * 0.2126 + var_G * 0.7152 + var_B * 0.0722;
     const z = var_R * 0.0193 + var_G * 0.1192 + var_B * 0.9505;
-
-    return [x, y, z] as Xyz;
+    xyz[0] = x;
+    xyz[1] = y;
+    xyz[2] = z;
 }
 
 /*

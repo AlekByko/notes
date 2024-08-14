@@ -1,4 +1,4 @@
-import { makeLab, rgbToXyz, setLabByXyz } from './coloring';
+import { makeLab, makeXyz, setLabByXyz, setXyzByRgb } from './coloring';
 import { broke } from './shared/core';
 
 export function pickHow(mode: Mode) {
@@ -75,13 +75,15 @@ function LABed(imda: ImageData): void {
     // do nothing
     const { data } = imda;
     const lab = makeLab();
+    const xyz = makeXyz();
     for (let i = 0; i < data.length; i += 4) {
         const r = data[i + 0];
         const g = data[i + 1];
         const b = data[i + 2];
 
-        const xyz = rgbToXyz(r, g, b);
+        setXyzByRgb(r, g, b, xyz);
         setLabByXyz(xyz, lab);
+
         let [l] = lab;
         l = Math.round(l / 100 * 255);
         data[i + 0] = l;
