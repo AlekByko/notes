@@ -1,16 +1,16 @@
 export type Xyz = [number, number, number] & As<'xyz'>;
 
 export function makeXyz(): Xyz {
-    return [0, 0, 0] as Xyz;
+    return new Float32Array() as any;
 }
 
 export type Lab = [number, number, number] & As<'lab'>;
 
 export function makeLab(): Lab {
-    return [0, 0, 0] as Lab;
+    return new Float32Array(3) as any;
 }
 
-function xxx(x: number): number {
+function xyzetting(x: number): number {
     x = x / 255;
     x = x > 0.04045
         ? Math.pow(((x + 0.055) / 1.055), 2.4)
@@ -20,9 +20,9 @@ function xxx(x: number): number {
 }
 
 export function setXyzByRgb(r: number, g: number, b: number, xyz: Xyz): void {
-    const var_R = xxx(r);
-    const var_G = xxx(g);
-    const var_B = xxx(b);
+    const var_R = xyzetting(r);
+    const var_G = xyzetting(g);
+    const var_B = xyzetting(b);
 
     // Observer. = 2°, Illuminant = D65
     const x = var_R * 0.4124 + var_G * 0.3576 + var_B * 0.1805;
