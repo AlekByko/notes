@@ -394,4 +394,6 @@ String.prototype.over = function <T>(this: string, over: (value: string) => T): 
     return over(this);
 }
 
-export function cast<S extends string>(_name: string): asserts _name is S { }
+export function cast<O extends {}>(_name: {}): asserts _name is O;
+export function cast<S extends string>(_name: string): asserts _name is S;
+export function cast(_name: any): void { }
