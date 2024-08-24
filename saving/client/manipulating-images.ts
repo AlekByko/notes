@@ -4,12 +4,16 @@ import { broke } from './shared/core';
 export function pickHow(mode: Mode) {
     switch (mode) {
         case 'nothing': return nothing;
+        case 'histo': return histo;
         case 'averaged': return averaged;
         case 'weighted': return weighted;
         case 'LABed': return LABed;
         case 'adaptive': return adaptive;
         default: return broke(mode);
     }
+}
+
+function histo(_: ImageData): void {
 }
 function nothing(_: ImageData): void {
     // do nothing
@@ -91,6 +95,6 @@ function LABed(imda: ImageData): void {
         data[i + 2] = l;
     }
 }
-const allModes = ['nothing', 'averaged', 'weighted', 'LABed', 'adaptive'] as const;
+const allModes = ['nothing', 'histo', 'averaged', 'weighted', 'LABed', 'adaptive'] as const;
 export type Mode = typeof allModes[number];
 export const modes = [...allModes];
