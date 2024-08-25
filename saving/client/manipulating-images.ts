@@ -14,6 +14,7 @@ export function pickHow(mode: Mode) {
         case 'gauss9': return gauss9;
         case 'gauss11': return gauss11;
         case 'gauss13': return gauss13;
+        case 'gauss51': return gauss51;
         case 'gauss101': return gauss101;
         case 'averaged': return averaged;
         case 'weighted': return weighted;
@@ -41,6 +42,7 @@ const gaussKernel7 = makeGaussianKernel(7);
 const gaussKernel9 = makeGaussianKernel(9);
 const gaussKernel11 = makeGaussianKernel(11);
 const gaussKernel13 = makeGaussianKernel(13);
+const gaussKernel51 = makeGaussianKernel(51);
 const gaussKernel101 = makeGaussianKernel(101);
 
 function gauss3(imda: ImageData, imageWidth: number): void {
@@ -66,6 +68,10 @@ function gauss11(imda: ImageData, imageWidth: number): void {
 function gauss13(imda: ImageData, imageWidth: number): void {
     weighted(imda);
     applyKernelToR(imda, imageWidth, gaussKernel13, 13);
+}
+function gauss51(imda: ImageData, imageWidth: number): void {
+    weighted(imda);
+    applyKernelToR(imda, imageWidth, gaussKernel51, 51);
 }
 function gauss101(imda: ImageData, imageWidth: number): void {
     weighted(imda);
@@ -246,6 +252,7 @@ const allModes = [
     'gauss9',
     'gauss11',
     'gauss13',
+    'gauss51',
     'gauss101',
     'averaged', 'weighted', 'LABed', 'adaptive'] as const;
 export type Mode = typeof allModes[number];
