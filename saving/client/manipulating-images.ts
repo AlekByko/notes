@@ -1,13 +1,20 @@
 import { makeLab, makeXyz, setLabByXyz, setXyzByRgb } from './coloring';
-import { broke } from './shared/core';
+import { broke, fail } from './shared/core';
 
+const sqrt2Pi = Math.sqrt(2 * Math.PI); // do not move, since processed first come first go
 
 export type ProcessImageData = (imda: ImageData, imageWidth: number) => void;
 
 export function pickHow(mode: Mode) {
     switch (mode) {
         case 'nothing': return nothing;
-        case 'gauss': return gauss;
+        case 'gauss3': return gauss3;
+        case 'gauss5': return gauss5;
+        case 'gauss7': return gauss7;
+        case 'gauss9': return gauss9;
+        case 'gauss11': return gauss11;
+        case 'gauss13': return gauss13;
+        case 'gauss101': return gauss101;
         case 'averaged': return averaged;
         case 'weighted': return weighted;
         case 'LABed': return LABed;
@@ -28,23 +35,89 @@ function normalizeInPlace(values: number[]): void {
 }
 
 
-const gauss7x7 = [
-    0.0007, 0.0018, 0.0043, 0.0077, 0.0043, 0.0018, 0.0007,
-    0.0018, 0.0046, 0.0109, 0.0191, 0.0109, 0.0046, 0.0018,
-    0.0043, 0.0109, 0.0256, 0.0440, 0.0256, 0.0109, 0.0043,
-    0.0077, 0.0191, 0.0440, 0.0764, 0.0440, 0.0191, 0.0077,
-    0.0043, 0.0109, 0.0256, 0.0440, 0.0256, 0.0109, 0.0043,
-    0.0018, 0.0046, 0.0109, 0.0191, 0.0109, 0.0046, 0.0018,
-    0.0007, 0.0018, 0.0043, 0.0077, 0.0043, 0.0018, 0.0007,
-];
-normalizeInPlace(gauss7x7);
+const gaussKernel3 = makeGaussianKernel(3);
+const gaussKernel5 = makeGaussianKernel(5);
+const gaussKernel7 = makeGaussianKernel(7);
+const gaussKernel9 = makeGaussianKernel(9);
+const gaussKernel11 = makeGaussianKernel(11);
+const gaussKernel13 = makeGaussianKernel(13);
+const gaussKernel101 = makeGaussianKernel(101);
 
-function gauss(imda: ImageData, imageWidth: number): void {
+function gauss3(imda: ImageData, imageWidth: number): void {
     weighted(imda);
-    gaussRGray(imda, 4, imageWidth, gauss7x7, 7);
+    applyKernelToR(imda, imageWidth, gaussKernel3, 3);
+}
+function gauss5(imda: ImageData, imageWidth: number): void {
+    weighted(imda);
+    applyKernelToR(imda, imageWidth, gaussKernel5, 5);
+}
+function gauss7(imda: ImageData, imageWidth: number): void {
+    weighted(imda);
+    applyKernelToR(imda, imageWidth, gaussKernel7, 7);
+}
+function gauss9(imda: ImageData, imageWidth: number): void {
+    weighted(imda);
+    applyKernelToR(imda, imageWidth, gaussKernel9, 9);
+}
+function gauss11(imda: ImageData, imageWidth: number): void {
+    weighted(imda);
+    applyKernelToR(imda, imageWidth, gaussKernel11, 11);
+}
+function gauss13(imda: ImageData, imageWidth: number): void {
+    weighted(imda);
+    applyKernelToR(imda, imageWidth, gaussKernel13, 13);
+}
+function gauss101(imda: ImageData, imageWidth: number): void {
+    weighted(imda);
+    applyKernelToR(imda, imageWidth, gaussKernel101, 101);
 }
 
-function gaussRGray(imda: ImageData, stride: number, imageWidth: number, kernel: number[], kernelSize: number): void {
+function makeGaussianKernel(size: number): number[] {
+    if (size % 2 === 0) return fail(`Kernel size ${size} must be an odd number.`);
+
+    const sigma = (size - 1) / 6; // magic numbers
+    const kernel: number[] = [];
+    const halfSize = (size - 1) / 2;
+    const twoSigmaSquare = 2 * sigma * sigma;
+    const normalizationFactor = 1 / (sqrt2Pi * sigma);
+
+    for (let y = -halfSize; y <= halfSize; y++) {
+        for (let x = -halfSize; x <= halfSize; x++) {
+            const exponent = -(x * x + y * y) / twoSigmaSquare;
+            const value = normalizationFactor * Math.exp(exponent);
+            kernel.push(value);
+        }
+    }
+    console.group(size);
+    // dumpKernel(kernel, size);
+
+    console.groupEnd()
+    normalizeInPlace(kernel);
+    return kernel;
+};
+
+
+void dumpKernel;
+function dumpKernel(kernel: number[], size: number) {
+    let row : number[] = [];
+    for (let i = 0; i < kernel.length; i ++) {
+        if (row.length === size) {
+            console.log(row);
+            row = [];
+        }
+        row.push(kernel[i]);
+    }
+    if (row.length > 0) {
+        console.log(row);
+    }
+}
+
+
+
+/** assuming gray image only applying the kernel to R in [R, G, B, A] */
+function applyKernelToR(imda: ImageData, imageWidth: number, kernel: number[], kernelSize: number): void {
+
+    const stride = 4; // [R, G, B, A]
     const { data } = imda;
     const imageHeight = data.length / stride / imageWidth;
     const kernelHalf = (kernelSize - 1) / 2;
@@ -66,10 +139,12 @@ function gaussRGray(imda: ImageData, stride: number, imageWidth: number, kernel:
                 const skx = sx - kernelHalf + kx;
                 const sky = sy - kernelHalf + ky;
                 let ski = (sky * imageWidth + skx) * stride + 0;  // we only care about R in [R, G, B, A]
-                let sk = 0;
+
+                let sk = 0; // anything outside the image is black
                 if (ski >= 0 && ski < data.length) {
                     sk = data[ski];
                 }
+
                 s += sk * k; // <-- accumulating weighed values
             }
             s = Math.round(s);
@@ -163,6 +238,15 @@ function LABed(imda: ImageData): void {
         data[i + 2] = l;
     }
 }
-const allModes = ['nothing', 'gauss', 'averaged', 'weighted', 'LABed', 'adaptive'] as const;
+const allModes = [
+    'nothing',
+    'gauss3',
+    'gauss5',
+    'gauss7',
+    'gauss9',
+    'gauss11',
+    'gauss13',
+    'gauss101',
+    'averaged', 'weighted', 'LABed', 'adaptive'] as const;
 export type Mode = typeof allModes[number];
 export const modes = [...allModes];
