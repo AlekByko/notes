@@ -60,6 +60,14 @@ export function fail(message: string): never {
     throw new Error(message);
 }
 
+export function failLoud(message: string): never {
+    debugger;
+    console.trace();
+    alert(message);
+    debugger;
+    throw new Error(message);
+}
+
 export function asFiniteOr<Or>(value: number, or: Or): number | Or {
     return isFinite(value) ? value : or;
 }
