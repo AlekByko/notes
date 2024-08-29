@@ -2,8 +2,8 @@ export function formatYesNo(value: boolean): string {
     return value ? 'Yes' : 'No';
 }
 
-const formatter = new window.Intl.NumberFormat('en-us');
 export function formatInteger(value: number): string {
+    const formatter = new window.Intl.NumberFormat('en-us');
     return formatter.format(value);
 }
 
