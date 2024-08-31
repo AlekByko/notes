@@ -74,16 +74,39 @@ export function makeMinMaxBySlidingWindow(imda: ImageData, windowSize: number): 
     foreachPxCollectInWindow({
         imda, windowSize, storage: minmax,
         makeCollected: value => ({ min: value, max: value }),
-        collect: (pxv, collected) => {
-            if (pxv > collected.max) collected.max = pxv;
-            if (pxv < collected.min) collected.min = pxv;
+        collect: (valueAt, collected) => {
+            if (valueAt > collected.max) collected.max = valueAt;
+            if (valueAt < collected.min) collected.min = valueAt;
         },
-        store: (collected, storage) => {
-            storage.push(collected.min);
-            storage.push(collected.max);
+        store: (collected, stored) => {
+            stored.push(collected.min);
+            stored.push(collected.max);
         }
     });
     return minmax;
+}
+
+export function toMaxVoting(imda: ImageData, windowSize: number, or: number): number[] {
+    const voted: number[] = [];
+    foreachPxCollectInWindow({
+        imda, windowSize, storage: voted,
+        makeCollected: () => ({ offCount: 0, onCount: 0 }),
+        collect: (value, collected) => {
+            if (value === 0) collected.offCount += 1;
+            if (value === 255) collected.onCount += 1;
+            alert('Ouch!');
+        },
+        store: ({onCount, offCount}, stored) => {
+            if (onCount > offCount) {
+                stored.push(255);
+            }
+            if (offCount> onCount) {
+                stored.push(0);
+            }
+            stored.push(or);
+        }
+    });
+    return voted;
 }
 
 type Data = Uint8ClampedArray;
@@ -282,7 +305,7 @@ export function applyKernelToR(sourceImda: ImageData, targetImda: ImageData, ker
 }
 
 
-export function averaged(imda: ImageData): ImageData {
+export function averaged(imda: ImageData): void {
     // do nothing
     const { data } = imda;
     for (let i = 0; i < data.length; i += 4) {
@@ -295,7 +318,6 @@ export function averaged(imda: ImageData): ImageData {
         data[i + 1] = y;
         data[i + 2] = y;
     }
-    return imda;
 }
 export function weighted(imda: ImageData): void {
     // do nothing
@@ -312,16 +334,7 @@ export function weighted(imda: ImageData): void {
     }
 
 }
-export function adaptive(imda: ImageData): ImageData {
-    weighted(imda);
-    const { data } = imda;
-    const stride = 4;
-    for (let i = 0; i < data.length; i += stride) {
-        const v = data[i + 0];
-        void v;
-    }
-    return imda;
-}
+
 export interface Xy {
     x: number;
     y: number;
@@ -342,7 +355,7 @@ export function xyAt(x: number, y: number, width: number, stride: number): numbe
     return at;
 }
 
-export function LABed(imda: ImageData): ImageData {
+export function LABed(imda: ImageData): void {
     // do nothing
     const { data } = imda;
     const lab = makeLab();
@@ -361,5 +374,4 @@ export function LABed(imda: ImageData): ImageData {
         data[i + 1] = l;
         data[i + 2] = l;
     }
-    return imda;
 }

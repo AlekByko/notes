@@ -1,4 +1,4 @@
-import { LABed, adaptive, applyKernelToR, dynamicThreshold, fastGauss, makeGaussianKernel, makeMinMaxBySlidingWindow, pullKernelMiddleRow, weighted } from './manipulating-images';
+import { LABed, applyKernelToR, dynamicThreshold, fastGauss, makeGaussianKernel, makeMinMaxBySlidingWindow, pullKernelMiddleRow, weighted } from './manipulating-images';
 import { broke } from './shared/core';
 
 export type ProcessImageData = (imda: ImageData, makeImageData: () => ImageData) => ImageData;
@@ -23,8 +23,7 @@ export function pickHow(mode: Mode): ProcessImageData {
         case 'gauss101': return gauss101;
         case 'averaged': return averaged;
         case 'weighted': return imda => (weighted(imda), imda)
-        case 'LABed': return LABed;
-        case 'adaptive': return adaptive;
+        case 'LABed': return imda => (LABed(imda), imda);
         default: return broke(mode);
     }
 }
@@ -149,6 +148,6 @@ const allModes = [
     'dynamicThreshold13',
     'gauss51',
     'gauss101',
-    'averaged', 'weighted', 'LABed', 'adaptive'] as const;
+    'averaged', 'weighted', 'LABed'] as const;
 export type Mode = typeof allModes[number];
 export const modes = [...allModes];
