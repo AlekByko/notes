@@ -100,6 +100,17 @@ export function makeMinMaxBySlidingWindow(imda: ImageData, size: number): number
     return minmax;
 }
 
+export function checkTempImda(imda: ImageData, temp: ImageData) {
+    if (imda.width !== temp.width) return { code: 'temp-width-mismatches', text: `Bad width.` } as const;
+    if (imda.height !== temp.height) return { code: 'temp-height-mismatches', text: `Bad height.` } as const;
+    if (imda.data.length !== temp.data.length) return { code: 'temp-length-mismatches', text: `Bad length.` } as const;
+    return null;
+}
+export function checkSlidingWindowSize(size: number) {
+    if (size % 2 === 0) return { code: 'sliding-window-of-even-size', text: 'Bad size.' } as const;
+    return null;
+}
+
 export function dynamicThreshold(imda: ImageData, minmax: number[]) {
     const sstride = 4;
     const mstride = 2;
