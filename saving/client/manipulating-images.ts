@@ -3,9 +3,9 @@ import { broke, fail } from './shared/core';
 
 const sqrt2Pi = Math.sqrt(2 * Math.PI); // do not move, since processed first come first go
 
-export type ProcessImageData = (imda: ImageData, imageWidth: number) => void;
+export type ProcessImageData = (imda: ImageData, makeImageData: () => ImageData) => ImageData;
 
-export function pickHow(mode: Mode) {
+export function pickHow(mode: Mode): ProcessImageData {
     switch (mode) {
         case 'nothing': return nothing;
         case 'gauss3': return gauss3;
@@ -45,37 +45,53 @@ const gaussKernel13 = makeGaussianKernel(13);
 const gaussKernel51 = makeGaussianKernel(51);
 const gaussKernel101 = makeGaussianKernel(101);
 
-function gauss3(imda: ImageData, imageWidth: number): void {
-    weighted(imda);
-    applyKernelToR(imda, imageWidth, gaussKernel3, 3);
+function gauss3(sourceImda: ImageData, makeImageData: () => ImageData): ImageData {
+    weighted(sourceImda);
+    const targetImda = makeImageData();
+    applyKernelToR(sourceImda, targetImda, gaussKernel3, 3);
+    return targetImda;
 }
-function gauss5(imda: ImageData, imageWidth: number): void {
-    weighted(imda);
-    applyKernelToR(imda, imageWidth, gaussKernel5, 5);
+function gauss5(sourceImda: ImageData, makeImda: () => ImageData): ImageData {
+    weighted(sourceImda);
+    const targetImda = makeImda();
+    applyKernelToR(sourceImda, targetImda, gaussKernel5, 5);
+    return targetImda;
 }
-function gauss7(imda: ImageData, imageWidth: number): void {
-    weighted(imda);
-    applyKernelToR(imda, imageWidth, gaussKernel7, 7);
+function gauss7(sourceImda: ImageData, makeImda: () => ImageData): ImageData {
+    weighted(sourceImda);
+    const targetImda = makeImda();
+    applyKernelToR(sourceImda, targetImda, gaussKernel7, 7);
+    return targetImda;
 }
-function gauss9(imda: ImageData, imageWidth: number): void {
-    weighted(imda);
-    applyKernelToR(imda, imageWidth, gaussKernel9, 9);
+function gauss9(sourceImda: ImageData, makeImda: () => ImageData): ImageData {
+    weighted(sourceImda);
+    const targetImda = makeImda();
+    applyKernelToR(sourceImda, targetImda, gaussKernel9, 9);
+    return targetImda;
 }
-function gauss11(imda: ImageData, imageWidth: number): void {
-    weighted(imda);
-    applyKernelToR(imda, imageWidth, gaussKernel11, 11);
+function gauss11(sourceImda: ImageData, makeImda: () => ImageData): ImageData {
+    weighted(sourceImda);
+    const targetImda = makeImda();
+    applyKernelToR(sourceImda, targetImda, gaussKernel11, 11);
+    return targetImda;
 }
-function gauss13(imda: ImageData, imageWidth: number): void {
-    weighted(imda);
-    applyKernelToR(imda, imageWidth, gaussKernel13, 13);
+function gauss13(sourceImda: ImageData, makeImda: () => ImageData): ImageData {
+    weighted(sourceImda);
+    const targetImda = makeImda();
+    applyKernelToR(sourceImda, targetImda, gaussKernel13, 13);
+    return targetImda;
 }
-function gauss51(imda: ImageData, imageWidth: number): void {
-    weighted(imda);
-    applyKernelToR(imda, imageWidth, gaussKernel51, 51);
+function gauss51(sourceImda: ImageData, makeImda: () => ImageData): ImageData {
+    weighted(sourceImda);
+    const targetImda = makeImda();
+    applyKernelToR(sourceImda, targetImda, gaussKernel51, 51);
+    return targetImda;
 }
-function gauss101(imda: ImageData, imageWidth: number): void {
-    weighted(imda);
-    applyKernelToR(imda, imageWidth, gaussKernel101, 101);
+function gauss101(sourceImda: ImageData, makeImda: () => ImageData): ImageData {
+    weighted(sourceImda);
+    const targetImda = makeImda();
+    applyKernelToR(sourceImda, targetImda, gaussKernel101, 101);
+    return targetImda;
 }
 
 function makeGaussianKernel(size: number): number[] {
@@ -105,8 +121,8 @@ function makeGaussianKernel(size: number): number[] {
 
 void dumpKernel;
 function dumpKernel(kernel: number[], size: number) {
-    let row : number[] = [];
-    for (let i = 0; i < kernel.length; i ++) {
+    let row: number[] = [];
+    for (let i = 0; i < kernel.length; i++) {
         if (row.length === size) {
             console.log(row);
             row = [];
@@ -121,11 +137,16 @@ function dumpKernel(kernel: number[], size: number) {
 
 
 /** assuming gray image only applying the kernel to R in [R, G, B, A] */
-function applyKernelToR(imda: ImageData, imageWidth: number, kernel: number[], kernelSize: number): void {
+function applyKernelToR(sourceImDa: ImageData, targetImDa: ImageData, kernel: number[], kernelSize: number): void {
+
+    if (sourceImDa.width !== targetImDa.width) return fail('Width of source and target does not match.');
+    if (sourceImDa.height !== targetImDa.height) return fail('Height of source and target does not match.');
 
     const stride = 4; // [R, G, B, A]
-    const { data } = imda;
-    const imageHeight = data.length / stride / imageWidth;
+    const { data: source, width: imageWidth } = sourceImDa;
+    const { data: target } = targetImDa;
+
+    const imageHeight = source.length / stride / imageWidth;
     const kernelHalf = (kernelSize - 1) / 2;
     for (let sy = 0; sy < imageHeight; sy++) {
         for (let sx = 0; sx < imageWidth; sx++) {
@@ -147,27 +168,28 @@ function applyKernelToR(imda: ImageData, imageWidth: number, kernel: number[], k
                 let ski = (sky * imageWidth + skx) * stride + 0;  // we only care about R in [R, G, B, A]
 
                 let sk = 0; // anything outside the image is black
-                if (ski >= 0 && ski < data.length) {
-                    sk = data[ski];
+                if (ski >= 0 && ski < source.length) {
+                    sk = source[ski];
                 }
 
                 s += sk * k; // <-- accumulating weighed values
             }
             s = Math.round(s);
             const si = (sy * imageWidth + sx) * stride;
-            data[si + 0] = s;
-            data[si + 1] = s;
-            data[si + 2] = s;
+            target[si + 0] = s;
+            target[si + 1] = s;
+            target[si + 2] = s;
             // data[si + 3] = 0;
         }
     }
 }
 
-function nothing(_: ImageData): void {
+function nothing(imda: ImageData): ImageData {
     // do nothing
+    return imda;
 }
 
-function averaged(imda: ImageData): void {
+function averaged(imda: ImageData): ImageData {
     // do nothing
     const { data } = imda;
     for (let i = 0; i < data.length; i += 4) {
@@ -180,8 +202,9 @@ function averaged(imda: ImageData): void {
         data[i + 1] = y;
         data[i + 2] = y;
     }
+    return imda;
 }
-function weighted(imda: ImageData): void {
+function weighted(imda: ImageData): ImageData {
     // do nothing
     const { data } = imda;
     for (let i = 0; i < data.length; i += 4) {
@@ -194,8 +217,9 @@ function weighted(imda: ImageData): void {
         data[i + 1] = y;
         data[i + 2] = y;
     }
+    return imda;
 }
-function adaptive(imda: ImageData): void {
+function adaptive(imda: ImageData): ImageData {
     weighted(imda);
     const { data } = imda;
     const stride = 4;
@@ -203,6 +227,7 @@ function adaptive(imda: ImageData): void {
         const v = data[i + 0];
         void v;
     }
+    return imda;
 }
 interface Xy {
     x: number;
@@ -224,7 +249,7 @@ function xyAt(x: number, y: number, width: number, stride: number): number {
     return at;
 }
 void xyAt;
-function LABed(imda: ImageData): void {
+function LABed(imda: ImageData): ImageData {
     // do nothing
     const { data } = imda;
     const lab = makeLab();
@@ -243,6 +268,7 @@ function LABed(imda: ImageData): void {
         data[i + 1] = l;
         data[i + 2] = l;
     }
+    return imda;
 }
 const allModes = [
     'nothing',
