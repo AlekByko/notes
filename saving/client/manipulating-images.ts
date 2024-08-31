@@ -14,11 +14,17 @@ export function pickHow(mode: Mode): ProcessImageData {
         case 'gauss9': return gauss9;
         case 'gauss11': return gauss11;
         case 'fastGauss13': return fastGauss13;
+        case 'dynamicThreshold3': return dynamicThresholdOver(3);
+        case 'dynamicThreshold5': return dynamicThresholdOver(5);
+        case 'dynamicThreshold7': return dynamicThresholdOver(7);
+        case 'dynamicThreshold9': return dynamicThresholdOver(9);
+        case 'dynamicThreshold11': return dynamicThresholdOver(11);
+        case 'dynamicThreshold13': return dynamicThresholdOver(13);
         case 'gauss13': return gauss13;
         case 'gauss51': return gauss51;
         case 'gauss101': return gauss101;
         case 'averaged': return averaged;
-        case 'weighted': return weighted;
+        case 'weighted': return imda => (weighted(imda), imda)
         case 'LABed': return LABed;
         case 'adaptive': return adaptive;
         default: return broke(mode);
@@ -82,21 +88,23 @@ function gauss13(sourceImda: ImageData, makeImda: () => ImageData): ImageData {
     applyKernelToR(sourceImda, targetImda, gaussKernel13, 13);
     return targetImda;
 }
-function fastGauss13(sourceImda: ImageData, makeImda: () => ImageData): ImageData {
-    weighted(sourceImda);
+function pullKernelMiddleRow(kernel: number[]): number[] {
+    let size = Math.sqrt(kernel.length);
+    if (size !== (~~size)) return fail(`Bad kernel length: ${kernel.length}.`);
+    if (size % 2 === 0) return fail(`Bad kernel size: ${size}. Needs to be odd.`);
+    const mid = (size - 1) / 2;
+    const start = mid * size;
+    const end = start + size;
+    const row = kernel.slice(start, end);
+    normalizeInPlace(row);
+    return row;
+}
+function fastGauss13(imda: ImageData, makeImda: () => ImageData): ImageData {
+    weighted(imda);
     const tempImda = makeImda();
-    const start = 6 * 13;
-    const end = start + 13;
-    const kernel = gaussKernel13.slice(start, end);
-
-    // dumpKernel(gaussKernel13, 13);
-    // console.log(kernel.slice());
-
-    normalizeInPlace(kernel);
-    // console.log(kernel);
-
-    const resultImda = fastGauss(sourceImda, tempImda, kernel);
-    return resultImda;
+    const kernel = pullKernelMiddleRow(gaussKernel13);
+    fastGauss(imda, tempImda, kernel);
+    return imda;
 }
 function gauss51(sourceImda: ImageData, makeImda: () => ImageData): ImageData {
     weighted(sourceImda);
@@ -153,7 +161,74 @@ function dumpKernel(kernel: number[], size: number) {
     console.groupEnd();
 }
 
-function fastGauss(sourceImda: ImageData, tempImda: ImageData, kernel: number[]): ImageData {
+function makeMinMaxBySlidingWindow(imda: ImageData, size: number): number[] {
+    if (size % 2 === 0) return fail(`Bad size ${size}. Has to be odd.`);
+    const minmax: number[] = [];
+    const stride = 4;
+    const { data, width, height } = imda;
+    const half = (size - 1) / 2;
+    let i = -stride;
+    for (let sy = 0; sy < height; sy++) {
+        for (let sx = 0; sx < width; sx++) {
+            i += stride;
+            let min = data[i];
+            let max = min;
+            for (let ky = 0; ky < size; ky++) {
+                const sky = sy - half + ky;
+                if (sky < 0 || sky >= height) continue;
+                for (let kx = 0; kx < size; kx++) {
+                    const skx = sx - half + kx;
+                    if (skx < 0 || skx >= width) continue;
+                    const si = (sky * width + skx) * stride + 0;
+                    const s = data[si];
+                    if (s > max) max = s;
+                    if (s < min) min = s;
+                }
+            }
+            minmax.push(min)
+            minmax.push(max);
+        }
+    }
+    return minmax;
+}
+
+function dynamicThreshold(imda: ImageData, minmax: number[]) {
+    const sstride = 4;
+    const mstride = 2;
+
+    const { data } = imda;
+
+    let mi = -mstride;
+    for (let si = 0; si < data.length; si += sstride) {
+        mi += mstride;
+        const v = data[si];
+        const min = minmax[mi + 0];
+        const max = minmax[mi + 1];
+        const mid = (min + max) / 2;
+        const cut = v > mid ? 255 : 0;
+        data[si + 0] = cut;
+        data[si + 1] = cut;
+        data[si + 2] = cut;
+        // data[si + 3] = 255;
+    }
+}
+
+function dynamicThresholdOver(size: number) {
+    return function dynamicThresholdUnder(imda: ImageData, makeImda: () => ImageData): ImageData {
+
+        weighted(imda);
+        const tempImda = makeImda();
+        const kernel = pullKernelMiddleRow(gaussKernel13);
+
+        fastGauss(imda, tempImda, kernel);
+        const minmax = makeMinMaxBySlidingWindow(imda, size);
+        dynamicThreshold(imda, minmax);
+
+        return imda;
+    }
+}
+
+function fastGauss(sourceImda: ImageData, tempImda: ImageData, kernel: number[]): void {
 
     if (sourceImda.width !== tempImda.width) return fail('Width of source and target does not match.');
     if (sourceImda.height !== tempImda.height) return fail('Height of source and target does not match.');
@@ -214,8 +289,6 @@ function fastGauss(sourceImda: ImageData, tempImda: ImageData, kernel: number[])
             target[si + 3] = 255;
         }
     }
-
-    return sourceImda;
 }
 
 /** assuming gray image only applying the kernel to R in [R, G, B, A] */
@@ -285,7 +358,7 @@ function averaged(imda: ImageData): ImageData {
     }
     return imda;
 }
-function weighted(imda: ImageData): ImageData {
+function weighted(imda: ImageData): void {
     // do nothing
     const { data } = imda;
     for (let i = 0; i < data.length; i += 4) {
@@ -298,7 +371,7 @@ function weighted(imda: ImageData): ImageData {
         data[i + 1] = y;
         data[i + 2] = y;
     }
-    return imda;
+
 }
 function adaptive(imda: ImageData): ImageData {
     weighted(imda);
@@ -360,6 +433,12 @@ const allModes = [
     'gauss11',
     'gauss13',
     'fastGauss13',
+    'dynamicThreshold3',
+    'dynamicThreshold5',
+    'dynamicThreshold7',
+    'dynamicThreshold9',
+    'dynamicThreshold11',
+    'dynamicThreshold13',
     'gauss51',
     'gauss101',
     'averaged', 'weighted', 'LABed', 'adaptive'] as const;
