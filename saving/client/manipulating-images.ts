@@ -86,24 +86,31 @@ export function makeMinMaxBySlidingWindow(imda: ImageData, windowSize: number): 
     return minmax;
 }
 
-export function makeMaxVoting(imda: ImageData, windowSize: number, defaulted: number): number[] {
+export function makeVoting(imda: ImageData, windowSize: number, defaulted: number): number[] {
     const voted: number[] = [];
     foreachPxCollectInWindow({
         imda, windowSize, storage: voted,
         makeCollected: () => ({ offCount: 0, onCount: 0 }),
         collect: (value, collected) => {
-            if (value === 0) collected.offCount += 1;
-            if (value === 255) collected.onCount += 1;
-            alert('Ouch!');
+            value = Math.round(value);
+            if (value === 0) {
+                collected.offCount += 1;
+                return;
+            }
+            if (value === 255) {
+                collected.onCount += 1;
+                return;
+            }
+            console.log('Ouch', value);
         },
-        store: ({onCount, offCount}, stored) => {
+        store: ({ onCount, offCount }, stored) => {
             if (onCount > offCount) {
                 stored.push(255);
-            }
-            if (offCount> onCount) {
+            } else if (offCount > onCount) {
                 stored.push(0);
+            } else {
+                stored.push(defaulted);
             }
-            stored.push(defaulted);
         }
     });
     return voted;
@@ -173,7 +180,7 @@ export function assert(checked: Checked): void | never {
     return fail(`${code}: ${text}`);
 }
 
-export function dynamicThreshold(imda: ImageData, minmax: number[]) {
+export function inflictDynamicThreshold(imda: ImageData, minmax: number[]) {
     const sstride = 4;
     const mstride = 2;
 

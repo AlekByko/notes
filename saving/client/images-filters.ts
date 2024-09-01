@@ -1,7 +1,20 @@
-import { LABed, applyKernelToR, dynamicThreshold, fastGauss, makeGaussianKernel, makeMinMaxBySlidingWindow, pullKernelMiddleRow, weighted } from './manipulating-images';
+import { LABed, applyKernelToR, fastGauss, inflictDynamicThreshold, makeGaussianKernel, makeMinMaxBySlidingWindow, makeVoting, pullKernelMiddleRow, weighted } from './manipulating-images';
 import { broke } from './shared/core';
 
 export type ProcessImageData = (imda: ImageData, makeImageData: () => ImageData) => ImageData;
+
+const allModes = [
+    'nothing',
+    'gauss3','gauss5','gauss7','gauss9','gauss11','gauss13',
+    'fastGauss13',
+    'dynamicThreshold3','dynamicThreshold5','dynamicThreshold7','dynamicThreshold9','dynamicThreshold11','dynamicThreshold13',
+    'dynamicThresholdWithMaxVoting13-3-3',
+    'dynamicThresholdWithMaxVoting13-3-5',
+    'gauss51',
+    'gauss101',
+    'averaged', 'weighted', 'LABed'] as const;
+export type Mode = typeof allModes[number];
+export const modes = [...allModes];
 
 export function pickHow(mode: Mode): ProcessImageData {
     switch (mode) {
@@ -18,6 +31,8 @@ export function pickHow(mode: Mode): ProcessImageData {
         case 'dynamicThreshold9': return dynamicThresholdOver(9);
         case 'dynamicThreshold11': return dynamicThresholdOver(11);
         case 'dynamicThreshold13': return dynamicThresholdOver(13);
+        case 'dynamicThresholdWithMaxVoting13-3-3': return dynamicThresholdWithMaxVotingOver(13, 3, 3);
+        case 'dynamicThresholdWithMaxVoting13-3-5': return dynamicThresholdWithMaxVotingOver(13, 3, 5);
         case 'gauss13': return gauss13;
         case 'gauss51': return gauss51;
         case 'gauss101': return gauss101;
@@ -94,7 +109,7 @@ function gauss101(sourceImda: ImageData, makeImda: () => ImageData): ImageData {
     return targetImda;
 }
 
-function dynamicThresholdOver(size: number) {
+function dynamicThresholdOver(windowSize: number) {
     return function dynamicThresholdUnder(imda: ImageData, makeImda: () => ImageData): ImageData {
 
         weighted(imda);
@@ -102,13 +117,47 @@ function dynamicThresholdOver(size: number) {
         const kernel = pullKernelMiddleRow(gaussKernel13);
 
         fastGauss(imda, tempImda, kernel);
-        const minmax = makeMinMaxBySlidingWindow(imda, size);
-        dynamicThreshold(imda, minmax);
+        const minmax = makeMinMaxBySlidingWindow(imda, windowSize);
+        inflictDynamicThreshold(imda, minmax);
 
         return imda;
     }
 }
 
+function dynamicThresholdWithMaxVotingOver(gaussSize: number, minmaxSize: number, votingSize: number) {
+    return function dynamicThresholdWithMaxVotingUnder(imda: ImageData, makeImda: () => ImageData): ImageData {
+
+        weighted(imda);
+        const tempImda = makeImda();
+        const gaussKernel = makeGaussianKernel(gaussSize);
+        const kernel = pullKernelMiddleRow(gaussKernel);
+
+        fastGauss(imda, tempImda, kernel);
+        const minmax = makeMinMaxBySlidingWindow(imda, minmaxSize);
+        inflictDynamicThreshold(imda, minmax);
+
+        const voted = makeVoting(imda, votingSize, 0);
+        applyFrom1D(imda, voted);
+
+        return imda;
+    }
+}
+
+
+function applyFrom1D(imda: ImageData, voted: number[]): void {
+    const stride = 4;
+    const { data } = imda;
+    const vstride = 1;
+    let vi = -vstride;
+    for (let si = 0; si < data.length; si += stride) {
+        vi += vstride;
+        const v = voted[vi];
+        data[si + 0] = v;
+        data[si + 1] = v;
+        data[si + 2] = v;
+        data[si + 3] = 255;
+    }
+}
 
 function nothing(imda: ImageData): ImageData {
     // do nothing
@@ -131,23 +180,3 @@ function averaged(imda: ImageData): ImageData {
     return imda;
 }
 
-const allModes = [
-    'nothing',
-    'gauss3',
-    'gauss5',
-    'gauss7',
-    'gauss9',
-    'gauss11',
-    'gauss13',
-    'fastGauss13',
-    'dynamicThreshold3',
-    'dynamicThreshold5',
-    'dynamicThreshold7',
-    'dynamicThreshold9',
-    'dynamicThreshold11',
-    'dynamicThreshold13',
-    'gauss51',
-    'gauss101',
-    'averaged', 'weighted', 'LABed'] as const;
-export type Mode = typeof allModes[number];
-export const modes = [...allModes];
