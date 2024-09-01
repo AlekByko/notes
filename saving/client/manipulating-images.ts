@@ -5,7 +5,7 @@ const sqrt2Pi = Math.sqrt(2 * Math.PI); // do not move, since processed first co
 
 
 /** mutates the given array */
-function normalizeInPlace(values: number[]): void {
+export function normalizeInPlace(values: number[]): void {
     let sum = 0;
     for (let i = 0; i < values.length; i++) {
         sum += values[i];

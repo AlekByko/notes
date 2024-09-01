@@ -144,14 +144,14 @@ function dynamicThresholdWithMaxVotingOver(gaussSize: number, minmaxSize: number
 }
 
 
-function applyFrom1D(imda: ImageData, voted: number[]): void {
+export function applyFrom1D(imda: ImageData, values: number[]): void {
     const stride = 4;
     const { data } = imda;
     const vstride = 1;
     let vi = -vstride;
     for (let si = 0; si < data.length; si += stride) {
         vi += vstride;
-        const v = voted[vi];
+        const v = values[vi];
         data[si + 0] = v;
         data[si + 1] = v;
         data[si + 2] = v;
@@ -159,7 +159,7 @@ function applyFrom1D(imda: ImageData, voted: number[]): void {
     }
 }
 
-function nothing(imda: ImageData): ImageData {
+export function nothing(imda: ImageData): ImageData {
     // do nothing
     return imda;
 }
