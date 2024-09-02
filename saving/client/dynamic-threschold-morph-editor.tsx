@@ -36,9 +36,13 @@ export class DynamicThrescholdMorphEditor extends React.PureComponent<DynamicThr
     whenChangedMinDynamicRange: ChangeEventHandler<HTMLInputElement> = e => {
         this.transform(morph => ({ ...morph, minDynamicRange: parseInt(e.currentTarget.value, 10) }));
     };
+    whenChangedShouldUseMinDynamicRange: ChangeEventHandler<HTMLInputElement> = e => {
+        this.transform(morph => ({ ...morph, shouldUseMinDynamicRange: e.currentTarget.checked }));
+    };
 
     render() {
-        const { morph: { isEnabled, dynamicWindowSize, gaussKernelSize, minDynamicRange, key }, regarding } = this.props;
+        const { morph, regarding } = this.props;
+        const { isEnabled, dynamicWindowSize, gaussKernelSize, minDynamicRange, shouldUseMinDynamicRange, key } = morph;
         return <div className="morph">
             <div className="morph-name">
                 <label><input type="checkbox" checked={isEnabled} onChange={this.whenToggled} /> dynamic threschold</label> <span>
@@ -53,6 +57,9 @@ export class DynamicThrescholdMorphEditor extends React.PureComponent<DynamicThr
             </div>
             <div className="morph-props">
                 min dynamic range: <input type="number" step="1" className="morph-number" value={minDynamicRange} onChange={this.whenChangedMinDynamicRange} />
+            </div>
+            <div className="morph-props">
+                <label><input type="checkbox" checked={shouldUseMinDynamicRange} onChange={this.whenChangedShouldUseMinDynamicRange} /> Min dynamic range?</label>
             </div>
         </div>;
     }
