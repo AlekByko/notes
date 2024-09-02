@@ -86,6 +86,26 @@ export function makeMinMaxBySlidingWindow(imda: ImageData, windowSize: number): 
     return minmax;
 }
 
+export function makeMinMaxByAway(imda: ImageData, maxAway: number, minDynamicRange: number): number[] {
+    const minmax: number[] = [];
+    foreachPxCollectAway({
+        imda, maxAway, storage: minmax,
+        makeCollected: value => ({ min: value, max: value }),
+        collect: (valueAt, collected) => {
+            if (valueAt > collected.max) collected.max = valueAt;
+            if (valueAt < collected.min) collected.min = valueAt;
+        },
+        tryStore: (collected, stored) => {
+            const range = collected.max - collected.min;
+            if (range < minDynamicRange) return false;
+            stored.push(collected.min);
+            stored.push(collected.max);
+            return true;
+        }
+    });
+    return minmax;
+}
+
 export function makeVoting(imda: ImageData, windowSize: number, defaulted: number): number[] {
     const voted: number[] = [];
     foreachPxCollectInWindow({
@@ -152,6 +172,97 @@ export function foreachPxCollectInWindow<Storage, Collected>(
                 }
             }
             store(collected, storage);
+        }
+    }
+}
+
+
+export function foreachPxCollectAway<Storage, Collected>(
+    defaults: {
+        imda: ImageData,
+        maxAway: number,
+        storage: Storage,
+        makeCollected: (value: number, data: Data, index: number) => Collected,
+        collect: (value: number, collected: Collected, data: Data, index: number) => void,
+        tryStore: (collected: Collected, storage: Storage) => boolean,
+    }
+): void {
+    const {
+        imda, maxAway, storage, makeCollected, collect, tryStore,
+    } = defaults;
+
+    const stride = 4;
+    const { data, width, height } = imda;
+    let i = -stride;
+    for (let sy = 0; sy < height; sy++) {
+        for (let sx = 0; sx < width; sx++) {
+            i += stride;
+            const collected = makeCollected(data[i], data, i);
+            let away = 0
+            while (away < maxAway) {
+                away += 1;
+                {
+                    const ky = -away; // top line
+                    const sky = sy + ky;
+                    // see if top line outside of image
+                    if (sky >= 0 && sky < height) {
+                        // top line is inside image
+                        for (let kx = -away; kx <= away; kx++) {
+                            const skx = sx + kx;
+                            if (skx < 0 || skx >= width) continue;
+
+                            const si = (sky * width + skx) * stride + 0;
+                            const s = data[si];
+                            collect(s, collected, data, i);
+                        }
+                    }
+                }
+                for (let ky = -away + 1; ky <= away - 1; ky++) {
+                    const sky = sy + ky;
+                    if (sky < 0 || sky >= height) continue;
+
+                    {
+                        const kx = -away; // left side
+                        const skx = sx + kx;
+                        if (skx >= 0 && skx < width) {
+
+                            const si = (sky * width + skx) * stride + 0;
+                            const s = data[si];
+                            collect(s, collected, data, i);
+                        }
+                    }
+
+                    {
+                        const kx = away; // right side
+                        const skx = sx + kx;
+                        if (skx >= 0 && skx < width) {
+                            const si = (sky * width + skx) * stride + 0;
+                            const s = data[si];
+                            collect(s, collected, data, i);
+                        }
+                    }
+
+                }
+                {
+                    const ky = away; // bottom line
+                    const sky = sy + ky;
+                    // see if top line outside of image
+                    if (sky >= 0 && sky < height) {
+                        // top line is inside image
+                        for (let kx = -away; kx <= away; kx++) {
+                            const skx = sx + kx;
+                            if (skx < 0 || skx >= width) continue;
+
+                            const si = (sky * width + skx) * stride + 0;
+                            const s = data[si];
+                            collect(s, collected, data, i);
+                        }
+                    }
+                }
+
+                const wasStored = tryStore(collected, storage);
+                if (wasStored) break;
+            }
         }
     }
 }

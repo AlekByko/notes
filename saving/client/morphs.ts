@@ -37,6 +37,7 @@ export interface DynamicThrescholdMorphConfig {
     isEnabled: boolean;
     dynamicWindowSize: number;
     gaussKernelSize: number;
+    minDynamicRange: number;
 }
 export interface DynamicThrescholdMorph
     extends DynamicThrescholdMorphConfig {
