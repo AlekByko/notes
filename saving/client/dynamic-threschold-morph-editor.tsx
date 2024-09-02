@@ -27,11 +27,15 @@ export class DynamicThrescholdMorphEditor extends React.PureComponent<DynamicThr
     whenToggled: ChangeEventHandler<HTMLInputElement> = e => {
         this.transform(morph => ({ ...morph, isEnabled: e.currentTarget.checked }));
     };
-    whenChangedSize: ChangeEventHandler<HTMLInputElement> = e => {
-        this.transform(morph => ({ ...morph, windowSize: parseInt(e.currentTarget.value, 10) }));
+    whenChangedDynamicSize: ChangeEventHandler<HTMLInputElement> = e => {
+        this.transform(morph => ({ ...morph, dynamicWindowSize: parseInt(e.currentTarget.value, 10) }));
     };
+    whenChangedGaussSize: ChangeEventHandler<HTMLInputElement> = e => {
+        this.transform(morph => ({ ...morph, gaussKernelSize: parseInt(e.currentTarget.value, 10) }));
+    };
+
     render() {
-        const { morph: { isEnabled, windowSize, key }, regarding } = this.props;
+        const { morph: { isEnabled, dynamicWindowSize, gaussKernelSize, key }, regarding } = this.props;
         return <div className="morph">
             <div className="morph-name">
                 <label><input type="checkbox" checked={isEnabled} onChange={this.whenToggled} /> dynamic threschold</label> <span>
@@ -39,7 +43,10 @@ export class DynamicThrescholdMorphEditor extends React.PureComponent<DynamicThr
                 </span>
             </div>
             <div className="morph-props">
-                window size: <input type="number" className="morph-number" value={windowSize} onChange={this.whenChangedSize} />
+                gauss window size: <input type="number" step="2" className="morph-number" value={gaussKernelSize} onChange={this.whenChangedGaussSize} />
+            </div>
+            <div className="morph-props">
+                dynamic window size: <input type="number" step="2" className="morph-number" value={dynamicWindowSize} onChange={this.whenChangedDynamicSize} />
             </div>
         </div>;
     }

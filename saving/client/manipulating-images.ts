@@ -101,7 +101,6 @@ export function makeVoting(imda: ImageData, windowSize: number, defaulted: numbe
                 collected.onCount += 1;
                 return;
             }
-            console.log('Ouch', value);
         },
         store: ({ onCount, offCount }, stored) => {
             if (onCount > offCount) {
@@ -178,6 +177,14 @@ export function assert(checked: Checked): void | never {
     console.log(code, text);
     debugger;
     return fail(`${code}: ${text}`);
+}
+
+export function copyImda(source: ImageData, target: ImageData): void {
+    const { data: sourceData } = source;
+    const { data: targetData } = target;
+    for (let i = 0; i < sourceData.length; i++) {
+        targetData[i] = sourceData[i];
+    }
 }
 
 export function inflictDynamicThreshold(imda: ImageData, minmax: number[]) {

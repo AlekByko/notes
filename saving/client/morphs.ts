@@ -35,7 +35,8 @@ export interface WeighedGrayMorph
 export interface DynamicThrescholdMorphConfig {
     kind: 'dynamic-threschold-morph';
     isEnabled: boolean;
-    windowSize: number;
+    dynamicWindowSize: number;
+    gaussKernelSize: number;
 }
 export interface DynamicThrescholdMorph
     extends DynamicThrescholdMorphConfig {
