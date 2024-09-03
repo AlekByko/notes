@@ -1,3 +1,4 @@
+import child from 'child_process';
 import { closeSync, lstatSync, openSync, readdirSync } from 'fs';
 import { join } from 'path';
 
@@ -52,4 +53,21 @@ export function seeIfBeingWrittenTo(path: string): boolean {
 
 export function forceBackslashes(text: string): string {
     return text.replace(/\//ig, '\\');
+}
+
+
+export function willBeDiskNames() {
+
+    return new Promise<string[]>((resolve, reject) => {
+        child.exec('wmic logicaldisk get name', (error, stdout) => {
+            if (error) {
+                reject(error);
+            } else {
+                const result = stdout.split('\r\r\n')
+                    .filter(value => /[A-Za-z]:/.test(value))
+                    .map(value => value.trim().replace(':', '').toLowerCase())
+                resolve(result);
+            }
+        });
+    });
 }
