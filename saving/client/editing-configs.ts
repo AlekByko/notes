@@ -11,7 +11,7 @@ export interface BeMovedConfigConcern {
     about: 'be-moved-config'; key: string; delta: number;
 }
 
-export interface BeAppliedConfig<Config> {
+export interface BeAppliedConfigConcern<Config> {
     about: 'be-applied-config'; config: Config;
 }
 
