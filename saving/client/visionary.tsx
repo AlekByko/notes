@@ -1,6 +1,6 @@
 import React from 'react';
 import { faceListerConcern } from './editing-configs';
-import { HorzVertBitHistoModder } from './horz-vert-bit-histo-morph-editor';
+import { HorzVertBitHistoModder } from './horz-vert-bit-histo-modder';
 import { KMeansClusteringModder } from './k-means-clustering-modder';
 import { MorphFlowModder } from './morph-flow-modder';
 import { VisionaryConfig } from './morphs';
