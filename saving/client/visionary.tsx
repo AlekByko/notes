@@ -1,11 +1,12 @@
 import React from 'react';
-import { faceListerConcern, willOpenVisionary, willTrySaveVisionary } from './editing-configs';
+import { faceListerConcern } from './editing-configs';
 import { HorzVertBitHistoModder } from './horz-vert-bit-histo-morph-editor';
 import { KMeansClusteringModder } from './k-means-clustering-modder';
 import { MorphFlowModder } from './morph-flow-modder';
 import { VisionaryConfig } from './morphs';
 import { enableMoving } from './moving-by-mouse';
 import { Regarding } from './reacting';
+import { willOpenJsonFile, willTrySaveFile } from './reading-writing-files';
 import { AboutAllBut, broke, isNull, to } from './shared/core';
 import { safeInside } from './shared/inside';
 
@@ -80,3 +81,19 @@ export class Visionary extends React.Component<VisionaryProps, State> {
     }
 }
 
+const visionaryFileName = 'visionary.json';
+
+async function willOpenVisionary(
+    dir: FileSystemDirectoryHandle,
+): Promise<VisionaryConfig> {
+    const result: VisionaryConfig = await willOpenJsonFile(dir, visionaryFileName);
+    return result;
+}
+
+async function willTrySaveVisionary(
+    dir: FileSystemDirectoryHandle,
+    config: VisionaryConfig,
+): Promise<boolean> {
+    const json = JSON.stringify(config, null, 4);
+    return willTrySaveFile(dir, visionaryFileName, json, false);
+}

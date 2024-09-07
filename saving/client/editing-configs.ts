@@ -1,5 +1,3 @@
-import { VisionaryConfig } from './morphs';
-import { willOpenJsonFile, willTrySaveFile } from './reading-writing-files';
 import { broke } from './shared/core';
 import { $across, $of, $on, BySafe } from './shared/inside';
 import { thusUpDown } from './up-down';
@@ -21,22 +19,6 @@ export const UpDown = thusUpDown({
     makeUp: (key: string) => ({ about: 'be-moved-config', key, delta: -1 }) satisfies BeMovedConfigConcern,
     makeDown: key => ({ about: 'be-moved-config', key, delta: +1 }) satisfies BeMovedConfigConcern,
 });
-
-export async function willOpenVisionary(
-    dir: FileSystemDirectoryHandle,
-): Promise<VisionaryConfig> {
-    const name = 'visionary.json';
-    const result: VisionaryConfig = await willOpenJsonFile(dir, name);
-    return result;
-}
-export async function willTrySaveVisionary(
-    dir: FileSystemDirectoryHandle,
-    config: VisionaryConfig,
-): Promise<boolean> {
-    const name = 'visionary.json';
-    const json = JSON.stringify(config, null, 4);
-    return willTrySaveFile(dir, name, json, false);
-}
 
 export type ListerConcern<Config> =
     | BeMovedConfigConcern
