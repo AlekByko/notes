@@ -62,6 +62,7 @@ interface ForEachable<T> {
     forEach(xx: (value: T) => void): void;
 }
 
-type Act =() => void;
-type Use<T> =(value: T) => void;
-type WillAct =() => Promise<void>;
+type Act = () => void;
+type Use<T> = (value: T) => void;
+type WillAct = () => Promise<void>;
+type Sorting<T> = (values: T[]) => T[];
