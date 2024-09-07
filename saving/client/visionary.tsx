@@ -1,15 +1,16 @@
 import React from 'react';
-import { BeReplacedConfigConcern, faceListerConcern, willOpenVisionary, willTrySaveVisionary } from './editing-morphs';
+import { faceListerConcern, willOpenVisionary, willTrySaveVisionary } from './editing-morphs';
 import { MorphFlowModder } from './morph-flow-modder';
-import { ModConfig, VisionaryConfig } from './morphs';
+import { VisionaryConfig } from './morphs';
 import { enableMoving } from './moving-by-mouse';
 import { Regarding } from './reacting';
-import { broke, isNull, to } from './shared/core';
+import { AboutAllBut, broke, isNull, to } from './shared/core';
 import { safeInside } from './shared/inside';
 
 export type VisionaryConcern =
-    | { about: 'be-applied-mod'; mod: ModConfig };
-
+    | AboutAllBut<typeof MorphFlowModder.Concern, 'be-replaced-config'>;
+type ModderConcern =
+    | typeof MorphFlowModder.Concern;
 export interface VisionaryProps {
     baseDir: FileSystemDirectoryHandle;
     regarding: Regarding<VisionaryConcern>;
@@ -37,10 +38,15 @@ export class Visionary extends React.Component<VisionaryProps, State> {
         this.setState({ config });
     }
 
-    regardingModder: Regarding<BeReplacedConfigConcern<ModConfig>> = concern => {
+    regardingModder: Regarding<ModderConcern> = concern => {
         let { config } = this.state;
         if (isNull(config)) return;
-        config = faceListerConcern(inConfig.modders, config, concern);
+        switch(concern.about) {
+            case 'be-applied-config': return this.props.regarding(concern);
+            default: {
+                config = faceListerConcern(inConfig.modders, config, concern);
+            }
+        }
         const { baseDir } = this.props;
         willTrySaveVisionary(baseDir, config);
 

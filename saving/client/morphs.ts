@@ -50,7 +50,6 @@ export type ModConfig =
 export interface MorphFlowModConfig {
     kind: 'morph-flow-modder';
     key: string;
-    isApplied: boolean;
     morphs: MorphConfig[];
 }
 

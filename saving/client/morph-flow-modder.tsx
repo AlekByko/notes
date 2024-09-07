@@ -1,11 +1,12 @@
-import React, { ChangeEventHandler } from 'react';
-import { BeReplacedConfigConcern, faceListerConcern } from './editing-morphs';
+import React, { MouseEventHandler } from 'react';
+import { BeAppliedConfig, BeReplacedConfigConcern, faceListerConcern } from './editing-morphs';
 import { MorphLister, MorphListerConcern } from './morph-lister';
 import { MorphFlowModConfig } from './morphs';
 import { Regarding } from './reacting';
-import { $on, safeInside } from './shared/inside';
+import { safeInside } from './shared/inside';
 
 export type MorphFlowModderConcern =
+    | BeAppliedConfig<MorphFlowModConfig>
     | BeReplacedConfigConcern<MorphFlowModConfig>;
 
 export interface MorphFlowModderProps {
@@ -25,22 +26,19 @@ export class MorphFlowModder extends React.PureComponent<MorphFlowModderProps>{
         config = faceListerConcern(inConfig.morphs, config, concern);
         this.props.regarding({ about: 'be-replaced-config', config })
     }
-
-    whenChangeIsApplied: ChangeEventHandler<HTMLInputElement> | undefined = e => {
-        const isApplied = e.currentTarget.checked;
-        let { config } = this.props;
-        config = inConfig.isApplied[$on](config, isApplied);
-        this.props.regarding({ about: 'be-replaced-config', config })
+    whenApplied: MouseEventHandler<HTMLButtonElement> = _e => {
+        const { regarding, config } = this.props;
+        regarding({ about: 'be-applied-config', config });
     }
 
     render() {
-        const { config: {  isApplied, morphs } } = this.props;
+        const { config: { morphs } } = this.props;
         return <div>
             <div>
                 <MorphLister morphs={morphs} regarding={this.regardingEditor} />
             </div>
             <div>
-                <label><input type="checkbox" onChange={this.whenChangeIsApplied} checked={isApplied} /> apply?</label>
+                <button onClick={this.whenApplied}>Apply</button>
             </div>
         </div>;
     }
