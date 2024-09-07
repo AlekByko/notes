@@ -1,5 +1,5 @@
 
-export type ProcessImageData = (imda: ImageData, makeImageData: () => ImageData) => ImageData;
+export type ProcessImageData<Tile> = (imda: ImageData, makeImageData: () => ImageData, tile: Tile) => ImageData;
 
 
 export function applyFrom1D(imda: ImageData, values: number[]): void {
