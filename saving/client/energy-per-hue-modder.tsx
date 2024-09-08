@@ -43,7 +43,7 @@ export class EnergyPerHueModder extends React.PureComponent<EnergyPerHueModderPr
     render() {
         const { config: { numberOfHueBins } } = this.props;
         return <div className="mod">
-            <div className="mod-name">energt per hue</div>
+            <div className="mod-name">energy per hue</div>
             <div className="morph-props">
                 number of hue bins: <input className="morph-number" type="number" value={numberOfHueBins} onChange={this.whenChangedSize} />
             </div>

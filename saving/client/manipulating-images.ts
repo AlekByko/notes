@@ -478,8 +478,8 @@ export function makeWeighted(imda: ImageData): number[] {
         const r = data[i + 0];
         const g = data[i + 1];
         const b = data[i + 2];
-        const y = 0.299 * r + 0.587 * g + 0.114 * b;
-        result[ri] = y;
+        const e = 0.299 * r + 0.587 * g + 0.114 * b;
+        result[ri] = e;
     }
     return result;
 }
@@ -569,8 +569,44 @@ function convertSourceIndexToTargetIndex(sourceLength: number, sourceIndex: numb
     return targetIndex;
 }
 
+function rgbToHue(r: number, g: number, b: number): number {
+    let max = Math.max(r, g, b);
+    let min = Math.min(r, g, b);
+    let hue;
+
+    if (max === min) {
+        hue = 0; // Undefined hue for grayscale
+    } else {
+        let delta = max - min;
+        if (max === r) {
+            hue = (60 * ((g - b) / delta) + 360) % 360;
+        } else if (max === g) {
+            hue = (60 * ((b - r) / delta) + 120) % 360;
+        } else {
+            hue = (60 * ((r - g) / delta) + 240) % 360;
+        }
+    }
+    return hue;
+}
+
 export function makeNormedEnergyPerHueVector(imda: ImageData, numberOfHueBins: number): number[] {
 
+    const { data } = imda;
+    const energy = make1D(numberOfHueBins, 0);
+
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i + 0];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const hue = Math.floor(rgbToHue(r, g, b));
+        const ei = convertSourceIndexToTargetIndex(360, hue, numberOfHueBins);
+        const e = 0.299 * r + 0.587 * g + 0.114 * b;
+        energy[ei] += e;
+    }
+
+    normalizeInPlace(energy);
+
+    return energy;
 }
 
 
