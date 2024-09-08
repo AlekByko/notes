@@ -6,6 +6,7 @@ export function kMeansOver<T>(dataOf: (item: T) => number[]) {
         k: number,
         maxIterations: number
     ) {
+        if (items.length < 2) return null;
         const numPoints = items.length;
         const numFeatures = dataOf(items[0]).length;
 
@@ -37,19 +38,22 @@ export function kMeansOver<T>(dataOf: (item: T) => number[]) {
 
         // Assign points to the nearest centroid
         function assignClusters(centroids: Centroid[]): Cluster[] {
-            const clusters: Cluster[] = Array(k).fill([]);
-            items.forEach(item => {
+            const clusters: Cluster[] = Array.from({ length: k }, () => []);
+            for (const item of items) {
+
                 let minDistance = Infinity;
                 let closestCentroid = -1;
-                centroids.forEach((centroid, index) => {
-                    const distance = euclideanDistance(dataOf(item), centroid);
+                const data = dataOf(item);
+                for (let index = 0; index < centroids.length; index++) {
+                    const centroid = centroids[index];
+                    const distance = euclideanDistance(data, centroid);
                     if (distance < minDistance) {
                         minDistance = distance;
                         closestCentroid = index;
                     }
-                });
+                }
                 clusters[closestCentroid].push(item);
-            });
+            }
             return clusters;
         }
 
