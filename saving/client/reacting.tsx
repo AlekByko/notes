@@ -14,6 +14,12 @@ let lastKey = 0;
 export function toNextKey(): string {
     return 'key#' + (lastKey++);
 }
+export function toRandKey(): string {
+    let key = Math.random();
+    key = key * 100000000000;
+    key = Math.floor(key);
+    return 'key-' + key.toString(16);
+}
 
 export function atBottomLeft(element: HTMLElement): Point {
     const { left: x, bottom: y } = element.getBoundingClientRect();
