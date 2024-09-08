@@ -3,7 +3,7 @@ import { BeAppliedConfigConcern, BeReplacedConfigConcern, faceListerConcern } fr
 import { MorphLister, MorphListerConcern } from './morph-lister';
 import { MorphFlowModConfig } from './morphs';
 import { Regarding } from './reacting';
-import { safeInside } from './shared/inside';
+import { inside } from './shared/inside';
 
 export type MorphFlowModderConcern =
     | BeAppliedConfigConcern<MorphFlowModConfig>
@@ -14,7 +14,7 @@ export interface MorphFlowModderProps {
     regarding: Regarding<MorphFlowModderConcern>;
 }
 
-const inConfig = safeInside<MorphFlowModConfig>();
+const inConfig = inside<MorphFlowModConfig>();
 
 export class MorphFlowModder extends React.PureComponent<MorphFlowModderProps>{
 

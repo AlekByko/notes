@@ -2,7 +2,7 @@ import React, { ChangeEventHandler, MouseEventHandler } from 'react';
 import { BeAppliedConfigConcern, BeReplacedConfigConcern } from './editing-configs';
 import { KMeansClusteringModConfig } from './morphs';
 import { Regarding } from './reacting';
-import { $on, safeInside } from './shared/inside';
+import { $on, inside } from './shared/inside';
 
 export type KMeansClusteringModderConcern =
     | BeAppliedConfigConcern<KMeansClusteringModConfig>
@@ -13,7 +13,7 @@ export interface KMeansClusteringModderProps {
     regarding: Regarding<KMeansClusteringModderConcern>;
 }
 
-const inConfig = safeInside<KMeansClusteringModConfig>();
+const inConfig = inside<KMeansClusteringModConfig>();
 
 export class KMeansClusteringModder extends React.PureComponent<KMeansClusteringModderProps>{
 

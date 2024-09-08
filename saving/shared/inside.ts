@@ -83,11 +83,7 @@ function toBlankSteward(boss: Core): Core {
     });
 }
 
-export function safeInside<T>(): BySafe<T, T> {
-    return theOnlyStewardYouEverNeed as any;
-}
-
-export function unsafeInside<T>(): ByUnsafe<T, T> {
+export function inside<T>(): ByUnsafe<T, T> {
     return theOnlyStewardYouEverNeed as any;
 }
 

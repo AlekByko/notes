@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Point } from './geometry';
 import { atBottomLeft, Regarding } from './reacting';
-import { safeInside } from './shared/inside';
+import { inside } from './shared/inside';
 
 export interface BeEngagedConcern { about: 'be-engaged'; at: () => Point; }
 export interface BeDisengagedConcern { about: 'be-disengaged'; }
@@ -17,7 +17,7 @@ export interface TypeaheadProps {
     text: string;
     regarding: Regarding<TypeaheadConcern>;
 }
-export const inTypeaheadProps = safeInside<TypeaheadProps>();
+export const inTypeaheadProps = inside<TypeaheadProps>();
 
 export function thusTypeahead() {
     return class Typeahead extends React.PureComponent<TypeaheadProps> {

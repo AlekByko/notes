@@ -10,7 +10,7 @@ import { enableMoving } from './moving-by-mouse';
 import { Regarding } from './reacting';
 import { willOpenJsonFile, willTrySaveFile } from './reading-writing-files';
 import { AboutAllBut, broke, isNull, to } from './shared/core';
-import { safeInside } from './shared/inside';
+import { inside } from './shared/inside';
 
 export type VisionaryConcern =
     | AboutAllBut<ModderConcern, 'be-replaced-config'>;
@@ -27,7 +27,7 @@ export interface VisionaryProps {
     regarding: Regarding<VisionaryConcern>;
 }
 
-const inConfig = safeInside<VisionaryConfig>();
+const inConfig = inside<VisionaryConfig>();
 
 interface State {
     config: VisionaryConfig | null;
