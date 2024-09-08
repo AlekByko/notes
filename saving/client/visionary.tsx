@@ -9,6 +9,7 @@ import { Regarding } from './reacting';
 import { willOpenJsonFile, willTrySaveFile } from './reading-writing-files';
 import { AboutAllBut, broke, isNull, to } from './shared/core';
 import { safeInside } from './shared/inside';
+import { SquaresNormedEnergyModder } from './squares-normed-energy-modder';
 
 export type VisionaryConcern =
     | AboutAllBut<ModderConcern, 'be-replaced-config'>;
@@ -16,7 +17,8 @@ export type VisionaryConcern =
 type ModderConcern =
     | typeof MorphFlowModder.Concern
     | typeof KMeansClusteringModder.Concern
-    | typeof HorzVertBitHistoModder.Concern;
+    | typeof HorzVertBitHistoModder.Concern
+    | typeof SquaresNormedEnergyModder.Concern;
 
 export interface VisionaryProps {
     baseDir: FileSystemDirectoryHandle;
@@ -73,6 +75,7 @@ export class Visionary extends React.Component<VisionaryProps, State> {
                         case 'morph-flow-mod': return <MorphFlowModder key={key} config={modder} regarding={this.regardingModder} />;
                         case 'k-means-clustering-mod': return <KMeansClusteringModder key={key} config={modder} regarding={this.regardingModder} />;
                         case 'horz-vert-bit-histo-mod': return <HorzVertBitHistoModder key={key} config={modder} regarding={this.regardingModder} />
+                        case 'squares-normed-energy-mod': return <SquaresNormedEnergyModder key={key} config={modder} regarding={this.regardingModder} />
                         default: return broke(modder);
                     }
                 })}

@@ -1,5 +1,5 @@
 import { makeLab, makeXyz, setLabByXyz, setXyzByRgb } from './coloring';
-import { fail, isNull } from './shared/core';
+import { alertAndFail, fail, isNull } from './shared/core';
 
 const sqrt2Pi = Math.sqrt(2 * Math.PI); // do not move, since processed first come first go
 
@@ -548,4 +548,33 @@ function convertSourceIndexToTargetIndex(sourceLength: number, sourceIndex: numb
     const normalizedPos = sourceIndex / sourceLength; // AB: should be less than 1, from 0.0 to 0.99999
     const targetIndex = Math.floor(normalizedPos * targetLength);
     return targetIndex;
+}
+
+export function makeSquaresNormedEnergyVector(imda: ImageData, size: number): number[] {
+    const { data, width, height } = imda;
+    const stride = 4;
+
+    if (width % size !== 0) return alertAndFail(`Bad width ${width}.`);
+    if (height % size !== 0) return alertAndFail(`Bad height ${height}.`);
+
+    let squaresLength = width * height / size / size;
+    let energies = Array.from({ length: squaresLength }).fill(0) as number[];
+
+    let si = -1;
+    for (let y = 0; y < height; y += size) {
+        for (let x = 0; x < width; x += size) {
+            si += 1;
+            let e = 0;
+            for (let dy = 0; dy < size; dy++) {
+                for (let dx = 0; dx < size; dx++) {
+                    const i = ((y + dy) * width + (x + dx)) * stride;
+                    const d = data[i];
+                    e += d;
+                }
+            }
+            energies[si] = e;
+        }
+    }
+    normalizeInPlace(energies);
+    return energies;
 }

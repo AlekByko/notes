@@ -39,7 +39,8 @@ export interface MaxVotingMorphConfig {
 export type ModConfig =
     | MorphFlowModConfig
     | HorzVertBitHistoModConfig
-    | KMeansClusteringModConfig;
+    | KMeansClusteringModConfig
+    | SquaresNormedEnergyModConfig;
 
 export interface MorphFlowModConfig {
     kind: 'morph-flow-mod';
@@ -51,6 +52,12 @@ export interface HorzVertBitHistoModConfig {
     kind: 'horz-vert-bit-histo-mod';
     key: string;
     featureVectorSize: number;
+}
+
+export interface SquaresNormedEnergyModConfig {
+    kind: 'squares-normed-energy-mod';
+    key: string;
+    squareSize: number;
 }
 
 export interface KMeansClusteringModConfig {

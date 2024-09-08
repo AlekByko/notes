@@ -409,5 +409,6 @@ export function cast(_name: any): void { }
 export function alertAndFail(message: string): never {
     debugger;
     alert(message);
+    window.history.go(0);
     return fail(message);
 }

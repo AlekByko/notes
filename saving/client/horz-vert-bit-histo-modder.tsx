@@ -40,6 +40,7 @@ export class HorzVertBitHistoModder extends React.PureComponent<HorzVertBitHisto
     render() {
         const { config: { featureVectorSize } } = this.props;
         return <div>
+            <div className="morph-name">H/V bit histo</div>
             <div className="morph-props">
                 feature vector size: <input className="morph-number" type="number" value={featureVectorSize} onChange={this.whenChangedSize} />
             </div>
