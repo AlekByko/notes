@@ -569,7 +569,13 @@ function convertSourceIndexToTargetIndex(sourceLength: number, sourceIndex: numb
     return targetIndex;
 }
 
+export function makeNormedEnergyPerHueVector(imda: ImageData, numberOfHueBins: number): number[] {
+
+}
+
+
 export function makeNormedEnergyPerSquareVector(imda: ImageData, size: number): number[] {
+
 
     const w = makeWeighted(imda);
     const { width, height } = imda;

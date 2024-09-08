@@ -1,5 +1,7 @@
 import React from 'react';
 import { faceListerConcern } from './editing-configs';
+import { EnergyPerHueModder } from './energy-per-hue-modder';
+import { EnergyPerSquareModder } from './energy-per-square-modder';
 import { HorzVertBitHistoModder } from './horz-vert-bit-histo-modder';
 import { KMeansClusteringModder } from './k-means-clustering-modder';
 import { MorphFlowModder } from './morph-flow-modder';
@@ -9,7 +11,6 @@ import { Regarding } from './reacting';
 import { willOpenJsonFile, willTrySaveFile } from './reading-writing-files';
 import { AboutAllBut, broke, isNull, to } from './shared/core';
 import { safeInside } from './shared/inside';
-import { SquaresNormedEnergyModder } from './squares-normed-energy-modder';
 
 export type VisionaryConcern =
     | AboutAllBut<ModderConcern, 'be-replaced-config'>;
@@ -18,7 +19,8 @@ type ModderConcern =
     | typeof MorphFlowModder.Concern
     | typeof KMeansClusteringModder.Concern
     | typeof HorzVertBitHistoModder.Concern
-    | typeof SquaresNormedEnergyModder.Concern;
+    | typeof EnergyPerSquareModder.Concern
+    | typeof EnergyPerHueModder.Concern;
 
 export interface VisionaryProps {
     baseDir: FileSystemDirectoryHandle;
@@ -75,7 +77,8 @@ export class Visionary extends React.Component<VisionaryProps, State> {
                         case 'morph-flow-mod': return <MorphFlowModder key={key} config={modder} regarding={this.regardingModder} />;
                         case 'k-means-clustering-mod': return <KMeansClusteringModder key={key} config={modder} regarding={this.regardingModder} />;
                         case 'horz-vert-bit-histo-mod': return <HorzVertBitHistoModder key={key} config={modder} regarding={this.regardingModder} />
-                        case 'squares-normed-energy-mod': return <SquaresNormedEnergyModder key={key} config={modder} regarding={this.regardingModder} />
+                        case 'energy-per-square-mod': return <EnergyPerSquareModder key={key} config={modder} regarding={this.regardingModder} />
+                        case 'energy-per-hue-mod': return <EnergyPerHueModder key={key} config={modder} regarding={this.regardingModder} />
                         default: return broke(modder);
                     }
                 })}

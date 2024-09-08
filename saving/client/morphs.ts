@@ -40,7 +40,8 @@ export type ModConfig =
     | MorphFlowModConfig
     | HorzVertBitHistoModConfig
     | KMeansClusteringModConfig
-    | SquaresNormedEnergyModConfig;
+    | EnergyPerSquareModConfig
+    | EnergyPerHueModConfig;
 
 export interface MorphFlowModConfig {
     kind: 'morph-flow-mod';
@@ -54,8 +55,14 @@ export interface HorzVertBitHistoModConfig {
     featureVectorSize: number;
 }
 
-export interface SquaresNormedEnergyModConfig {
-    kind: 'squares-normed-energy-mod';
+export interface EnergyPerHueModConfig {
+    kind: 'energy-per-hue-mod';
+    key: string;
+    numberOfHueBins: number;
+}
+
+export interface EnergyPerSquareModConfig {
+    kind: 'energy-per-square-mod';
     key: string;
     squareSize: number;
 }

@@ -1,22 +1,22 @@
 import React, { ChangeEventHandler, MouseEventHandler } from 'react';
 import { BeAppliedConfigConcern, BeReplacedConfigConcern } from './editing-configs';
-import { HorzVertBitHistoModConfig } from './morphs';
+import { EnergyPerHueModConfig } from './morphs';
 import { Regarding } from './reacting';
 
-export type HorzVertBitHistoModderConcern =
-    | BeReplacedConfigConcern<HorzVertBitHistoModConfig>
-    | BeAppliedConfigConcern<HorzVertBitHistoModConfig>;
+export type EnergyPerHueModderConcern =
+    | BeReplacedConfigConcern<EnergyPerHueModConfig>
+    | BeAppliedConfigConcern<EnergyPerHueModConfig>;
 
-export interface HorzVertBitHistoModderProps {
-    config: HorzVertBitHistoModConfig;
-    regarding: Regarding<HorzVertBitHistoModderConcern>;
+export interface EnergyPerHueModderProps {
+    config: EnergyPerHueModConfig;
+    regarding: Regarding<EnergyPerHueModderConcern>;
 }
 
-export class HorzVertBitHistoModder extends React.PureComponent<HorzVertBitHistoModderProps> {
+export class EnergyPerHueModder extends React.PureComponent<EnergyPerHueModderProps> {
 
-    static Concern: HorzVertBitHistoModderConcern;
+    static Concern: EnergyPerHueModderConcern;
 
-    transform = (change: (morph: HorzVertBitHistoModConfig) => HorzVertBitHistoModConfig) => {
+    transform = (change: (morph: EnergyPerHueModConfig) => EnergyPerHueModConfig) => {
         let { config, regarding } = this.props;
         config = change(config);
         regarding({ about: 'be-replaced-config', config });
@@ -31,8 +31,8 @@ export class HorzVertBitHistoModder extends React.PureComponent<HorzVertBitHisto
     whenChangedSize: ChangeEventHandler<HTMLInputElement> = e => {
         this.transform(morph => ({
             ...morph,
-            featureVectorSize: parseInt(e.currentTarget.value, 10)
-        }) satisfies HorzVertBitHistoModConfig);
+            numberOfHueBins: parseInt(e.currentTarget.value, 10)
+        }) satisfies EnergyPerHueModConfig);
     };
 
     whenApplied: MouseEventHandler<HTMLButtonElement> = _e => {
@@ -41,12 +41,11 @@ export class HorzVertBitHistoModder extends React.PureComponent<HorzVertBitHisto
     };
 
     render() {
-        const { config: { featureVectorSize } } = this.props;
+        const { config: { numberOfHueBins } } = this.props;
         return <div className="mod">
-            <div className="mod-name">H/V bit histo</div>
-            <div className="mod-note">Sensitive to camera shifts</div>
+            <div className="mod-name">energt per hue</div>
             <div className="morph-props">
-                feature vector size: <input className="morph-number" type="number" value={featureVectorSize} onChange={this.whenChangedSize} />
+                number of hue bins: <input className="morph-number" type="number" value={numberOfHueBins} onChange={this.whenChangedSize} />
             </div>
             <div>
                 <button onClick={this.whenApplied}>Apply</button>
