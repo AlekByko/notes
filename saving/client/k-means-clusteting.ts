@@ -1,44 +1,19 @@
 
 export function kMeansOver<T>(dataOf: (item: T) => number[]) {
+    type Centroid = number[];
+    type Cluster = T[];
 
-    return function kMeans(
+    function kMeans(
         items: T[],
-        k: number,
+        centroids: Centroid[],
         maxIterations: number
     ) {
         if (items.length < 2) return null;
-        const numPoints = items.length;
         const numFeatures = dataOf(items[0]).length;
-
-        type Centroid = number[];
-        type Cluster = T[];
-
-        // Initialize centroids randomly
-        function initializeCentroids(): Centroid[] {
-            const centroids: Centroid[] = [];
-            const usedIndices = new Set();
-            while (centroids.length < k) {
-                const index = Math.floor(Math.random() * numPoints);
-                if (usedIndices.has(index)) continue;
-                usedIndices.add(index);
-                const item = items[index];
-                centroids.push(dataOf(item));
-            }
-            return centroids;
-        }
-
-        // Calculate Euclidean distance between two vectors
-        function euclideanDistance(a: number[], b: number[]) {
-            let sum = 0;
-            for (let i = 0; i < numFeatures; i++) {
-                sum += (a[i] - b[i]) ** 2;
-            }
-            return Math.sqrt(sum);
-        }
 
         // Assign points to the nearest centroid
         function assignClusters(centroids: Centroid[]): Cluster[] {
-            const clusters: Cluster[] = Array.from({ length: k }, () => []);
+            const clusters: Cluster[] = Array.from({ length: centroids.length }, () => []);
             for (const item of items) {
 
                 let minDistance = Infinity;
@@ -76,7 +51,6 @@ export function kMeansOver<T>(dataOf: (item: T) => number[]) {
         }
 
         // Main K-means loop
-        let centroids = initializeCentroids();
         let clusters: Cluster[] = [];
         for (let iteration = 0; iteration < maxIterations; iteration++) {
             clusters = assignClusters(centroids);
@@ -89,4 +63,46 @@ export function kMeansOver<T>(dataOf: (item: T) => number[]) {
 
         return { centroids, clusters };
     };
+
+    // Calculate Euclidean distance between two vectors
+    function euclideanDistance(a: number[], b: number[]) {
+        let sum = 0;
+        for (let i = 0; i < a.length; i++) {
+            sum += (a[i] - b[i]) ** 2;
+        }
+        return Math.sqrt(sum);
+    }
+
+    function kMeansFixed(items: T[], centroids: Centroid[]) {
+
+        if (items.length < 2) return null;
+
+        // Assign points to the nearest centroid
+        function assignClusters(centroids: Centroid[]): Cluster[] {
+            const clusters: Cluster[] = Array.from({ length: centroids.length }, () => []);
+            for (const item of items) {
+
+                let minDistance = Infinity;
+                let closestCentroid = -1;
+                const data = dataOf(item);
+                for (let index = 0; index < centroids.length; index++) {
+                    const centroid = centroids[index];
+                    const distance = euclideanDistance(data, centroid);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestCentroid = index;
+                    }
+                }
+                clusters[closestCentroid].push(item);
+            }
+            return clusters;
+        }
+
+        // Assign points to fixed centroids for maxIterations times (or until convergence)
+        let clusters = assignClusters(centroids);
+
+        return { clusters };
+    }
+
+    return {kMeans, kMeansFixed}
 }
