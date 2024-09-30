@@ -11,6 +11,7 @@ export interface SelectingDefaults<Order, Item, Selected> {
     makeSelected: (selected: Selected, item: Item) => void;
     makeUnselected: (selected: Selected, item: Item) => void;
     makeAllUnselected: (selected: Selected, item: Item[]) => void;
+    makeSelectedThose: (selected: Selected, item: Item[], isThat: (item: Item) => boolean) => void;
 }
 
 export function enableSelecting<Order, Item, Selected>(defaults: SelectingDefaults<Order, Item, Selected>) {

@@ -1,6 +1,9 @@
 import { Timestamp, toTimestamp } from './shared/time-stamping';
 
 export function startTrackingIdle(
+    controller: {
+        shouldWorryAboutUnsafe: boolean;
+    },
     timeout: number,
     whenIdle: (
         /** Percent: 0.0 - 1.0 */
@@ -23,7 +26,9 @@ export function startTrackingIdle(
         const ago = Math.min(since, timeout);
         const readiness = ago / timeout;
         const left = timeout - ago;
-        whenIdle(readiness, left);
+        if (controller.shouldWorryAboutUnsafe) {
+            whenIdle(readiness, left);
+        }
     }, 250);
     return function idle(): void {
         const now = toTimestamp();
