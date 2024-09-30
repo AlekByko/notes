@@ -1,9 +1,12 @@
-.dialog(@width, @height) {
-    position: fixed;
+.mix-center() {
     inset: 0;
     width: fit-content;
     height: fit-content;
     margin: auto;
+}
+.dialog(@width, @height) {
+    position: fixed;
+    .mix-center();
     background-color: white;
     border-color: gray;
     z-index: 30; // #Z-INDEX-BATTLE
@@ -18,8 +21,9 @@
 }
 
 .dialog-button {
+    position: relative;
     color: white;
-    max-width: 150px;
+    max-width: 120px;
     text-align: center;
     background-color: darkturquoise;
     padding: 20px 40px;
