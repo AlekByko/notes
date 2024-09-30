@@ -1,0 +1,44 @@
+.dialog(@width, @height) {
+    position: fixed;
+    inset: 0;
+    width: fit-content;
+    height: fit-content;
+    margin: auto;
+    background-color: white;
+    border-color: gray;
+    z-index: 30; // #Z-INDEX-BATTLE
+    padding: 20px;
+    box-shadow: 10px 10px 0px 0px rgba(0,0,0,0.51);
+    border: solid 1px gray;
+}
+
+.dialog-header {
+    text-align: center;
+    padding: 10px 20px;
+}
+
+.dialog-button {
+    color: white;
+    background-color: darkturquoise;
+    padding: 20px 40px;
+    &:hover {
+        filter: brightness(125%);
+    }
+}
+
+.dialog-button+.dialog-button {
+    margin-left: 20px;
+}
+
+.dialog-buttons {
+    display: flex;
+    flex-direction: row;
+}
+
+.dialog-buttons+.dialog-buttons {
+    margin-top: 20px;
+}
+
+.trash-dialog {
+    .dialog(400px, 200px);
+}
