@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Point, pointFrom } from './geometry';
-import { isDefined, isNonNull } from './shared/core';
+import { isDefined, isNonNull, isNull } from './shared/core';
 
 export type Regarding<Concern> = (concern: Concern) => void;
 export function addClassIf(shouldAdd: boolean, className: string): string {
@@ -59,4 +59,10 @@ export function seeIfReffed<Element>(
     return isNonNull(ref)
     && !(ref instanceof Function)
     && isNonNull(ref.current)
+}
+
+export function getFocused(element: HTMLElement | null): void {
+    if (isNull(element))
+        return;
+    element.focus();
 }
