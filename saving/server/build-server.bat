@@ -1,3 +1,3 @@
 @echo off
 del /S/Q .\server\*.js > nul
-node ../../node_modules/typescript/bin/tsc --project ./tsconfig.json
+node ../../node_modules/typescript/bin/tsc --pretty --project ./tsconfig.json

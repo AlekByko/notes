@@ -445,3 +445,5 @@ export function readBoxOr<Or>(regexp: RegExp, or: Or): Box | Or {
     const height = parseInt(textHeight, 10);
     return { x, y, width, height };
 }
+
+export function fix<const T>(value: T) { return value; }

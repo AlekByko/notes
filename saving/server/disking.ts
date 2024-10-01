@@ -1,6 +1,7 @@
 import child from 'child_process';
-import { closeSync, copyFileSync, existsSync, lstatSync, openSync, readdirSync } from 'fs';
+import { closeSync, copyFileSync, existsSync, lstatSync, openSync, readdirSync, RmOptions, rmSync } from 'fs';
 import { join } from 'path';
+import { fix } from './shared/core';
 
 export interface DirFile {
     dir: string;
@@ -41,25 +42,25 @@ export function combinePath(path1: string, path2: string): string {
 export function copyFile(filePath: string, targetPath: string) {
     try {
         if (existsSync(targetPath)) {
-            return 'target-file-exists';
+            return fix({ kind: 'target-file-exists' });
         }
     }
     catch (e: any) {
         console.log(`Unable to check if the target ${targetPath} for the source ${filePath} already exists. Unexpected error.`);
         console.log(e);
-        return 'unexpected-error';
+        return fix({ kind: 'unexpected-error', e });
     }
 
     try {
         copyFileSync(filePath, targetPath);
-        return 'copied';
+        return fix({ kind: 'copied' });
     } catch (e: any) {
         if (e.code === 'ENOSPC') {
-            return 'no-space-left';
+            return fix({ kind: 'no-space-left' });
         } else {
             console.log(`Unable to copy ${filePath} to ${targetPath}. Unexpected error.`);
             console.log(e);
-            return 'unexpected-error';
+            return fix({ kind: 'unexpected-error', e });
         }
     }
 }
@@ -99,4 +100,17 @@ export function willBeDiskNames() {
             }
         });
     });
+}
+
+export type FileRemovedOrNot = ReturnType<typeof removeFile>;
+
+const forcedRemoveOptions: RmOptions = { force: true };
+
+export function removeFile(path: string) {
+    try {
+        rmSync(path, forcedRemoveOptions);
+        return fix({ kind: 'file-removed' });
+    } catch (e: any) {
+        return fix({ kind: 'cannot-remove-file' as const, path, e });
+    }
 }
