@@ -1,7 +1,9 @@
 
 import { ChildProcess, spawn, SpawnOptions } from 'child_process';
 import * as fs from 'fs';
+import { PassThrough } from 'stream';
 import { fix, isNull } from './shared/core';
+
 
 export type AppRun = NoCodeAppRun | CodedAppRun | ErroredAppRun;
 export interface NoCodeAppRun {
@@ -182,11 +184,14 @@ export function willRunChildAttachedAndLogFile(
     const logFile = fs.createWriteStream(logPath);
     // https://nodejs.org/dist./v0.10.44/docs/api/child_process.html#child_process_child_stdio
     const child = spawn(command, args, options);
-    child.stdout!.pipe(process.stdout);
-    child.stderr!.pipe(process.stderr);
+    const passThrough = new PassThrough();
 
-    child.stdout!.pipe(logFile);
-    child.stderr!.pipe(logFile);
+    child.stdout!.pipe(passThrough).pipe(process.stdout);
+    child.stderr!.pipe(passThrough).pipe(process.stderr);
+
+    passThrough.pipe(logFile);
+    passThrough.pipe(logFile);
+
     return new Promise<{ kind: 'error', e: any } | { kind: 'exit', code: number | null, signal: NodeJS.Signals | null }>(resolve => {
         child.on('close', _e => {
             logFile.end();
