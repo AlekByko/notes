@@ -188,14 +188,14 @@ export function willRunChildAttachedAndLogFile(
     child.stdout!.pipe(logFile);
     child.stderr!.pipe(logFile);
     return new Promise<{ kind: 'error', e: any } | { kind: 'exit', code: number | null, signal: NodeJS.Signals | null }>(resolve => {
-        child.on('error', e => { // <-- exit may or may not follow error
+        child.on('close', _e => {
             logFile.end();
             logFile.close();
+        });
+        child.on('error', e => { // <-- exit may or may not follow error
             resolve(fix({ kind: 'error', e }));
         });
         child.on('exit', (code, signal) => {
-            logFile.end();
-            logFile.close();
             resolve(fix({ kind: 'exit', code, signal }));
         });
     });
