@@ -184,13 +184,29 @@ export function willRunChildAttachedAndLogFile(
     const logFile = fs.createWriteStream(logPath);
     // https://nodejs.org/dist./v0.10.44/docs/api/child_process.html#child_process_child_stdio
     const child = spawn(command, args, options);
-    const passThrough = new PassThrough();
 
-    child.stdout!.pipe(passThrough).pipe(process.stdout);
-    child.stderr!.pipe(passThrough).pipe(process.stderr);
+    class StdoutPassThrough extends PassThrough {}
+    class StderrPassThrough extends PassThrough {}
 
-    passThrough.pipe(logFile);
-    passThrough.pipe(logFile);
+    const stdoutPassThrough = new StdoutPassThrough();
+    child.stdout!.pipe(stdoutPassThrough);
+    stdoutPassThrough.pipe(process.stdout);
+    stdoutPassThrough.pipe(logFile);
+    stdoutPassThrough.on('error', e => {
+        console.log('error in child stdout', e);
+        stdoutPassThrough.unpipe(process.stdout);
+        stdoutPassThrough.unpipe(logFile);
+    });
+
+    const stderrPassThrough = new StderrPassThrough();
+    child.stderr!.pipe(stderrPassThrough)
+    stderrPassThrough.pipe(process.stderr);
+    stderrPassThrough.pipe(logFile);
+    stderrPassThrough.on('error', e => {
+        console.log('error in child stderr', e);
+        stderrPassThrough.unpipe(process.stderr);
+        stderrPassThrough.unpipe(logFile);
+    });
 
     return new Promise<{ kind: 'error', e: any } | { kind: 'exit', code: number | null, signal: NodeJS.Signals | null }>(resolve => {
         child.on('close', _e => {
