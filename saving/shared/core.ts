@@ -458,3 +458,7 @@ export function readBoxOr<Or>(regexp: RegExp, or: Or): Box | Or {
 }
 
 export function fix<const T>(value: T) { return value; }
+
+export function run<T>(run: () => T): T {
+    return run();
+}
