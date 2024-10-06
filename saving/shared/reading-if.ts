@@ -1,15 +1,15 @@
-import { Choked, chokedFrom, Read, readFrom } from './reading-basics';
+import { Captured, capturedFrom, Choked, chokedFrom } from './reading-basics';
 
 
 
 export function readIf<Seen, Thened, Elseed, SeenThened, SeenElsed>(
-    readSee: (text: string, index: number) => Choked | Read<Seen>,
-    readThen: (text: string, index: number) => Choked | Read<Thened>,
+    readSee: (text: string, index: number) => Choked | Captured<Seen>,
+    readThen: (text: string, index: number) => Choked | Captured<Thened>,
     haveThen: (seen: Seen, then: Thened) => SeenThened,
-    readElse: (text: string, index: number) => Choked | Read<Elseed>,
+    readElse: (text: string, index: number) => Choked | Captured<Elseed>,
     haveElsed: (elsed: Elseed) => SeenElsed,
     text: string, index: number,
-): Choked | Read<SeenThened | SeenElsed> {
+): Choked | Captured<SeenThened | SeenElsed> {
     const seen = readSee(text, index);
     if (seen.isBad) {
         const elsed = readElse(text, index);
@@ -17,7 +17,7 @@ export function readIf<Seen, Thened, Elseed, SeenThened, SeenElsed>(
             return chokedFrom(elsed.index);
         } else {
             const had = haveElsed(elsed.value);
-            return readFrom(elsed.index, had);
+            return capturedFrom(elsed.index, had);
         }
     } else {
         const thened = readThen(text, seen.index);
@@ -25,19 +25,19 @@ export function readIf<Seen, Thened, Elseed, SeenThened, SeenElsed>(
             return chokedFrom(thened.index);
         } else {
             const had = haveThen(seen.value, thened.value);
-            return readFrom(thened.index, had);
+            return capturedFrom(thened.index, had);
         }
     }
 }
 
 export function readIfOver<Seen, Thened, Elsed, SeenThened, SeenElsed>(
-    readSee: (text: string, index: number) => Choked | Read<Seen>,
-    readThen: (text: string, index: number) => Choked | Read<Thened>,
+    readSee: (text: string, index: number) => Choked | Captured<Seen>,
+    readThen: (text: string, index: number) => Choked | Captured<Thened>,
     haveThen: (seen: Seen, then: Thened) => SeenThened,
-    readElse: (text: string, index: number) => Choked | Read<Elsed>,
+    readElse: (text: string, index: number) => Choked | Captured<Elsed>,
     haveElsed: (elsed: Elsed) => SeenElsed,
 ) {
-    function readIfUnder(text: string, index: number): Choked | Read<SeenThened | SeenElsed> {
+    function readIfUnder(text: string, index: number): Choked | Captured<SeenThened | SeenElsed> {
         return readIf(readSee, readThen, haveThen, readElse, haveElsed, text, index);
     }
     readIfUnder.debugName = 'if(' + readSee.toDebugName() + ') ? (' + readThen.toDebugName() + ') : (' + readElse.toDebugName() + ')';

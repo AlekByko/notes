@@ -1,11 +1,11 @@
 import { fail } from './core';
-import { Choked, firstGoes, Read, readFrom, readLitOver, readOver } from './reading-basics';
+import { Captured, capturedFrom, Choked, firstGoes, readLitOver, readOver } from './reading-basics';
 
 export class SequenceReader<OlderResult> {
     constructor(
         private toResult: () => OlderResult,
         private all = [] as {
-            read: (text: string, index: number) => Choked | Read<unknown>;
+            read: (text: string, index: number) => Choked | Captured<unknown>;
             add: (older: any, value: any) => unknown;
         }[],
     ) {
@@ -13,7 +13,7 @@ export class SequenceReader<OlderResult> {
     }
 
     read<Value, NewerResult>(
-        read: (text: string, index: number) => Choked | Read<Value>,
+        read: (text: string, index: number) => Choked | Captured<Value>,
         add: (result: OlderResult, value: Value) => NewerResult,
     ): SequenceReader<NewerResult> {
         this.all.push({ read, add });
@@ -27,14 +27,14 @@ export class SequenceReader<OlderResult> {
     }
 
     skip<Value>(
-        read: (text: string, index: number) => Choked | Read<Value>,
+        read: (text: string, index: number) => Choked | Captured<Value>,
     ): SequenceReader<OlderResult> {
         this.all.push({ read, add: firstGoes });
         return this as any;
     }
 
     parse<Value, Parse, NewerResult>(
-        read: (text: string, index: number, parse: Parse) => Choked | Read<Value>,
+        read: (text: string, index: number, parse: Parse) => Choked | Captured<Value>,
         parse: Parse,
         add: (result: OlderResult, value: Value) => NewerResult,
     ): SequenceReader<NewerResult> {
@@ -42,10 +42,10 @@ export class SequenceReader<OlderResult> {
         return this as any;
     }
 
-    build<FinalResult>(finish: (older: OlderResult) => FinalResult) {
+    build<FinalResult>(finish: (result: OlderResult) => FinalResult) {
         const { all, toResult } = this;
         if (all.length < 1) return fail('No readers');
-        function readUnder(text: string, index: number): Choked | Read<FinalResult> {
+        function readUnder(text: string, index: number): Choked | Captured<FinalResult> {
             let older = toResult() as unknown;
             for (let i = 0; i < all.length; i++) {
                 const { read, add } = all[i];
@@ -60,7 +60,7 @@ export class SequenceReader<OlderResult> {
             }
             const final = finish(older as any);
             // console.log(final);
-            return readFrom(index, final);
+            return capturedFrom(index, final);
         };
         readUnder.debugName = 'seq(' + all.map(x => x.read.toDebugName()).join(' - ') + ')'
         return readUnder;

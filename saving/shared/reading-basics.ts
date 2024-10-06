@@ -10,58 +10,59 @@ export function chokedFrom(index: number): Choked {
     return { kind: 'choked', isBad: true, index };
 }
 
-export interface Read<T = string> {
-    kind: 'read';
+export interface Captured<T = string> {
+    kind: 'captured';
     isBad: false;
     index: number;
     value: T;
 }
 
-export function readFrom<T>(index: number, value: T): Read<T> {
-    return { kind: 'read', isBad: false, index, value };
+export function capturedFrom<T>(index: number, value: T): Captured<T> {
+    return { kind: 'captured', isBad: false, index, value };
 }
-
+export type Read<T> = (text: string, index: number) => Choked | Captured<T>;
 export function readLitOver<Liteal extends string>(literal: Liteal) {
-    function readLitUnder(text: string, index: number): Choked | Read<Liteal> {
+    function readLitUnder(text: string, index: number): Choked | Captured<Liteal> {
         return readLit(text, index, literal);
     };
     readLitUnder.debugName = 'lit(' + literal + ')';
     return readLitUnder;
 }
-export function readLit<Literal extends string>(text: string, index: number, literal: Literal): Choked | Read<Literal> {
+export function readLit<Literal extends string>(text: string, index: number, literal: Literal): Choked | Captured<Literal> {
     const part = text.substr(index, literal.length);
     if (part !== literal) return chokedFrom(index);
-    return readFrom(index + part.length, literal);
+    return capturedFrom(index + part.length, literal);
 }
 
 
 export function readReg<T>(
     text: string, index: number, regexp: RegExp,
     parse: (matched: RegExpExecArray) => T,
-): Choked | Read<T> {
-    if (!regexp.global) return fail('Regexp has to be global to update the lastIndex./gy: ' + regexp.source);
+): Choked | Captured<T> {
+    // either sticky or global is enough to make lastIndex work:
+    // if (!regexp.global) return fail('Regexp has to be global to update the lastIndex./gy: ' + regexp.source);
     if (!regexp.sticky) return fail('Regexp has to be sticky to respect the lastIndex./gy: ' + regexp.source);
     regexp.lastIndex = index;
     const matched = regexp.exec(text);
     if (isNull(matched)) return chokedFrom(index);
     const [all] = matched;
     const parsed = parse(matched);
-    return readFrom(index + all.length, parsed);
+    return capturedFrom(index + all.length, parsed);
 }
 
 export function readInto<Value, Result>(
-    read1st: (text: string, index: number) => Choked | Read<string>,
-    read2nd: (text: string, index: number) => Choked | Read<Value>,
+    read1st: (text: string, index: number) => Choked | Captured<string>,
+    read2nd: (text: string, index: number) => Choked | Captured<Value>,
     add: (text: string, value: Value) => Result,
 ) {
-    function readAfter(text: string, index: number): Choked | Read<Result> {
+    function readAfter(text: string, index: number): Choked | Captured<Result> {
         const tried1st = read1st(text, index);
         if (tried1st.isBad) return tried1st;
         const tried2nd = read2nd(tried1st.value, 0);
         if (tried2nd.isBad) return chokedFrom(index);
         if (tried2nd.index < tried1st.value.length) return chokedFrom(index);
         const result = add(tried1st.value, tried2nd.value);
-        return readFrom(tried1st.index, result);
+        return capturedFrom(tried1st.index, result);
     }
     readAfter.debugName = read1st.toDebugName + '~>' + read2nd.toDebugName();
     return readAfter;
@@ -69,7 +70,7 @@ export function readInto<Value, Result>(
 
 
 export function readRegOver<T>(regexp: RegExp, parse: (matched: RegExpExecArray) => T) {
-    function readRegUnder(text: string, index: number): Choked | Read<T> {
+    function readRegUnder(text: string, index: number): Choked | Captured<T> {
         return readReg(text, index, regexp, parse);
     };
     readRegUnder.debugName = 'reg(' + regexp.source + ')';
@@ -79,22 +80,22 @@ export function readRegOver<T>(regexp: RegExp, parse: (matched: RegExpExecArray)
 export const unparsed = Symbol('unparsed');
 export type Unparsed = typeof unparsed;
 export function parseOver<T, U>(
-    read: (text: string, index: number) => Choked | Read<T>,
+    read: (text: string, index: number) => Choked | Captured<T>,
     parse: (value: T) => U | Unparsed,
 ) {
-    function parseUnder(text: string, index: number): Choked | Read<U> {
+    function parseUnder(text: string, index: number): Choked | Captured<U> {
         const tried = read(text, index);
         if (tried.isBad) return tried;
         const parsed = parse(tried.value);
         if (parsed === unparsed) return chokedFrom(index);
-        return readFrom(tried.index, parsed);
+        return capturedFrom(tried.index, parsed);
     };
     parseUnder.debugName = read.toDebugName() + '->' + parse.toDebugName();
     return parseUnder;
 }
 
-export function readOver<Parse, Value>(read: (text: string, index: number, parse: Parse) => Choked | Read<Value>, parse: Parse) {
-    return function readUnder(text: string, index: number): Choked | Read<Value> {
+export function readOver<Parse, Value>(read: (text: string, index: number, parse: Parse) => Choked | Captured<Value>, parse: Parse) {
+    return function readUnder(text: string, index: number): Choked | Captured<Value> {
         return read(text, index, parse);
     };
 }
@@ -114,7 +115,7 @@ export function wholeThing(match: RegExpMatchArray): string {
 wholeThing.debugName = 'whole-thing';
 
 export function diagnose<Actual>(
-    read: (text: string, index: number) => Choked | Read<Actual>,
+    read: (text: string, index: number) => Choked | Captured<Actual>,
     text: string, index: number, shouldRun: boolean,
 ): void {
     if (!shouldRun) return;
