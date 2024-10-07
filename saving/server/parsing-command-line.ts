@@ -1,4 +1,5 @@
-import { alwaysNull, broke, same } from './shared/core';
+import * as fs from 'fs';
+import { alwaysNull, broke, fix, isUndefined, same } from './shared/core';
 import { capturedFrom, chokedFrom, readRegOver, wholeThing } from './shared/reading-basics';
 import { readLoopOver } from './shared/reading-loop';
 import { OptionsReader } from './shared/reading-options';
@@ -12,7 +13,7 @@ const readCliArgValue = new OptionsReader()
 const readCliArg = new SequenceReader(alwaysNull)
     .lit('--')
     .skip(readRegOver(/\s*/y, same))
-    .read(readRegOver(/\w+/y, wholeThing), (_before, name) => ({ name }))
+    .read(readRegOver(/[\w-_\d]+/y, wholeThing), (_before, name) => ({ name }))
     .skip(readRegOver(/\s+/y, same))
     .read(readCliArgValue, ({ name, ...before }, value) => ({ ...before, [name]: value }))
     .build(x => x);
@@ -58,3 +59,21 @@ export const readCliArgs = readLoopOver<{}, { [name: string]: string | undefined
     1, 40,
 );
 
+export function ensureDir(text: string | undefined) {
+    if (isUndefined(text)) return fix({ kind: 'nothing', isBad: true });
+    if (!fs.existsSync(text)) return fix({ kind: 'does-not-exist', text, isBad: true });
+    const stats = fs.statSync(text);
+    if (!stats.isDirectory()) return fix({ kind: 'not-a-directory', isBad: true });
+    return fix({ kind: 'directory', value: text, isBad: false });
+}
+
+export function ensureString(text: string | undefined) {
+    if (isUndefined(text)) return fix({ isBad: true });
+    return fix({ string: text, isBad: false });
+}
+
+export function ensureInteger(text: string | undefined) {
+    if (isUndefined(text)) return fix({ isBad: true });
+    const integer = parseInt(text, 10);
+    return fix({ integer, isBad: false });
+}
