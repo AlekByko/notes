@@ -1,4 +1,4 @@
-import { fail } from './shared/core';
+import { broke, fail, fix } from './shared/core';
 
 export function willFetch<T>(
     url: string,
@@ -22,8 +22,57 @@ export function willFetch<T>(
 
 
 export async function willPost(url: string, body: object) {
+    const posted = await willPostExt(url, body);
+    switch (posted.kind) {
+        case 'got-json':
+            break;
+
+        case 'bad-json':
+        case 'no-response':
+        case 'bad-response':
+            console.log(posted);
+            alert('BAD REQUEST!!!');
+            debugger;
+            return fail('BAD REQUEST');
+        default: return broke(posted);
+    }
+    const { json } = posted;
+    return json;
+}
+
+export async function willPostExt(url: string, body: object) {
+
+    const fetched = await willTryMakePostRequest(url, body);
+    switch (fetched.kind) {
+        case 'got-response':
+            break;
+        case 'no-response':
+        case 'bad-response':
+            return fetched;
+        default: broke(fetched);
+    }
+    const { response } = fetched;
+    const text = await response.text();
+    const parsed = parseJson(text);
+    switch (parsed.kind) {
+        case 'got-json': return parsed;
+        case 'bad-json': return parsed;
+        default: return broke(parsed);
+    }
+}
+
+export function parseJson(text: string) {
     try {
-        const json = JSON.stringify(body);
+        const json = JSON.parse(text);
+        return fix({ kind: 'got-json', json });
+    } catch (e) {
+        return fix({ kind: 'bad-json', e, text });
+    }
+}
+
+export async function willTryMakePostRequest(url: string, body: object) {
+    const json = JSON.stringify(body);
+    try {
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -32,12 +81,13 @@ export async function willPost(url: string, body: object) {
             },
             body: json,
         });
-        const result = await response.json();
-        return result;
+        if (!response.ok) {
+            const { status: code, statusText: message, url } = response;
+            return fix({ kind: 'bad-response', code, message, url, response });
+        }
+        return fix({ kind: 'got-response', response });
     } catch (e) {
-        console.log(e);
-        alert('BAD REQUEST!!!');
-        debugger;
-        return fail('BAD REQUEST');
+        return fix({ kind: 'no-response', e });
     }
 }
+
