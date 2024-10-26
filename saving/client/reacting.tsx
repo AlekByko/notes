@@ -61,8 +61,9 @@ export function seeIfReffed<Element>(
     && isNonNull(ref.current)
 }
 
-export function getFocused(element: HTMLElement | null): void {
+export function reFocus(element: HTMLElement | null): void {
     if (isNull(element))
         return;
+    element.blur();
     element.focus();
 }
