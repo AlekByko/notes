@@ -1,4 +1,3 @@
-import { LoadedImage } from './imaging';
 import { hslToRgb, rgbToHex, toHue } from './shared/coloring';
 import { fail, isNull } from './shared/core';
 
@@ -7,10 +6,9 @@ export interface CenterMass {
     y: number;
     m: number;
 }
-export function calculateColorMasses(steps: number, loaded: LoadedImage): CenterMass[] {
-    const { bytes } = loaded;
-    const width = loaded.image.naturalWidth;
-    const height = loaded.image.naturalHeight;
+export function calculateColorMasses(
+    steps: number, bytes: number[], width: number, height: number
+): CenterMass[] {
     const result = new Array<CenterMass>(steps).fill({ x: 0, y: 0, m: 0 });
     const gray: CenterMass = { x: 0, y: 0, m: 0 };
     result.forEach((_, index) => {
