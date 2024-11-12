@@ -11,6 +11,21 @@ export function addClassIfDefined(className: string | undefined): string {
     return isDefined(className) ? ' ' + className : '';
 }
 
+
+export function switchClassOnOff(tokens: DOMTokenList, isOn: boolean, token: string): void {
+    const hasIt = tokens.contains(token);
+    if (isOn) {
+        if (!hasIt) {
+            tokens.add(token);
+        }
+    } else {
+        if (hasIt) {
+            tokens.remove(token);
+        }
+    }
+}
+
+
 export function toRandKey(): string {
     let key = Math.random();
     key = key * 100000000000;
@@ -57,8 +72,8 @@ export function seeIfReffed<Element>(
     ref: React.Ref<Element>,
 ): ref is React.RefObject<Element> & { current: Element; } {
     return isNonNull(ref)
-    && !(ref instanceof Function)
-    && isNonNull(ref.current)
+        && !(ref instanceof Function)
+        && isNonNull(ref.current)
 }
 
 export function reFocus(element: HTMLElement | null): void {
