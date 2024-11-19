@@ -2,16 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 export interface ProgressDialogProps {
-    progress: number;
+    progress: number | string;
 }
 
 export function thusProgressDialog() {
     return class ProgressDialog extends React.Component<ProgressDialogProps> {
         render() {
-            const {progress} = this.props;
-            return <div className="progress-dialog">
-                {(progress * 100).toFixed(1)}%
-            </div>;
+            const { progress } = this.props;
+            const text = typeof progress === 'string' ? progress : (progress * 100).toFixed(1);
+            return <div className="progress-dialog">{text}</div>;
         }
     };
 }
