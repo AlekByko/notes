@@ -10,7 +10,7 @@ export function thusProgressDialog() {
         render() {
             const {progress} = this.props;
             return <div className="progress-dialog">
-                {progress.toFixed(1)}%
+                {(progress * 100).toFixed(1)}%
             </div>;
         }
     };
