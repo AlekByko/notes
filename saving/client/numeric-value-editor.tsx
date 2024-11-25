@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { to } from './shared/core';
 
 export interface NumbericValueEditortProps {
     value: number;
@@ -13,7 +12,7 @@ interface State {
 
 export function thusNumericValueEditor(size: number) {
     return class NumericValueEditor extends React.Component<NumbericValueEditortProps> {
-        state = to<State>({ text: String(this.props.value) });
+        state = makeState(this.props);
         render() {
             const { onChange } = this.props;
             const { text } = this.state;
@@ -26,11 +25,16 @@ export function thusNumericValueEditor(size: number) {
                 }}
                 onBlur={e => {
                     const text = e.currentTarget.value
-                    const value = Number(text);
+                    const value = eval(text);
                     if (!isFinite(value)) return;
                     onChange(value);
                 }}
             />;
         }
     };
+}
+
+function makeState(props: NumbericValueEditortProps): State {
+    const { value } = props;
+    return { text: String(value) };
 }
