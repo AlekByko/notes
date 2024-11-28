@@ -3,10 +3,12 @@ import os
 import cv2
 import numpy as np
 from face_sdk import Service
-from face_sdk.modules.context import Context
 from fastapi import FastAPI
 from PIL import Image
 from pydantic import BaseModel
+
+from core import fail
+from face_skd_utils import read_face_sdk_context
 
 app = FastAPI()
 
@@ -22,11 +24,6 @@ class Tile(BaseModel):
     y: int
     width: int
     height: int
-
-
-def fail(message):
-    print(message)
-    raise ValueError(message)
 
 
 def read_sdk_path():
@@ -47,7 +44,7 @@ def make_sure_path_exist(path):
         fail(f"Path {path} does not exist.")
 
 
-@app.post("/tile")
+@app.post("/face-mesh")
 async def tile_face(tile: Tile):
     image_path = tile.imageFilePath
     make_sure_path_exist(image_path)
@@ -59,6 +56,7 @@ async def tile_face(tile: Tile):
 
     image = cv2.imread(tile.imageFilePath)  # , cv2.IMREAD_COLOR)
     print("ok image")
+
     whole_image: np.ndarray = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     print("ok whole image")
 
@@ -72,64 +70,17 @@ async def tile_face(tile: Tile):
         "shape": [dim for dim in tile_image.shape],
     }
 
-    ioData = service.create_context({"image": imgCtx})
+    context = service.create_context({"image": imgCtx})
 
-    face_detector(ioData)
-    mesh_fitter(ioData)
+    face_detector(context)
+    mesh_fitter(context)
 
-    read_all = read_obj(ioData)
+    all_objects = read_face_sdk_context(context)
 
-    result = {"tile": tile, "objects": read_all}
+    result = {"tile": tile, "objects": all_objects}
     return result
 
 
-def read_obj(obj: Context):
-    if obj.is_none():
-        return None
-    if obj.is_string():
-        return obj.get_value()
-    if obj.is_double():
-        return obj.get_value()
-    if obj.is_long():
-        return obj.get_value()
-    if obj.is_bool():
-        return obj.get_value()
-    if obj.is_unsigned_long():
-        return obj.get_value()
-    if obj.is_array():
-        all = list()
-        for val in obj:
-            one = read_obj(val)
-            all.append(one)
-        return all
-
-    if obj.is_object():
-        keys = obj.keys()
-        all = {}
-        for key in keys:
-            all[key] = read_obj(obj[key])
-        return all
-
-
-def read_points(points):
-    all = list()
-    for point in points:
-        one = {
-            "x": point["x"].get_value(),
-            "y": point["y"].get_value(),
-        }
-        all.append(one)
-    return all
-
-
-def read_box(box):
-    result = {
-        "x0": box[0].get_value(),
-        "y0": box[1].get_value(),
-        "x1": box[2].get_value(),
-        "y1": box[3].get_value(),
-    }
-    return result
 
 
 def pil_to_opencv(pil_image: Image.Image):
