@@ -5,8 +5,14 @@
     position: absolute;
     top: 100%;
     left: 0px;
+    max-height: @string-list-item-height * 5;
+    overflow-y: scroll;
 }
+
+@string-list-item-height: 30px;
 .string-list-dropdown-item {
+    padding: 0 10px;
+    line-height: @string-list-item-height;
     &.as-highlighted {
         background-color: navy;
         color: white;
