@@ -9,6 +9,7 @@ export function thusTrackedNumber<Holder>(
     defaults: {
         numberOf: (holder: Holder) => number,
         formatNumber: (value: number) => string,
+        maxSamples: number,
     },
 ) {
 
@@ -22,12 +23,8 @@ export function thusTrackedNumber<Holder>(
         at: number;
     }
     const LineChart = thusLineChart<Item>({
-        height: 50,
-        marginBottom: 5,
-        marginLeft: 5,
-        marginRight: 5,
-        marginTop: 5,
-        width: 200,
+        height: 24,
+        width: 104,
         xOf: (_x, i) => i,
         yOf: (d, _i) => d.at,
     });
@@ -46,12 +43,11 @@ export function thusTrackedNumber<Holder>(
             const { holder } = props;
             const value = defaults.numberOf(holder);
             const delta = value - state.lastValue;
-            if (delta === 0) return null;
-            const { items } = state;
+            const { items: olderItems } = state;
             const item: Item = { at: value };
-            const all = [...items, item];
-            const lastFew = all.slice(-20);
-            return { ...state, lastValue: value, delta, items: lastFew } satisfies State;
+            const newerItems = [...olderItems, item];
+            const lastFewNewerItems = newerItems.slice(-defaults.maxSamples);
+            return { ...state, lastValue: value, delta, items: lastFewNewerItems } satisfies State;
         }
         render() {
             const { delta, lastValue, items } = this.state;
