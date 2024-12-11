@@ -55,7 +55,7 @@ export function thusDbTracker<Config, Key extends string, Context>(
                 }
                 this.scheduleSaving();
             } else {
-                const newer = make(key, same);
+                const newer = across(make(key, same));
                 this.dirty.add(key);
                 this.all.set(key, newer);
                 this.scheduleSaving();
