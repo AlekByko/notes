@@ -6,15 +6,33 @@
     border: solid 1px gray;
 }
 
-.context-menu-item {
+.context-menu-item() {
     line-height: 30px;
     display: block;
     padding: 0px 10px;
+}
 
-    &.as-actionable {
-        &:hover {
-            background-color: navy;
-            color: white;
-        }
+.info-context-menu-item {
+    .context-menu-item();
+}
+
+.actionable-context-menu-item {
+    .context-menu-item();
+    &:hover {
+        background-color: navy;
+        color: white;
+    }
+}
+
+.multi-actionable-context-menu-item {
+    display: flex;
+    flex-direction: row;
+}
+
+.multi-actionable-context-menu-item-option {
+    .context-menu-item();
+    &:hover {
+        background-color: navy;
+        color: white;
     }
 }

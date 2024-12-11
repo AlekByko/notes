@@ -56,12 +56,24 @@ if (window.sandbox === 'context-menu') {
     ReactDOM.render(<ContextMenu x={100} y={100} items={items} regarding={ignore} />, rootElement);
 }
 
-export type MenuItem<Concern> = ActionableMenuItem<Concern> | InfoMenuItem;
+export type MenuItem<Concern> =
+    | MultiActionableMenuItem<Concern>
+    | ActionableMenuItem<Concern>
+    | InfoMenuItem;
 
 export interface InfoMenuItem {
     kind: 'info-menu-item';
     key: string;
     text: string;
+}
+
+export interface MultiActionableMenuItem<Concern> {
+    kind: 'multi-actionable-menu-item';
+    key: string;
+    options: {
+        text: string;
+        concern: Concern;
+    }[];
 }
 
 export interface ActionableMenuItem<Concern> {
@@ -73,18 +85,31 @@ export interface ActionableMenuItem<Concern> {
 
 export function renderMenuItem<Concern>(item: MenuItem<Concern>, regarding: Regarding<Concern>) {
     switch (item.kind) {
+        case 'info-menu-item': {
+            const { key, text } = item;
+            return <span key={key} className="info-context-menu-item">{text}</span>;
+        }
         case 'actionable-menu-item': {
             const { key, text, concern } = item;
             return <a key={key} href="#"
-                className="context-menu-item as-actionable" onClick={e => {
+                className="actionable-context-menu-item" onClick={e => {
                     e.stopPropagation();
                     e.preventDefault();
                     regarding(concern);
-                } }>{text}</a>;
+                }}>{text}</a>;
         }
-        case 'info-menu-item': {
-            const { key, text } = item;
-            return <span key={key} className="context-menu-item">{text}</span>;
+        case 'multi-actionable-menu-item': {
+            const { key, options } = item;
+            return <div key={key} className="multi-actionable-context-menu-item">
+                {options.map(option => {
+                    const { text, concern } = option;
+                    return <a key={text} href="#" className="multi-actionable-context-menu-item-option" onClick={e => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        regarding(concern);
+                    }}>{text}</a>;
+                })}
+            </div>;
         }
         default: return broke(item);
     }
