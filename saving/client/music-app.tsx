@@ -42,8 +42,15 @@ export class MusicApp extends React.Component<MusicAppProps> {
     whenStart = () => {
         if (isNonNull(this.controller)) return;
         this.controller = new AudioController(scale, startFreq);
-        this.forceUpdate();
+        this.UPDATE_ALL_BOOM_BLYAT();
     };
+
+        /** @deprecated do not update all!!! */
+        private UPDATE_ALL_BOOM_BLYAT() {
+            this.forceUpdate();
+        }
+
+
     whenGo = () => {
         const {picked, controller} = this;
         if (isNull(controller)) return;
