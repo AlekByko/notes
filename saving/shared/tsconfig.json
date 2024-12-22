@@ -1,0 +1,16 @@
+{
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "composite": true,
+        "outDir": "../../built/shared",
+        "lib": [
+            "ESNext"
+        ],
+        "module": "amd",
+        "baseUrl": ".",
+        "jsx": "react",
+    },
+    "include": [
+        "*.ts"
+    ]
+}

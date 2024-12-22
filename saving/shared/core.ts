@@ -102,7 +102,7 @@ export function to<T>(value: T): T { return value; }
 export type AreEqual<T> = (one: T, another: T) => boolean;
 
 export function ignore(): void { }
-
+export function beenIgnored(): Promise<void> { return Promise.resolve(); }
 export function swallow(value: unknown): void {
     console.log(value);
 }
@@ -462,5 +462,6 @@ export function fix<const T>(value: T) { return value; }
 export function run<T>(run: () => T): T {
     return run();
 }
-export function bare<T>(_: T extends {} ? any : never) {}
 
+export function bare<T >(_: {} extends T ? object : never) { }
+export type Abort = () => void;

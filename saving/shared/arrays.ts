@@ -139,6 +139,15 @@ module arrays {
         }
         return count;
     }
+    export function sumAllOf<T>(values: T[], numberOf: (value: T) => number): number {
+        let count = 0;
+        for (let index = values.length - 1; index >= 0; index--) {
+            const value = values[index];
+            const number = numberOf(value);
+            count += number;
+        }
+        return count;
+    }
 
     export function append<T>(result: T[], value: T): T[] {
         result.push(value);
