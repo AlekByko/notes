@@ -1,5 +1,6 @@
-import { alertAndFail, fail, isNull } from '../shared/core';
+import { fail, isNull } from '../shared/core';
 import { makeLab, makeXyz, setLabByXyz, setXyzByRgb } from './coloring';
+import { alertAndFail } from './failing';
 
 const sqrt2Pi = Math.sqrt(2 * Math.PI); // do not move, since processed first come first go
 

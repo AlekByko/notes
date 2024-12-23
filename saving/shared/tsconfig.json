@@ -9,7 +9,8 @@
         "module": "amd",
         "baseUrl": ".",
         "jsx": "react",
-        "types": []
+        "types": [],
+        "declaration": true,
     },
     "include": ["*.ts"]
 }

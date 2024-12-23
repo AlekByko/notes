@@ -21,7 +21,6 @@
         "noStrictGenericChecks": false,
 
         "esModuleInterop": true,
-        "declaration": true,
 
         "alwaysStrict": true,
         "strictPropertyInitialization": true,
