@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { broke, ignore, isNull } from '../shared/core';
 import { Regarding } from './reacting';
-import { broke, ignore, isNull } from './shared/core';
 
 export interface ContextMenuProps<Item, Concern> {
     x: number;

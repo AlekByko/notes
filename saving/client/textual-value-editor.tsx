@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { to } from './shared/core';
+import { to } from '../shared/core';
 
 export interface TextualValueEditortProps {
     value: string;

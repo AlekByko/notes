@@ -1,4 +1,4 @@
-import { isUndefined } from './shared/core';
+import { isUndefined } from '../shared/core';
 
 export function toBucketMapFromArray<T, K, V, B>(
     items: T[],

@@ -1,5 +1,7 @@
 import { fail, isNull } from './core';
 
+declare var console: { log(...args: any[]): void; }
+
 export interface Choked {
     kind: 'choked';
     isBad: true;

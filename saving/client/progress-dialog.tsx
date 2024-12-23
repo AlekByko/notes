@@ -1,6 +1,6 @@
 import React, { MouseEventHandler } from 'react';
 import ReactDOM from 'react-dom';
-import { isUndefined } from './shared/core';
+import { isUndefined } from '../shared/core';
 
 export interface ProgressDialogProps {
     progress: number | string;

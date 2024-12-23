@@ -1,9 +1,9 @@
 import React, { MouseEventHandler } from 'react';
+import { inside } from '../shared/inside';
 import { BeAppliedConfigConcern, BeReplacedConfigConcern, faceListerConcern } from './editing-configs';
 import { MorphLister, MorphListerConcern } from './morph-lister';
 import { MorphFlowModConfig } from './morphs';
 import { Regarding } from './reacting';
-import { inside } from './shared/inside';
 
 export type MorphFlowModderConcern =
     | BeAppliedConfigConcern<MorphFlowModConfig>

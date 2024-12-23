@@ -1,5 +1,5 @@
-import { hslToRgb, rgbToHex, toHue } from './shared/coloring';
-import { fail, isNull } from './shared/core';
+import { hslToRgb, rgbToHex, toHue } from '../shared/coloring';
+import { fail, isNull } from '../shared/core';
 
 export interface CenterMass {
     x: number;

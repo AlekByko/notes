@@ -1,5 +1,5 @@
+import { isNonNull } from '../shared/core';
 import { SelectingDefaults } from './selecting';
-import { isNonNull } from './shared/core';
 import { TilingDefaults } from './tiling';
 
 export function henceGrading<TileKey, Tile, Grade, Order, Selection>(

@@ -60,24 +60,6 @@ export function fail(message: string): never {
     throw new Error(message);
 }
 
-
-
-export function failLoud(message: string): never {
-    debugger;
-    console.trace();
-    alert(message);
-    debugger;
-    throw new Error(message);
-}
-
-export function logAndFail(e: any): never {
-    debugger;
-    console.error(e);
-    console.trace();
-    debugger;
-    throw new Error(e);
-}
-
 export function asFiniteOr<Or>(value: number, or: Or): number | Or {
     return isFinite(value) ? value : or;
 }
@@ -344,6 +326,8 @@ export function binarySearch<T, U>(
     return ~low;
 }
 
+declare var console: { log(...args: any[]): void; }
+
 export function why(message: string): undefined {
     console.log(message);
     return undefined;
@@ -370,13 +354,6 @@ export function areNotSame<T, U extends T>(one: T, another: U): boolean {
     return one !== another;
 }
 
-export function keepScheduling(act: () => void, delay: number): void {
-    function schedule() {
-        act();
-        setTimeout(schedule, delay);
-    }
-    setTimeout(schedule, delay);
-}
 
 export function seeIfObjectsSame<T extends object, U extends T>(one: T, another: U): boolean {
     return one === another;
@@ -416,46 +393,6 @@ export function cast<O extends {}>(_name: {}): asserts _name is O;
 export function cast<S extends string>(_name: string): asserts _name is S;
 export function cast(_name: any): void { }
 
-export function alertAndFail(message: string): never {
-    debugger;
-    console.trace();
-    alert(message);
-    window.history.go(0);
-    return fail(message);
-}
-
-
-export function readQueryStringParam<S extends string, Or>(
-    regexp: RegExp, seeIfValid: (x: string) => x is S, or: Or
-): S | Or {
-    const matched = regexp.exec(window.location.search);
-    if (isNull(matched)) return or;
-    const [_full, value] = matched;
-    if (seeIfValid(value)) return value;
-    return or;
-}
-
-export function testQueryString(regexp: RegExp): boolean {
-    return regexp.test(window.location.search);
-}
-
-export interface Box {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}
-
-export function readBoxOr<Or>(regexp: RegExp, or: Or): Box | Or {
-    const matched = regexp.exec(window.location.search);
-    if (isNull(matched)) return or;
-    const [_full, textX, textY, textWidth, textHeight] = matched;
-    const x = parseInt(textX, 10);
-    const y = parseInt(textY, 10);
-    const width = parseInt(textWidth, 10);
-    const height = parseInt(textHeight, 10);
-    return { x, y, width, height };
-}
 
 export function fix<const T>(value: T) { return value; }
 

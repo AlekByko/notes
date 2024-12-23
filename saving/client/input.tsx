@@ -1,5 +1,5 @@
 import React, { ChangeEventHandler, FocusEventHandler, InputHTMLAttributes, KeyboardEventHandler } from 'react';
-import { to } from './shared/core';
+import { to } from '../shared/core';
 
 export interface InputProps {
     text: string;

@@ -1,4 +1,4 @@
-import { KnownPickedDirRef } from './shared/identities';
+import { KnownPickedDirRef } from '../shared/identities';
 
 export interface KnownPickedDirEntry {
     name: KnownPickedDirRef;

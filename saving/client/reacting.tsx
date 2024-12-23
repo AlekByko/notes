@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
+import { isDefined, isNonNull, isNull, isUndefined } from '../shared/core';
 import { Point, pointFrom } from './geometry';
-import { isDefined, isNonNull, isNull, isUndefined } from './shared/core';
 
 export type Regarding<Concern> = (concern: Concern) => void;
 export function addClassIf(shouldAdd: boolean, className: string): string {

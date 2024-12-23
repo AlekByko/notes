@@ -1,6 +1,6 @@
+import { isNonNull, isUndefined } from '../shared/core';
+import { Timestamp, toTimestamp } from '../shared/time-stamping';
 import { wait } from './promises';
-import { isNonNull, isUndefined } from './shared/core';
-import { Timestamp, toTimestamp } from './shared/time-stamping';
 
 export type DefaultContext = unknown;
 export type TaskResult<State, Context = DefaultContext> = [State, Context];

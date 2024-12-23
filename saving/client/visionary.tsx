@@ -1,4 +1,6 @@
 import React from 'react';
+import { AboutAllBut, broke, isNull, to } from '../shared/core';
+import { inside } from '../shared/inside';
 import { faceListerConcern } from './editing-configs';
 import { EnergyPerHueModder } from './energy-per-hue-modder';
 import { EnergyPerSquareModder } from './energy-per-square-modder';
@@ -9,8 +11,6 @@ import { VisionaryConfig } from './morphs';
 import { enableMoving } from './moving-by-mouse';
 import { Regarding } from './reacting';
 import { willOpenJsonFile, willTrySaveFile } from './reading-writing-files';
-import { AboutAllBut, broke, isNull, to } from './shared/core';
-import { inside } from './shared/inside';
 
 export type VisionaryConcern =
     | AboutAllBut<ModderConcern, 'be-replaced-config'>;

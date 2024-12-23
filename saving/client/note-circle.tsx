@@ -1,6 +1,6 @@
 import * as React from 'react';
+import { iterate } from '../shared/arrays';
 import { Regarding } from './reacting';
-import { iterate } from './shared/arrays';
 
 const size = 700;
 const hpad = 100;

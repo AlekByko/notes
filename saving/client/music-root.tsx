@@ -1,6 +1,6 @@
+import { fail, isNull } from '../shared/core';
 import { MusicApp } from './music-app';
 import { willRerenderOver } from './reacting';
-import { fail, isNull } from './shared/core';
 
 function run() {
     const rootElement = document.getElementById('root');

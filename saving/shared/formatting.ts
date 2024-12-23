@@ -3,8 +3,8 @@ export function formatYesNo(value: boolean): string {
 }
 
 export function formatInteger(value: number): string {
-    const formatter = new window.Intl.NumberFormat('en-us');
-    return formatter.format(value);
+    const formatted = value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return formatted;
 }
 
 const units = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];

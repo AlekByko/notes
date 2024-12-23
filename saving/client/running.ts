@@ -1,5 +1,5 @@
+import { isNonNull, isUndefined } from '../shared/core';
 import { wait } from './promises';
-import { isNonNull, isUndefined } from './shared/core';
 
 export interface RunnerContext<Concern, Props> {
     isRunning: boolean;

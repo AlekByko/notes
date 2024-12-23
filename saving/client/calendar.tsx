@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { addDay, toFirstDateOfMonth, toFirstDateOfNextWeek, toFirstDateOfWeek, toLastDateOfMonth } from './shared/time';
+import { addDay, toFirstDateOfMonth, toFirstDateOfNextWeek, toFirstDateOfWeek, toLastDateOfMonth } from '../shared/time';
 
 export class Calendar {
     constructor() {

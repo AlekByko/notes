@@ -1,6 +1,6 @@
 import React from 'react';
+import { to } from '../shared/core';
 import { Regarding } from './reacting';
-import { to } from './shared/core';
 import { AdjectiveConfig, AdverbConfig, NounConfig, VerbConfig, WordConfig } from './word-config';
 
 export type WordEditorConcern =

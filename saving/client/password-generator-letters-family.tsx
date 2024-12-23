@@ -1,6 +1,6 @@
 import React, { ChangeEventHandler, FocusEventHandler, KeyboardEventHandler } from 'react';
+import { to } from '../shared/core';
 import type { LettersFamiliy } from './letters-family';
-import { to } from './shared/core';
 
 export interface PasswordGeneratorFamilyProps {
     family: LettersFamiliy,

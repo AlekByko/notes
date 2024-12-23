@@ -1,4 +1,4 @@
-import { isNull } from './shared/core';
+import { isNull } from '../shared/core';
 
 // direct control of a DOM element
 export class DirectControl {

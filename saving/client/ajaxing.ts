@@ -1,4 +1,4 @@
-import { broke, fail, fix } from './shared/core';
+import { broke, fail, fix } from '../shared/core';
 
 export function willFetch<T>(
     url: string,

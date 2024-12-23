@@ -1,6 +1,6 @@
+import { isNonNull } from '../shared/core';
+import { StoreName } from '../shared/identities';
 import { knownDbStores } from "./known-settings";
-import { isNonNull } from './shared/core';
-import { StoreName } from './shared/identities';
 
 export function willOpenKnownDb(): Promise<IDBDatabase> {
     return new Promise<IDBDatabase>((resolve, reject) => {

@@ -1,4 +1,4 @@
-import { isNonNull, isNull } from './shared/core';
+import { isNonNull, isNull } from '../shared/core';
 
 export type ChangedOrNot = string | null;
 export function checkIfDifferentOver<T, V>(

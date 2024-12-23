@@ -1,8 +1,8 @@
+import { alwaysTrue, fail, isNull } from '../shared/core';
+import { KnownPickedDirRef } from '../shared/identities';
 import { willFindAllInStoreOf, willPutAllToStoreOf } from "./databasing";
 import { KnownPickedDirEntry } from "./file-system-entries";
 import { knownDbStores } from "./known-settings";
-import { alwaysTrue, fail, isNull } from './shared/core';
-import { KnownPickedDirRef } from './shared/identities';
 
 // https://web.dev/file-system-access/
 export async function willTryGetAllDirsFromDb(db: IDBDatabase): Promise<KnownPickedDirEntry[]> {

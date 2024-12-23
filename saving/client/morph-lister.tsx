@@ -1,10 +1,10 @@
 import React from 'react';
+import { broke } from '../shared/core';
 import { DynamicThrescholdMorphEditor } from './dynamic-threschold-morph-editor';
 import { GaussBlurMorphEditor } from './gauss-blur-morph-editor';
 import { MaxVotingMorphEditor } from './max-voting-morph-editor';
 import { MorphConfig } from './morphs';
 import { Regarding } from './reacting';
-import { broke } from './shared/core';
 import { WeighedGrayMorphEditor } from './weighed-gray-morph-editor';
 
 export type MorphListerConcern =

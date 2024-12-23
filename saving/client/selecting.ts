@@ -1,4 +1,4 @@
-import { isNonNull } from './shared/core';
+import { isNonNull } from '../shared/core';
 
 export interface SelectingDefaults<Order, Item, Selected> {
     orderOf: (item: Item) => Order;

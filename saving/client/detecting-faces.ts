@@ -4,7 +4,7 @@
 // <script src="https://cdn.jsdelivr.net/npm/opencv.js-webassembly@4.2.0/opencv.min.js"></script>
 
 // https://github.com/Cvartel/Open-Source-Face-SDK/tree/main/sdk
-import { isNull } from './shared/core';
+import { isNull } from '../shared/core';
 
 declare var ort: any;
 declare var cv: any;

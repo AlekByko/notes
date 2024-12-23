@@ -1,5 +1,5 @@
-import { fail, isUndefined, same } from './shared/core';
-import { Timestamp, toTimestamp } from './shared/time-stamping';
+import { fail, isUndefined, same } from '../shared/core';
+import { Timestamp, toTimestamp } from '../shared/time-stamping';
 
 export function thusDbTracker<Config, Key extends string, Context>(
     delay: number,

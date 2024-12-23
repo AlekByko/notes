@@ -1,4 +1,4 @@
-import { isDefined } from './shared/core';
+import { isDefined } from '../shared/core';
 
 export async function wait(delay: number, controller?: { dontWait: () => void }): Promise<void> {
     return new Promise<void>(resolve => {

@@ -1,7 +1,7 @@
 import * as React from 'react';
+import { inside } from '../shared/inside';
 import { Point } from './geometry';
 import { atBottomLeft, Regarding } from './reacting';
-import { inside } from './shared/inside';
 
 export interface BeEngagedConcern { about: 'be-engaged'; at: () => Point; }
 export interface BeDisengagedConcern { about: 'be-disengaged'; }

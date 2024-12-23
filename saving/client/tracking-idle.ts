@@ -1,4 +1,4 @@
-import { Timestamp, toTimestamp } from './shared/time-stamping';
+import { Timestamp, toTimestamp } from '../shared/time-stamping';
 
 export function startTrackingIdle(
     controller: {

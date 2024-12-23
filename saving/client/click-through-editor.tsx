@@ -1,5 +1,5 @@
 import React from 'react';
-import { nextAtAround } from './shared/numbers';
+import { nextAtAround } from '../shared/numbers';
 
 export interface ClickThroughEditorProps<Value extends string, Context> {
     value: Value;

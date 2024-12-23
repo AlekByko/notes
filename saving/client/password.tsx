@@ -1,8 +1,8 @@
 import React, { FocusEventHandler, MouseEventHandler } from 'react';
 import ReactDOM from 'react-dom';
+import { compareRandom, to } from '../shared/core';
 import type { LettersFamiliy } from './letters-family';
 import { PasswordGeneratorLettersFamily } from './password-generator-letters-family';
-import { compareRandom, to } from './shared/core';
 
 export interface PasswordGeneratorProps {
     families: LettersFamiliy[];

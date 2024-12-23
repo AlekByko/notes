@@ -1,4 +1,4 @@
-import { isNull, seeIfObjectsSame } from './shared/core';
+import { isNull, seeIfObjectsSame } from '../shared/core';
 
 interface Holder {
     rightVerticalBarElement: HTMLElement | null;

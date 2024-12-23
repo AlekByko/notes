@@ -1,8 +1,8 @@
 import React, { ChangeEventHandler, MouseEventHandler } from 'react';
+import { $on, inside } from '../shared/inside';
 import { BeAppliedConfigConcern, BeReplacedConfigConcern } from './editing-configs';
 import { KMeansClusteringModConfig } from './morphs';
 import { Regarding } from './reacting';
-import { $on, inside } from './shared/inside';
 
 export type KMeansClusteringModderConcern =
     | BeAppliedConfigConcern<KMeansClusteringModConfig>

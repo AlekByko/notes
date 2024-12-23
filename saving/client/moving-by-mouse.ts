@@ -1,4 +1,4 @@
-import { ignore, isNull } from './shared/core';
+import { ignore, isNull } from '../shared/core';
 
 export function enableMouseMoving(handleElement: HTMLElement | null, rootElementOrNull: HTMLElement | null): () => void {
     if (isNull(handleElement) || isNull(rootElementOrNull)) return ignore;

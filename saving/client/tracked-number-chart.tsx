@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { isNull } from './shared/core';
+import { isNull } from '../shared/core';
 
 export interface TrackedNumberChartProps<Item> {
     items: Item[];

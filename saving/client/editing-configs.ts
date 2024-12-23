@@ -1,5 +1,5 @@
-import { broke } from './shared/core';
-import { $across, $of, $on, BySafe } from './shared/inside';
+import { broke } from '../shared/core';
+import { $across, $of, $on, BySafe } from '../shared/inside';
 import { thusUpDown } from './up-down';
 
 

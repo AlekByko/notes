@@ -1,9 +1,9 @@
+import { append } from '../shared/arrays';
+import { alwaysNull } from '../shared/core';
 import { atomicTagFrom, Attribute, closingTagFrom, Html, openingTagFrom, textFrom, whitespace } from './html';
 import { Eoffed, eoffedFrom, Jammed, jammedFrom, Passed, passedFrom, Tried } from './parsed';
 import { readListOver, readRegexp, readRegexpOver, readWholeRegexp } from './reading';
 import { readSequentially } from './reading-sequentially';
-import { append } from './shared/arrays';
-import { alwaysNull } from './shared/core';
 
 export function readHtml<R>(
     index: number,

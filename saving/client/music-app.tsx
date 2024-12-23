@@ -1,9 +1,9 @@
 import * as React from 'react';
+import { iterate } from '../shared/arrays';
+import { broke, isNonNull, isNull } from '../shared/core';
 import { AudioController } from './audio-controller';
 import { NoteCircleConcern, thusNoteCircle } from './note-circle';
 import { Regarding } from './reacting';
-import { iterate } from './shared/arrays';
-import { broke, isNonNull, isNull } from './shared/core';
 
 export interface MusicAppProps {
 }
