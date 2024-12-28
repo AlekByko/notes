@@ -1,20 +1,21 @@
 {
+    "extends": "../tsconfig.base.json",
     "compilerOptions": {
         "outDir": "../../built/server",
-        "lib": ["es6", "dom"],
+        "lib": [
+            "ESNext",
+            "dom"
+        ],
         "module": "commonjs",
-        "target": "esnext",
-        "baseUrl": ".",
-        "jsx": "react", // without it explicitly set the root folder will be resolved by all linked files, if a file is linked from 3 folders higher up, then the root folder will be 3 folders higher up, and thus the output folder structure would include the path from the root folder down to a file
-        "moduleResolution": "node",
-        "strict": true,
-        "strictNullChecks": true,
-        "resolveJsonModule": true,
-        "esModuleInterop": true,
-        "noFallthroughCasesInSwitch": true,
-        "noImplicitThis": true,
-        "noImplicitReturns": true,
-        "noUnusedParameters": true,
-        "skipLibCheck": true
+        "baseUrl": "."
     },
+    "references": [
+        {
+            "path": "../shared"
+        }
+    ],
+    "include": [
+        "*.ts", "*.tsx", "../extension.d.ts"
+    ]
 }
+
