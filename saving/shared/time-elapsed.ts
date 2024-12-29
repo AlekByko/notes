@@ -46,15 +46,29 @@ export function formatElapsedUptoSeconds({ days, hours, minutes, seconds }: Elap
     return daysText + padZero(2, hours) + ':' + padZero(2, minutes) + ':' + padZero(2, seconds);
 }
 
+function _formatDaysHours(days: number, hours: number): string {
+    if (days > 2) {
+        return `${days} d`;
+    } else {
+        if (hours > 0) {
+            return `${days} d ${hours} h`
+        } else {
+            return `${days} d`;
+        }
+    }
+}
+function _formatHoursMinutes(hours: number, minutes: number): string {
+    if (minutes > 0) {
+        return `${hours} hr ${minutes} m`;
+    } else {
+        return `${hours} hr`;
+    }
+}
 export function formatElapsedToMinutes({ days, hours, minutes }: Elapsed): string {
     if (days > 0) {
-        return 'forever';
+        return _formatDaysHours(days, hours);
     } else if (hours > 0) {
-        if (minutes > 0) {
-            return `${hours} hr ${minutes} m`;
-        } else {
-            return `${hours} hr`;
-        }
+        return _formatHoursMinutes(hours, minutes);
     } else if (minutes > 0) {
         return `${minutes} m`;
     } else {
@@ -63,15 +77,11 @@ export function formatElapsedToMinutes({ days, hours, minutes }: Elapsed): strin
 }
 export function formatElapsedToSeconds({ days, hours, minutes, seconds }: Elapsed): string {
     if (days > 0) {
-        return 'forever';
+        return _formatDaysHours(days, hours);
     } else if (hours > 0) {
-        if (minutes > 0) {
-            return `${hours} hr ${minutes} m`;
-        } else {
-            return `${hours} hr`;
-        }
+        return _formatHoursMinutes(hours, minutes);
     } else if (minutes > 0) {
-            return `${minutes} m ${seconds} s`;
+        return `${minutes} m ${seconds} s`;
     } else {
         return `${seconds} s`;
     }

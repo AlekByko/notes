@@ -133,3 +133,6 @@ export function willBeDiskNames() {
     });
 }
 
+export function asWindowsPath(path: string): string {
+    return path.replace(/\//ig, '\\');
+}
