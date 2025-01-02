@@ -181,6 +181,8 @@ declare global {
         toLookup<K, V>(keyOf: (value: T) => K, valueOf: (value: T) => V): Map<K, V[]>;
         toSetInstead<U>(instead: (value: T) => U): Set<U>;
         sortOf<V>(copy: (values: T[]) => T[], of: (value: T) => V, compare: (one: V, another: V) => number): T[];
+        /** safe version of `find` because the predicate must return a boolean (forgetting to return anything and thus treating `void` as `false` isn't allowed) */
+        safeFind(predicate: (value: T, index: number, obj: T[]) => boolean, thisArg?: any): T | undefined;
     }
     interface Set<T> {
         toArray(): T[];
@@ -189,6 +191,7 @@ declare global {
         toValues(): V[];
     }
 }
+Array.prototype.safeFind = Array.prototype.find;
 Array.prototype.toSet = function <T>(this: Array<T>) {
     return new Set(this);
 }
