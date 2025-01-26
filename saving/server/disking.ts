@@ -39,7 +39,8 @@ export function combinePath(path1: string, path2: string): string {
 }
 
 
-export function moveFile(filePath: string, targetPath: string) {
+export function moveFile(filePath: string, targetPath: string, isDryRun: boolean) {
+    if (isDryRun) return fix({ kind: 'dry-run-nothing-copied' });
     try {
         if (fs.existsSync(targetPath)) {
             return fix({ kind: 'target-file-exists' });
@@ -68,7 +69,8 @@ export function moveFile(filePath: string, targetPath: string) {
 
 
 
-export function copyFile(filePath: string, targetPath: string) {
+export function copyFile(filePath: string, targetPath: string, isDryRun: boolean) {
+    if (isDryRun) return fix({ kind: 'dry-run-nothing-copied' });
     try {
         if (fs.existsSync(targetPath)) {
             return fix({ kind: 'target-file-exists' });
@@ -168,14 +170,22 @@ export function readTextFile(path: string) {
 
 export function readJsonFileAs<T>(path: string) {
     const read = readTextFile(path);
-    switch(read.kind) {
+    switch (read.kind) {
         case 'file-read': break;
         case 'file-does-not-exist':
         case 'unable-to-read-file':
             return read;
         default: return broke(read);
     }
-    const { text} = read;
+    const { text } = read;
     const parsed = parseJsonAs<T>(text);
     return parsed;
+}
+
+
+export async function willReadPairs() {
+    const json = fs.readFileSync('pairs.json', { encoding: 'utf-8' });
+    const pairs = JSON.parse(json) as GlobalCamName[][];
+    console.log(`pairs read`);
+    return pairs;
 }

@@ -137,8 +137,30 @@ export function henceReadingArgs<Key extends string>() {
             }
         },
 
+        readBoolOr<Or>(
+            argKey: Key,
+            cliArgs: CliArgs<Key>,
+            configValue: boolean | undefined,
+            or: Or,
+        ) {
+            const argText = cliArgs[argKey];
+            if (isDefined(argText)) {
+                switch(argText) {
+                    case 'yes': case 'true': return true;
+                    case 'no': case 'false': return false;
+                    default: {
+                        console.log(`Bad argument: ${argKey}. Unexpected value: ${argText}`);
+                        throw noLuckWithArgs;
+                    }
+                }
+            } else if (isDefined(configValue)) {
+                return configValue;
+            } else {
+                return or;
+            }
+        },
 
-        readStrDare(
+        readStrUnto(
             argKey: Key,
             cliArgs: CliArgs<Key>,
             configValue: string | undefined,
