@@ -5,6 +5,7 @@ import { extname, join } from 'path';
 import { parse } from 'url';
 import { CamConfig } from '../shared/cam-config';
 import { asNonNullOr, isNull } from '../shared/core';
+import { dotJpg, dotJson } from '../shared/extentions';
 import { willLoadConfigsFromDb } from './databasing';
 import { setConsoleTitle } from './utils';
 
@@ -136,10 +137,10 @@ function setContentType(res: ServerResponse, extension: string) {
 
 function toMimeType(extension: string): string | null {
     switch (extension) {
+        case dotJson: return 'application/json';
+        case dotJpg: return 'image/jpeg';
         case '.ico': return 'image/x-icon';
         case '.js': return 'application/javascript';
-        case '.json': return 'application/json';
-        case '.jpg': return 'image/jpeg';
         case '.svg': return 'image/svg+xml';
         case '.css': return 'text/css';
         case '.html': return 'text/html';
