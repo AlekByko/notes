@@ -12,6 +12,8 @@ plugins/*
 !plugins/cam4.py
 !plugins/streamate.py
 
+tmp/*
+
 *.css
 *.reg
 *.log

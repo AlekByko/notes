@@ -85,6 +85,7 @@ export function diffArraysViaKeys<K, V>(older: V[], newer: V[], keyOf: (value: V
     const diff = diffMapsViaKeys(olderByKey, newerByKey);
     return { coming: diff.coming.toValues(), staying: diff.staying.toValues(), leaving: diff.leaving.toValues() };
 }
+
 export function diffMapsViaKeys<K, V>(older: Map<K, V>, newer: Map<K, V>) {
     const staying = new Map<K, V>();
     const coming = new Map<K, V>();
@@ -169,4 +170,14 @@ export function claimInMap<K, V>(
     } else {
         return found;
     }
+}
+
+export function subtractMaps<K, V>(left: Map<K, V>, right: Map<K, V>): Map<K, V> {
+    const result = new Map<K, V>();
+    left.forEach((value, key) => {
+        if (!right.has(key)) {
+            result.set(key, value);
+        }
+    });
+    return result;
 }
