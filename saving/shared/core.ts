@@ -440,3 +440,18 @@ export function run<T>(run: () => T): T {
 
 export function bare<T >(_: {} extends T ? object : never) { }
 export type Abort = () => void;
+
+
+export type Either<L, R> = Left<L> | Right<R>;
+export interface Left<T> {
+    kind: 'left';
+    isLeft: true;
+    isRight: false;
+    left: T;
+}
+export interface Right<T> {
+    kind: 'right';
+    isLeft: false;
+    isRight: true;
+    right: T;
+}
