@@ -2,7 +2,7 @@ import { ChangeEvent, MouseEvent } from 'react';
 import { isDefined, isNull } from '../shared/core';
 import { $across, $assign, $of, $on, $where, By, inside } from '../shared/inside';
 
-export interface Statefull<State> {
+export interface Stateful<State> {
     state: State;
     scheduleModelConfigSaving(): void;
     setState(across: (state: State) => State | null, then?: Act): void;
@@ -17,7 +17,7 @@ export function parseInteger(text: string): number | NotParsed {
 }
 export const uponAnchorClick = {
     setBoth<State extends { config: Config | null; }, Config, Value>(
-        stateful: Statefull<State>,
+        stateful: Stateful<State>,
         byState: By<State, Value>,
         byConfig: By<Config, Value>,
         across: (value: Value) => Value,
@@ -52,7 +52,7 @@ export function inCaseOf<Event, Crude>(
 ) {
     return {
         setBoth<State extends { config: Config | null; }, Config, Fine>(
-            stateful: Statefull<State>,
+            stateful: Stateful<State>,
             byState: By<State, Fine>,
             byConfig: By<Config, Fine>,
             parse: (value: Crude, state: State) => Fine | NotParsed,
@@ -90,7 +90,7 @@ export function inCaseOf<Event, Crude>(
             };
         },
         setState<State, Fine>(
-            stateful: Statefull<State>,
+            stateful: Stateful<State>,
             byState: By<State, Fine>,
             parse: (value: Crude, state: State) => Fine | NotParsed,
             then?: Act,
@@ -115,7 +115,8 @@ export function inCaseOf<Event, Crude>(
             };
         },
     };
-} const inTextareaChangeEvent = inside<ChangeEvent<HTMLTextAreaElement>>();
+}
+const inTextareaChangeEvent = inside<ChangeEvent<HTMLTextAreaElement>>();
 const inInputChangeEvent = inside<ChangeEvent<HTMLInputElement>>();
 export const uponChangedTexarea = inCaseOf(inTextareaChangeEvent.currentTarget.value);
 export const uponChangedInput = inCaseOf(inInputChangeEvent.currentTarget.value);
