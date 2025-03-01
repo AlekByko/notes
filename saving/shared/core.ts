@@ -455,3 +455,11 @@ export interface Right<T> {
     isRight: true;
     right: T;
 }
+export function right<T>(right: T): Right<T> {
+    return {
+        kind: 'right',
+        isLeft: false,
+        isRight: true,
+        right: right,
+    };
+}
