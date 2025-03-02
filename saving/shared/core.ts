@@ -99,6 +99,10 @@ export function areStringsEqual<S extends string>(one: S, another: S): boolean {
 export function areStringsDifferent<S extends string>(one: S, another: S): boolean {
     return one !== another;
 }
+export function areNullableStringsDifferent<S extends string>(one: S | null, another: S | null): boolean {
+    return one !== another;
+}
+
 
 export function not(isIt: boolean): boolean {
     return !isIt;
