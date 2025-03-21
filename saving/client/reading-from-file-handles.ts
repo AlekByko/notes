@@ -13,8 +13,8 @@ export async function willReadImageFromFile(file: File) {
 }
 
 export async function willReadJsonFromFileHandle<T = any>(handle: FileSystemFileHandle): Promise<T> {
-    const blob = await handle.getFile();
-    const json = await blob.text();
+    const file = await handle.getFile();
+    const json = await file.text();
     const obj = JSON.parse(json);
     return obj as T;
 }
