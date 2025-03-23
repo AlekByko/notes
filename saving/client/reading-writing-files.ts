@@ -160,7 +160,7 @@ export function assertIsFileSystemDirectoryHandle(handle: FileSystemHandle): ass
     return fail('Expected to be a directory.');
 }
 
-export async function willGetFileOr<Or>(dir: FileSystemDirectoryHandle, name: string, or: Or) {
+export async function willGetFileHandleOr<Or>(dir: FileSystemDirectoryHandle, name: string, or: Or) {
     try {
         return await dir.getFileHandle(name);
     } catch {
