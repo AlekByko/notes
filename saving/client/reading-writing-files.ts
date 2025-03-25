@@ -185,3 +185,6 @@ export async function willReadAllFileHandles(dir: FileSystemDirectoryHandle) {
     return files;
 }
 
+export function seeIfDirectory(entry: FileSystemHandle): entry is FileSystemDirectoryHandle {
+    return entry.kind === 'directory';
+}
