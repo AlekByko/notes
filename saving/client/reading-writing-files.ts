@@ -171,7 +171,7 @@ export async function willGetFileHandleOr<Or>(dir: FileSystemDirectoryHandle, na
 export async function willReadAllFileHandles(dir: FileSystemDirectoryHandle) {
     const files: FileSystemFileHandle[] = [];
     for await (const handle of dir.values()) {
-        switch(handle.kind) {
+        switch (handle.kind) {
             case 'directory': {
                 continue;
             }
@@ -188,3 +188,13 @@ export async function willReadAllFileHandles(dir: FileSystemDirectoryHandle) {
 export function seeIfDirectory(entry: FileSystemHandle): entry is FileSystemDirectoryHandle {
     return entry.kind === 'directory';
 }
+export function seeIfFile(entry: FileSystemHandle): entry is FileSystemFileHandle {
+    return entry.kind === 'file';
+}
+export async function willMoveFiles(sourceDir: FileSystemDirectoryHandle, targetDir: FileSystemDirectoryHandle) {
+    for await (const entry of sourceDir.values()) {
+        if (!seeIfFile(entry)) continue;
+        entry.move(targetDir);
+    }
+}
+

@@ -96,7 +96,7 @@ export function thusDbTracker<Config, Key extends string, Context>(
             const key = keyOf(config);
             this.dirty.add(key);
             this.all.set(key, config);
-            await this.saveNow();
+            await this.willSaveAllNow();
         }
         public async willPutAll(configs: Config[]): Promise<void> {
             for (const config of configs) {
@@ -104,7 +104,7 @@ export function thusDbTracker<Config, Key extends string, Context>(
                 this.dirty.add(key);
                 this.all.set(key, config);
             }
-            await this.saveNow();
+            await this.willSaveAllNow();
         }
 
         public forEach(use: (config: Config) => void): void {
@@ -127,12 +127,12 @@ export function thusDbTracker<Config, Key extends string, Context>(
                 if (this.isSaving) {
                     this.scheduleSaving();
                 } else {
-                    this.saveNow();
+                    this.willSaveAllNow();
                 }
             }, delay);
         }
 
-        private async saveNow() {
+        private async willSaveAllNow() {
             if (this.isSaving) return;
             this.isSaving = true;
             const configs = this.toUnsavedConfigs();
