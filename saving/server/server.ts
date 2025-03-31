@@ -85,13 +85,9 @@ async function run() {
                 const text = await willReadBody(req);
                 const { name, where }: BeMovedInCaps = JSON.parse(text);
 
-                const all = makeCapPath(name);
-                all.reverse();
-                const [, ...last] = all;
-                last.reverse();
-                all.reverse();
-                const source = pth.join(capsDir, ...all);
-                const destination = pth.join(capsDir, where, ...last);
+                const parts = makeCapPath(name);
+                const source = pth.join(capsDir, ...parts);
+                const destination = pth.join(capsDir, where, ...parts);
 
                 try {
                     // Ensure destination directory exists
