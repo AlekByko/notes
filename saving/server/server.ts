@@ -13,7 +13,7 @@ import { willLoadConfigsFromDb } from './databasing';
 import { henceReadingArgsOf, readCliArgs } from './parsing-command-line';
 import { setConsoleTitle } from './utils';
 
-type ArgKeys = 'port' | 'caps-dir' | 'mates-dir' | 'paired-dir';
+type ArgKeys = 'port' | 'caps-dir' | 'mates-dir' | 'paired-dir' | 'put-off-dir';
 
 
 const options: ServerOptions = {};
@@ -39,7 +39,8 @@ async function run() {
     const capsDir = readingArgs.readDirUnto('caps-dir', cliArgs, undefined);
     const matesDir = readingArgs.readDirUnto('mates-dir', cliArgs, undefined);
     const pairedDir = readingArgs.readDirUnto('paired-dir', cliArgs, undefined);
-    console.log({ port, capsDir, matesDir, pairedDir });
+    const putOffDir = readingArgs.readDirUnto('put-off-dir', cliArgs, undefined);
+    console.log({ port, capsDir, matesDir, pairedDir, putOffDir });
 
     setConsoleTitle(`http://localhost:${port}`)
     console.log(`listening at ${port}`);
@@ -103,6 +104,30 @@ async function run() {
                     res.end();
                 }
 
+            } else if (path === '/put-off/mates') {
+                const text = await willReadBody(req);
+                const { matesDirName }: BeMovedMates = JSON.parse(text);
+                const source = pth.join(matesDir, matesDirName);
+                const destination = pth.join(putOffDir, matesDirName);
+
+                try {
+                    // Ensure destination directory exists
+                    await fs.mkdir(pth.dirname(destination), { recursive: true });
+
+                    // Move directory using rename
+                    await fs.rename(source, destination);
+                    console.log(`Mates directory moved from ${source} to ${destination}`);
+                    const result: SuccesfulBackendOperation = { wasOk: true };
+                    res.write(JSON.stringify(result, null, 4));
+                    res.statusCode = 200;
+                    res.end();
+                } catch (e: any) {
+                    console.error('Error moving mates directory:', e);
+                    const result: FailedBackendOperation = { error: e.message, wasOk: false };
+                    res.write(JSON.stringify(result, null, 4));
+                    res.statusCode = 500;
+                    res.end();
+                }
             } else if (path === '/move/mates') {
                 const text = await willReadBody(req);
                 const { matesDirName }: BeMovedMates = JSON.parse(text);
