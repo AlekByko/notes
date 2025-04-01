@@ -6,14 +6,14 @@ import { extname, join } from 'path';
 import { parse } from 'url';
 import { CamConfig } from '../shared/cam-config';
 import { makeCapPath } from '../shared/caps-folders';
-import { BeMovedInCaps, FailedBackendOperation, SuccesfulBackendOperation } from '../shared/contract';
+import { BeDeletedInMates, BeMovedInCaps, FailedBackendOperation, SuccesfulBackendOperation } from '../shared/contract';
 import { asNonNullOr, isNull } from '../shared/core';
 import { dotJpg, dotJson } from '../shared/extentions';
 import { willLoadConfigsFromDb } from './databasing';
 import { henceReadingArgsOf, readCliArgs } from './parsing-command-line';
 import { setConsoleTitle } from './utils';
 
-type ArgKeys = 'port' | 'caps-dir';
+type ArgKeys = 'port' | 'caps-dir' | 'mates-dir';
 
 
 const options: ServerOptions = {};
@@ -37,7 +37,8 @@ async function run() {
     const readingArgs = henceReadingArgsOf<ArgKeys>();
     const port = readingArgs.readIntegerUnto('port', cliArgs, undefined);
     const capsDir = readingArgs.readDirUnto('caps-dir', cliArgs, undefined);
-    console.log({ port, capsDir });
+    const matesDir = readingArgs.readDirUnto('mates-dir', cliArgs, undefined);
+    console.log({ port, capsDir, matesDir });
 
     setConsoleTitle(`http://localhost:${port}`)
     console.log(`listening at ${port}`);
@@ -81,7 +82,27 @@ async function run() {
             }
         } else if (req.method === 'POST') {
             console.log('POST', path);
-            if (path === '/move/caps') {
+            if (path === '/delete/mates') {
+                const text = await willReadBody(req);
+                const { matesDirName }: BeDeletedInMates = JSON.parse(text);
+                const target = pth.join(matesDir, matesDirName);
+                try {
+                    await fs.rm(target, { recursive: true, force: true });
+                    console.log(`Mates directory deleted at ${target}`);
+                    const result: SuccesfulBackendOperation = { wasOk: true };
+                    res.write(JSON.stringify(result, null, 4));
+                    res.statusCode = 200;
+                    res.end();
+
+                } catch (e: any) {
+                    console.error('Error deleting mates directory:', e);
+                    const result: FailedBackendOperation = { error: e.message, wasOk: false };
+                    res.write(JSON.stringify(result, null, 4));
+                    res.statusCode = 500;
+                    res.end();
+                }
+
+            } else if (path === '/move/caps') {
                 const text = await willReadBody(req);
                 const { name, where }: BeMovedInCaps = JSON.parse(text);
 
@@ -95,14 +116,14 @@ async function run() {
 
                     // Move directory using rename
                     await fs.rename(source, destination);
-                    console.log(`Directory moved from ${source} to ${destination}`);
+                    console.log(`Caps directory moved from ${source} to ${destination}`);
                     const result: SuccesfulBackendOperation = { wasOk: true };
                     res.write(JSON.stringify(result, null, 4));
                     res.statusCode = 200;
                     res.end();
-                } catch (error: any) {
-                    console.error('Error moving directory:', error);
-                    const result: FailedBackendOperation = { error: error.message, wasOk: false };
+                } catch (e: any) {
+                    console.error('Error moving caps directory:', e);
+                    const result: FailedBackendOperation = { error: e.message, wasOk: false };
                     res.write(JSON.stringify(result, null, 4));
                     res.statusCode = 500;
                     res.end();
