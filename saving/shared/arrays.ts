@@ -194,5 +194,20 @@ module arrays {
             }
         }
     }
+
+    export function makePairs<T, P>(parts: T[], makePair: (one: T, another: T) => P): P[] {
+        const pairs: P[] = [];
+        for (let i = 0; i < parts.length; i++) {
+            const one = parts[i];
+            for (let j = i + 1; j < parts.length; j++) {
+                const another = parts[j];
+                pairs.push(makePair(one, another));
+                pairs.push(makePair(another, one));
+            }
+        }
+        return pairs;
+    }
+
 }
 export = arrays;
+
