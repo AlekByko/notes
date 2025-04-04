@@ -84,135 +84,148 @@ async function run() {
             }
         } else if (req.method === 'POST') {
             console.log('POST', path);
-            if (path === '/delete/mates') {
-                const text = await willReadBody(req);
-                const { matesDirName }: BeDeletedInMates = JSON.parse(text);
-                const target = pth.join(matesDir, matesDirName);
-                try {
-                    await fs.rm(target, { recursive: true, force: true });
-                    console.log(`Mates directory deleted at ${target}`);
-                    const result: SuccesfulBackendOperation = { wasOk: true };
-                    res.write(JSON.stringify(result, null, 4));
-                    res.statusCode = 200;
-                    res.end();
+            switch (path) {
+                case '/delete/mates': {
+                    const text = await willReadBody(req);
+                    const { matesDirName }: BeDeletedInMates = JSON.parse(text);
+                    const target = pth.join(matesDir, matesDirName);
+                    try {
+                        await fs.rm(target, { recursive: true, force: true });
+                        console.log(`Mates directory deleted at ${target}`);
+                        const result: SuccesfulBackendOperation = { wasOk: true };
+                        res.write(JSON.stringify(result, null, 4));
+                        res.statusCode = 200;
+                        res.end();
 
-                } catch (e: any) {
-                    console.error('Error deleting mates directory:', e);
-                    const result: FailedBackendOperation = { error: e.message, wasOk: false };
-                    res.write(JSON.stringify(result, null, 4));
-                    res.statusCode = 500;
-                    res.end();
-                }
-
-            } else if (path === '/put-off/mates') {
-                const text = await willReadBody(req);
-                const { matesDirName }: BeMovedMates = JSON.parse(text);
-                const source = pth.join(matesDir, matesDirName);
-                const destination = pth.join(putOffDir, matesDirName);
-
-                try {
-                    // Ensure destination directory exists
-                    await fs.mkdir(pth.dirname(destination), { recursive: true });
-
-                    // Move directory using rename
-                    await fs.rename(source, destination);
-                    console.log(`Mates directory moved from ${source} to ${destination}`);
-                    const result: SuccesfulBackendOperation = { wasOk: true };
-                    res.write(JSON.stringify(result, null, 4));
-                    res.statusCode = 200;
-                    res.end();
-                } catch (e: any) {
-                    console.error('Error moving mates directory:', e);
-                    const result: FailedBackendOperation = { error: e.message, wasOk: false };
-                    res.write(JSON.stringify(result, null, 4));
-                    res.statusCode = 500;
-                    res.end();
-                }
-            } else if (path === '/move/mates') {
-                const text = await willReadBody(req);
-                const { matesDirName }: BeMovedMates = JSON.parse(text);
-                const source = pth.join(matesDir, matesDirName);
-                const destination = pth.join(pairedDir, matesDirName);
-
-                try {
-                    // Ensure destination directory exists
-                    await fs.mkdir(pth.dirname(destination), { recursive: true });
-
-                    // Move directory using rename
-                    await fs.rename(source, destination);
-                    console.log(`Mates directory moved from ${source} to ${destination}`);
-                    const result: SuccesfulBackendOperation = { wasOk: true };
-                    res.write(JSON.stringify(result, null, 4));
-                    res.statusCode = 200;
-                    res.end();
-                } catch (e: any) {
-                    console.error('Error moving mates directory:', e);
-                    const result: FailedBackendOperation = { error: e.message, wasOk: false };
-                    res.write(JSON.stringify(result, null, 4));
-                    res.statusCode = 500;
-                    res.end();
-                }
-            } else if (path === '/move/caps') {
-                const text = await willReadBody(req);
-                const { name, where }: BeMovedInCaps = JSON.parse(text);
-
-                const parts = makeCapPath(name);
-                const source = pth.join(capsDir, ...parts);
-                const destination = pth.join(capsDir, where, ...parts);
-
-                try {
-                    // Ensure destination directory exists
-                    await fs.mkdir(pth.dirname(destination), { recursive: true });
-
-                    // Move directory using rename
-                    await fs.rename(source, destination);
-                    console.log(`Caps directory moved from ${source} to ${destination}`);
-                    const result: SuccesfulBackendOperation = { wasOk: true };
-                    res.write(JSON.stringify(result, null, 4));
-                    res.statusCode = 200;
-                    res.end();
-                } catch (e: any) {
-                    console.error('Error moving caps directory:', e);
-                    const result: FailedBackendOperation = { error: e.message, wasOk: false };
-                    res.write(JSON.stringify(result, null, 4));
-                    res.statusCode = 500;
-                    res.end();
-                }
-
-
-            } else if (path === '/cams/pull') {
-                const text = await willReadBody(req);
-                const names: GlobalCamName[] = JSON.parse(text);
-                console.log('pulling cam configs:', names.join(', '));
-                const configs = await willLoadConfigsFromDb(db, names);
-                const json = JSON.stringify(configs, null, 4);
-                console.log('Cam configs for', names.join(', '), json);
-                res.write(json);
-                res.statusCode = 200;
-                res.end();
-            } else if (path === '/cams/save') {
-                const text = await willReadBody(req);
-                const configs: CamConfig[] = JSON.parse(text);
-                console.log('saving cam configs', configs);
-                const ids = {} as any;
-                for (const config of configs) {
-                    if ('_id' in config) {
-                        // after deserializing from JSON we have _id as string
-                        // but in order for update it has to be of type ObjectId
-                        const _id = new ObjectId(config._id as any);
-                        config._id = _id as any;
-                        const replaced = await db.collection('cams').replaceOne({ '_id': _id }, config);
-                        console.log('replaced', replaced);
-                    } else {
-                        const inserted = await db.collection('cams').insertOne(config as any);
-                        console.log('inserted', inserted);
-                        ids[config.name] = inserted.insertedId;
+                    } catch (e: any) {
+                        console.error('Error deleting mates directory:', e);
+                        const result: FailedBackendOperation = { error: e.message, wasOk: false };
+                        res.write(JSON.stringify(result, null, 4));
+                        res.statusCode = 500;
+                        res.end();
                     }
+                    break;
                 }
-                const json = JSON.stringify(ids);
-                res.write(json, 'utf-8');
-                res.statusCode = 200;
-                res.end();
+                case '/put-off/mates': {
+                    const text = await willReadBody(req);
+                    const { matesDirName }: BeMovedMates = JSON.parse(text);
+                    const source = pth.join(matesDir, matesDirName);
+                    const destination = pth.join(putOffDir, matesDirName);
+
+                    try {
+                        // Ensure destination directory exists
+                        await fs.mkdir(pth.dirname(destination), { recursive: true });
+
+                        // Move directory using rename
+                        await fs.rename(source, destination);
+                        console.log(`Mates directory moved from ${source} to ${destination}`);
+                        const result: SuccesfulBackendOperation = { wasOk: true };
+                        res.write(JSON.stringify(result, null, 4));
+                        res.statusCode = 200;
+                        res.end();
+                    } catch (e: any) {
+                        console.error('Error moving mates directory:', e);
+                        const result: FailedBackendOperation = { error: e.message, wasOk: false };
+                        res.write(JSON.stringify(result, null, 4));
+                        res.statusCode = 500;
+                        res.end();
+                    }
+                    break;
+                }
+                case '/move/mates': {
+                    const text = await willReadBody(req);
+                    const { matesDirName }: BeMovedMates = JSON.parse(text);
+                    const source = pth.join(matesDir, matesDirName);
+                    const destination = pth.join(pairedDir, matesDirName);
+
+                    try {
+                        // Ensure destination directory exists
+                        await fs.mkdir(pth.dirname(destination), { recursive: true });
+
+                        // Move directory using rename
+                        await fs.rename(source, destination);
+                        console.log(`Mates directory moved from ${source} to ${destination}`);
+                        const result: SuccesfulBackendOperation = { wasOk: true };
+                        res.write(JSON.stringify(result, null, 4));
+                        res.statusCode = 200;
+                        res.end();
+                    } catch (e: any) {
+                        console.error('Error moving mates directory:', e);
+                        const result: FailedBackendOperation = { error: e.message, wasOk: false };
+                        res.write(JSON.stringify(result, null, 4));
+                        res.statusCode = 500;
+                        res.end();
+                    }
+                    break;
+                }
+                case '/move/caps': {
+                    const text = await willReadBody(req);
+                    const { name, where }: BeMovedInCaps = JSON.parse(text);
+
+                    const parts = makeCapPath(name);
+                    const source = pth.join(capsDir, ...parts);
+                    const destination = pth.join(capsDir, where, ...parts);
+
+                    try {
+                        // Ensure destination directory exists
+                        await fs.mkdir(pth.dirname(destination), { recursive: true });
+
+                        // Move directory using rename
+                        await fs.rename(source, destination);
+                        console.log(`Caps directory moved from ${source} to ${destination}`);
+                        const result: SuccesfulBackendOperation = { wasOk: true };
+                        res.write(JSON.stringify(result, null, 4));
+                        res.statusCode = 200;
+                        res.end();
+                    } catch (e: any) {
+                        console.error('Error moving caps directory:', e);
+                        const result: FailedBackendOperation = { error: e.message, wasOk: false };
+                        res.write(JSON.stringify(result, null, 4));
+                        res.statusCode = 500;
+                        res.end();
+                    }
+                    break;
+                }
+                case '/cams/pull': {
+                    const text = await willReadBody(req);
+                    const names: GlobalCamName[] = JSON.parse(text);
+                    console.log('pulling cam configs:', names.join(', '));
+                    const configs = await willLoadConfigsFromDb(db, names);
+                    const json = JSON.stringify(configs, null, 4);
+                    console.log('Cam configs for', names.join(', '), json);
+                    res.write(json);
+                    res.statusCode = 200;
+                    res.end();
+                    break;
+                }
+                case 'cams/save': {
+                    const text = await willReadBody(req);
+                    const configs: CamConfig[] = JSON.parse(text);
+                    console.log('saving cam configs', configs);
+                    const ids = {} as any;
+                    for (const config of configs) {
+                        if ('_id' in config) {
+                            // after deserializing from JSON we have _id as string
+                            // but in order for update it has to be of type ObjectId
+                            const _id = new ObjectId(config._id as any);
+                            config._id = _id as any;
+                            const replaced = await db.collection('cams').replaceOne({ '_id': _id }, config);
+                            console.log('replaced', replaced);
+                        } else {
+                            const inserted = await db.collection('cams').insertOne(config as any);
+                            console.log('inserted', inserted);
+                            ids[config.name] = inserted.insertedId;
+                        }
+                    }
+                    const json = JSON.stringify(ids);
+                    res.write(json, 'utf-8');
+                    res.statusCode = 200;
+                    res.end();
+                    break;
+                }
+                default: {
+                    // do nothing
+                }
             }
         }
     });
