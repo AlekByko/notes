@@ -474,7 +474,9 @@ export function right<T>(right: T): Right<T> {
 export function sureNonNull<T>(x: T | null, unto: string): asserts x is T & {} {
     if (isNonNull(x)) return;
     const message = `NULL for ${unto}, SHOULD NOT BE!`;
-    // @ts-expect-error
-    alert(message);
+    var window: any;
+    if (typeof window !== 'undefined') {
+        window.alert(message);
+    }
     return fail(message);
 }
