@@ -6,10 +6,11 @@ import { extname, join } from 'path';
 import { parse } from 'url';
 import { CamConfig } from '../shared/cam-config';
 import { makeCapPath } from '../shared/caps-folders';
-import { BeDeletedInMates, BeMovedInCaps, BeMovedMates, FailedBackendOperation, SuccesfulBackendOperation } from '../shared/contract';
+import { BeDeletedInMates, BeGottenFamMemsPairs, BeMovedInCaps, BeMovedMates, BeRegisteredFamMems, FailedBackendOperation, SuccesfulBackendOperation, SuccesfulBackendResult } from '../shared/contract';
 import { asNonNullOr, isNull } from '../shared/core';
 import { dotJpg, dotJson } from '../shared/extentions';
 import { willLoadConfigsFromDb } from './databasing';
+import { willGetFamMemPairs, willRegisterFamMems } from './databasing-fam-mems-and-colabs';
 import { henceReadingArgsOf, readCliArgs } from './parsing-command-line';
 import { setConsoleTitle } from './utils';
 
@@ -20,11 +21,11 @@ const options: ServerOptions = {};
 async function run() {
 
     const mongoUrl = 'mongodb://0.0.0.0:27017/';
-    const mongo = new MongoClient(mongoUrl);
+    const client = new MongoClient(mongoUrl);
     console.log('connecting to backend at', mongoUrl, '...');
-    await mongo.connect();
+    await client.connect();
     console.log('connected');
-    const db = mongo.db('saving');
+    const db = client.db('saving');
     const text = process.argv.slice(2).join(' ');
     const parsedOrNot = readCliArgs(text, 0);
     if (parsedOrNot.isBad) {
@@ -85,6 +86,37 @@ async function run() {
         } else if (req.method === 'POST') {
             console.log('POST', path);
             switch (path) {
+                case '/get/fam-mems-pairs': {
+                    const text = await willReadBody(req);
+                    const { names }: BeGottenFamMemsPairs = JSON.parse(text);
+                    const gotten = await willGetFamMemPairs(client, names);
+                    console.log(`Fam-mems gotten`);
+                    const result: SuccesfulBackendResult<typeof gotten> = { wasOk: true, result: gotten };
+                    res.write(JSON.stringify(result, null, 4));
+                    res.statusCode = 200;
+                    res.end();
+                    break;
+                }
+                case '/register/fam-mems': {
+                    const text = await willReadBody(req);
+                    const { names, flingName }: BeRegisteredFamMems = JSON.parse(text);
+                    const regged = await willRegisterFamMems(client, names, flingName);
+                    if (regged.isBad) {
+                        console.error('Error registing fam-mems:', regged);
+                        const result: FailedBackendOperation = { wasOk: false, error: regged.e.message };
+                        res.write(JSON.stringify(result, null, 4));
+                        res.statusCode = 500;
+                        res.end();
+                        break;
+                    } else {
+                        console.log(`Fam-mems registered`);
+                        const result: SuccesfulBackendOperation = { wasOk: true };
+                        res.write(JSON.stringify(result, null, 4));
+                        res.statusCode = 200;
+                        res.end();
+                        break;
+                    }
+                }
                 case '/delete/mates': {
                     const text = await willReadBody(req);
                     const { matesDirName }: BeDeletedInMates = JSON.parse(text);
