@@ -11,6 +11,7 @@ import { asNonNullOr, isNull } from '../shared/core';
 import { dotJpg, dotJson } from '../shared/extentions';
 import { willLoadConfigsFromDb } from './databasing';
 import { willGetFamMemPairs, willRegisterFamMems } from './databasing-fam-mems-and-colabs';
+import { handleMovedDirs, willMoveDir } from './moving-folders';
 import { henceReadingArgsOf, readCliArgs } from './parsing-command-line';
 import { setConsoleTitle } from './utils';
 
@@ -169,26 +170,12 @@ async function run() {
                     const { matesDirName }: BeMovedMates = JSON.parse(text);
                     const source = pth.join(matesDir, matesDirName);
                     const destination = pth.join(pairedDir, matesDirName);
-
-                    try {
-                        // Ensure destination directory exists
-                        await fs.mkdir(pth.dirname(destination), { recursive: true });
-
-                        // Move directory using rename
-                        await fs.rename(source, destination);
-                        console.log(`Mates directory moved from ${source} to ${destination}`);
-                        const result: SuccesfulBackendOperation = { isOk: true, isBad: false };
-                        res.write(JSON.stringify(result, null, 4));
-                        res.statusCode = 200;
-                        res.end();
-                    } catch (e: any) {
-                        console.error('Error moving mates directory:', e);
-                        const result: FailedBackendOperation = { error: e.message, isOk: false, isBad: true };
-                        res.write(JSON.stringify(result, null, 4));
-                        res.statusCode = 500;
-                        res.end();
-                    }
-                    break;
+                    const moved = await willMoveDir(source, destination);
+                    return handleMovedDirs(
+                        moved, res,
+                        `Mates directory moved from ${source} to ${destination}.`,
+                        `Unable to move mates directory from ${source} to ${destination}.`
+                    );
                 }
                 case '/move/caps': {
                     const text = await willReadBody(req);
