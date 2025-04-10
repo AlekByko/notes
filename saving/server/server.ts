@@ -15,7 +15,7 @@ import { handleMovedDirs, willMoveDir } from './moving-folders';
 import { henceReadingArgsOf, readCliArgs } from './parsing-command-line';
 import { setConsoleTitle } from './utils';
 
-type ArgKeys = 'port' | 'caps-dir' | 'mates-dir' | 'paired-dir' | 'put-off-dir';
+type ArgKeys = 'port' | 'caps-dir' | 'mates-dir' | 'paired-dir' | 'other-dir';
 
 
 const options: ServerOptions = {};
@@ -41,8 +41,8 @@ async function run() {
     const capsDir = readingArgs.readDirUnto('caps-dir', cliArgs, undefined);
     const matesDir = readingArgs.readDirUnto('mates-dir', cliArgs, undefined);
     const pairedDir = readingArgs.readDirUnto('paired-dir', cliArgs, undefined);
-    const putOffDir = readingArgs.readDirUnto('put-off-dir', cliArgs, undefined);
-    console.log({ port, capsDir, matesDir, pairedDir, putOffDir });
+    const otherDir = readingArgs.readDirUnto('other-dir', cliArgs, undefined);
+    console.log({ port, capsDir, matesDir, pairedDir, otherDir });
 
     setConsoleTitle(`http://localhost:${port}`)
     console.log(`listening at ${port}`);
@@ -143,27 +143,13 @@ async function run() {
                     const text = await willReadBody(req);
                     const { matesDirName }: BeMovedMates = JSON.parse(text);
                     const source = pth.join(matesDir, matesDirName);
-                    const destination = pth.join(putOffDir, matesDirName);
-
-                    try {
-                        // Ensure destination directory exists
-                        await fs.mkdir(pth.dirname(destination), { recursive: true });
-
-                        // Move directory using rename
-                        await fs.rename(source, destination);
-                        console.log(`Mates directory moved from ${source} to ${destination}`);
-                        const result: SuccesfulBackendOperation = { isOk: true, isBad: false };
-                        res.write(JSON.stringify(result, null, 4));
-                        res.statusCode = 200;
-                        res.end();
-                    } catch (e: any) {
-                        console.error('Error moving mates directory:', e);
-                        const result: FailedBackendOperation = { error: e.message, isOk: false, isBad: true };
-                        res.write(JSON.stringify(result, null, 4));
-                        res.statusCode = 500;
-                        res.end();
-                    }
-                    break;
+                    const destination = pth.join(otherDir, matesDirName);
+                    const moved = await willMoveDir(source, destination);
+                    return handleMovedDirs(
+                        moved, res,
+                        `Mates directory moved from ${source} to ${destination}.`,
+                        `Unable to move mates directory from ${source} to ${destination}.`
+                    );
                 }
                 case '/move/mates': {
                     const text = await willReadBody(req);
