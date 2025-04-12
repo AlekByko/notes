@@ -50,4 +50,38 @@ export function chopDiscreteDistanceIntoPixelPerfectChunks(distance: number, num
     return tiles;
 }
 
+export function zipToGrid<T, U, V>(
+    one: T[],
+    another: U[],
+    zip: (one: T, another: U) => V
+): V[][] {
+    const result: V[][] = [];
 
+    for (let i = 0; i < one.length; i++) {
+        const row: V[] = [];
+
+        for (let j = 0; j < another.length; j++) {
+            const zipped = zip(one[i], another[j]);
+            row.push(zipped);
+        }
+
+        result.push(row);
+    }
+
+    return result;
+}
+
+export function tileDiscreteRectPixelPerfect(
+    width: number, height: number,
+    numberOfHorizontalTiles: number, numberOfVerticalTiles: number,
+) {
+    const horizontal = chopDiscreteDistanceIntoPixelPerfectChunks(width, numberOfHorizontalTiles);
+    const vertical = chopDiscreteDistanceIntoPixelPerfectChunks(height, numberOfVerticalTiles);
+    const zipped = zipToGrid(horizontal, vertical, (
+        [x, width],
+        [y, height],
+    ) => {
+        return { x, y, width, height };
+    });
+    return zipped;
+}
