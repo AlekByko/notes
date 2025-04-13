@@ -1,3 +1,4 @@
+
 /**
  * Cuts out an ImDa (ImageData) from given 2d canvas context using normalized coordinates and normalized size:
  * - `n...` stands for normalized coordinates
@@ -32,7 +33,7 @@ export function getImdaFromNormedBox__UNSAFE(
 }
 
 
-export function chopDiscreteDistanceIntoPixelPerfectChunks(distance: number, numberOfTiles: number) {
+export function chopDistancePxSharp(distance: number, numberOfTiles: number) {
 
     const boundaries: number[] = [];
     for (let i = 0; i <= numberOfTiles; i++) {
@@ -71,12 +72,12 @@ export function zipToGrid<T, U, V>(
     return result;
 }
 
-export function tileDiscreteRectPixelPerfect(
+export function tileRectPxSharp(
     width: number, height: number,
     numberOfHorizontalTiles: number, numberOfVerticalTiles: number,
 ) {
-    const horizontal = chopDiscreteDistanceIntoPixelPerfectChunks(width, numberOfHorizontalTiles);
-    const vertical = chopDiscreteDistanceIntoPixelPerfectChunks(height, numberOfVerticalTiles);
+    const horizontal = chopDistancePxSharp(width, numberOfHorizontalTiles);
+    const vertical = chopDistancePxSharp(height, numberOfVerticalTiles);
     const zipped = zipToGrid(horizontal, vertical, (
         [x, width],
         [y, height],
@@ -84,4 +85,38 @@ export function tileDiscreteRectPixelPerfect(
         return { x, y, width, height };
     });
     return zipped;
+}
+
+export function xxx<Context>(
+    context: Context, imda: ImageData,
+    sx: number, sy: number,
+    sw: number, sh: number,
+    process: (
+        context: Context,
+        r: number, g: number, b: number,
+        x: number, y: number,
+    ) => void
+) {
+    if (sx < 0) return;
+    if (sy < 0) return;
+    if (sw < 1) return;
+    if (sh < 1) return;
+    const { data, width, height } = imda;
+    if (sx + sw > width) return;
+    if (sy + sh > height) return;
+    const stride = 4;
+    for (let dy = 0; dy < sh; dy++) {
+        const y = dy + sy;
+        const ixs = y * width + sx;
+        for (let dx = 0; dx < sw; dx++) {
+            const ix = ixs + dx;
+            const x = dx + sx;
+            let at = ix * stride;
+            const r = data[at++];
+            const g = data[at++];
+            const b = data[at++];
+            process(context, r, g, b, x, y);
+        }
+    }
+    return;
 }
