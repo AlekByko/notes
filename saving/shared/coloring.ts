@@ -1,6 +1,6 @@
 import { padZeroText } from './texting';
 
-export function rgbToHueOnly(r: number, g: number, b: number): number | null {
+export function rgbToHueOnlyOr<Or>(r: number, g: number, b: number, or: Or): number | Or {
     r /= 255;
     g /= 255;
     b /= 255;
@@ -8,7 +8,7 @@ export function rgbToHueOnly(r: number, g: number, b: number): number | null {
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
 
-    if (max == min) return null;
+    if (max == min) return or;
 
     let h = 0;
     const d = max - min;
