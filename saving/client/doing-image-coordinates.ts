@@ -1,3 +1,4 @@
+import { sureNonNull } from '../shared/core';
 
 /**
  * Cuts out an ImDa (ImageData) from given 2d canvas context using normalized coordinates and normalized size:
@@ -153,4 +154,80 @@ export function makeHvTileTransitionsOfTileGrid<Tile, Value>(
         }
     }
     return transitions;
+}
+
+
+
+
+function getImagePixels(image: HTMLImageElement, width: number, height: number) {
+    const thumbnail = document.createElement('canvas');
+    const thumbnailContext = thumbnail.getContext('2d', {
+        willReadFrequently: true,
+        alpha: false,
+    });
+    sureNonNull(thumbnailContext, 'Thumbnail context');
+    thumbnail.width = width;
+    thumbnail.height = height;
+    thumbnailContext.drawImage(image, 0, 0, width, height);
+    const data = thumbnailContext.getImageData(0, 0, width, height).data;
+    const pixels = new Array(width * height);
+    for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+        pixels[j] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    }
+    return pixels;
+}
+
+
+// Generate pHash: 8x8 grayscale, DCT, binary hash
+export function computePHash(image: HTMLImageElement) {
+    const width = 8;
+    const height = 8;
+
+    // Step 1: Get 8x8 grayscale pixels
+    const pixels = getImagePixels(image, width, height);
+
+    // Step 2: Apply DCT
+    const dct = dct2d(pixels, width, height);
+
+    // Step 3: Use top-left 8x8 (low frequencies), compute median
+    const values = dct.slice(0, 64); // 8x8 = 64 values
+    const sorted = [...values].sort((a, b) => a - b);
+    const median = sorted[31]; // Approx median for 64 values
+
+    // Step 4: Create 64-bit binary hash (above median = 1, below = 0)
+    let hash = '';
+    for (let i = 0; i < 64; i++) {
+        hash += values[i] > median ? '1' : '0';
+    }
+    return hash;
+}
+
+function dct2d(pixels: number[], width: number, height: number) {
+    const result = new Array(width * height);
+    const scale = Math.sqrt(2 / width);
+    const sqrt2 = Math.sqrt(2);
+    for (let u = 0; u < height; u++) {
+        for (let v = 0; v < width; v++) {
+            let sum = 0;
+            for (let x = 0; x < height; x++) {
+                for (let y = 0; y < width; y++) {
+                    const pixel = pixels[x * width + y];
+                    const cu = u === 0 ? 1 / sqrt2 : 1;
+                    const cv = v === 0 ? 1 / sqrt2 : 1;
+                    sum += pixel * cu * cv * Math.cos(((2 * x + 1) * u * Math.PI) / (2 * width)) * Math.cos(((2 * y + 1) * v * Math.PI) / (2 * height));
+                }
+            }
+            result[u * width + v] = scale * sum;
+        }
+    }
+    return result;
+}
+
+export function hammingDistance<Or>(hash1: string, hash2: string, or: Or) {
+    if (hash1.length !== hash2.length) return or;
+    let distance = 0;
+    for (let i = 0; i < hash1.length; i++) {
+        if (hash1[i] !== hash2[i]) distance++;
+    }
+    return distance;
 }
