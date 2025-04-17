@@ -1,8 +1,21 @@
 
-export function willLoadImageFromUrl(url: string) {
-    return new Promise<HTMLImageElement>(resolve => {
+export function willLoadImageFromUrlOr<Or>(url: string, timeout: number, or: Or) {
+    return new Promise<HTMLImageElement | Or>(resolve => {
         const imageElement = document.createElement('img');
-        imageElement.onload = () => resolve(imageElement);
+
+        let wasTimedout = false;
+
+        const scheduled = setTimeout(() => {
+            wasTimedout = true;
+            resolve(or);
+        }, timeout);
+
+        imageElement.onload = () => {
+            if (wasTimedout) return;
+            window.clearTimeout(scheduled);
+            resolve(imageElement);
+        }
+
         imageElement.src = url;
     });
 }

@@ -1,4 +1,5 @@
-import { willLoadImageFromUrl } from 'loading-images';
+import { willLoadImageFromUrlOr } from 'loading-images';
+import { isNull } from '../shared/core';
 
 /**!!! AN OVERKILL FOR TYPICAL USE WHEN ONLY URL IS NEEDED !!! SHOULD NOT MAKE AN HTML IMAGE OBJECT !!! */
 export async function willReadImageFromFileHandle(handle: FileSystemFileHandle) {
@@ -8,7 +9,8 @@ export async function willReadImageFromFileHandle(handle: FileSystemFileHandle) 
 
 export async function willReadImageFromFile(file: File) {
     const url = URL.createObjectURL(file);
-    const image = await willLoadImageFromUrl(url);
+    const image = await willLoadImageFromUrlOr(url, 1000 * 10, null);
+    if (isNull(image)) return null;
     return { image, url };
 }
 
