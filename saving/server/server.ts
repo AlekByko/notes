@@ -37,11 +37,11 @@ async function run() {
     const cliArgs = parsedOrNot.value;
     console.log(cliArgs);
     const readingArgs = henceReadingArgsOf<ArgKeys>();
-    const port = readingArgs.readIntegerUnto('port', cliArgs, undefined);
-    const capsDir = readingArgs.readDirUnto('caps-dir', cliArgs, undefined);
-    const matesDir = readingArgs.readDirUnto('mates-dir', cliArgs, undefined);
-    const pairedDir = readingArgs.readDirUnto('paired-dir', cliArgs, undefined);
-    const otherDir = readingArgs.readDirUnto('other-dir', cliArgs, undefined);
+    const port = readingArgs.readIntegerFore('port', cliArgs, undefined);
+    const capsDir = readingArgs.readDirFore('caps-dir', cliArgs, undefined);
+    const matesDir = readingArgs.readDirFore('mates-dir', cliArgs, undefined);
+    const pairedDir = readingArgs.readDirFore('paired-dir', cliArgs, undefined);
+    const otherDir = readingArgs.readDirFore('other-dir', cliArgs, undefined);
     console.log({ port, capsDir, matesDir, pairedDir, otherDir });
 
     setConsoleTitle(`http://localhost:${port}`)

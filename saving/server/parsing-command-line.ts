@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { alwaysNull, broke, fix, isDefined, isUndefined, same } from '../shared/core';
+import { alwaysNull, broke, fail, fix, isDefined, isUndefined, same } from '../shared/core';
 import { capturedFrom, chokedFrom, readRegOver, wholeThing } from '../shared/reading-basics';
 import { readLoopOver } from '../shared/reading-loop';
 import { OptionsReader } from '../shared/reading-options';
@@ -71,11 +71,6 @@ export function ensureDir(text: string | undefined) {
     return fix({ kind: 'directory', value: text, isBad: false });
 }
 
-export function ensureString(text: string | undefined) {
-    if (isUndefined(text)) return fix({ isBad: true });
-    return fix({ string: text, isBad: false });
-}
-
 export function ensureInteger(text: string | undefined) {
     if (isUndefined(text)) return fix({ isBad: true });
     const integer = parseInt(text, 10);
@@ -86,7 +81,7 @@ export const noLuckWithArgs = Symbol('no-luck-with-args');
 
 export function henceReadingArgsOf<Key extends string>() {
     return {
-        readIntegerUnto(
+        readIntegerFore(
             argKey: Key,
             cliArgs: CliArgs<Key>,
             configValue: number | undefined,
@@ -140,7 +135,7 @@ export function henceReadingArgsOf<Key extends string>() {
             }
         },
 
-        readDirUnto(
+        readDirFore(
             argKey: Key,
             cliArgs: CliArgs<Key>,
             configValue: string | undefined,
@@ -187,7 +182,7 @@ export function henceReadingArgsOf<Key extends string>() {
             }
         },
 
-        readStrUnto(
+        readStrFore(
             argKey: Key,
             cliArgs: CliArgs<Key>,
             configValue: string | undefined,
@@ -240,5 +235,82 @@ export function readConfigOrAs<Config, Or>(configPath: string | undefined, or: O
             throw noLuckWithArgs;
         }
         default: return broke(read);
+    }
+}
+
+const readingArgsOfString = henceReadingArgsOf<string>();
+export function readingCli() {
+    return new ReadingCli();
+}
+type Take<In, Out> = (result: In, args: CliArgs) => Out;
+class ReadingCli<Result = {}> {
+    constructor(
+        private all: Take<any, any>[] = [],
+    ) { }
+
+    boolOr<Arg extends string, Or>(arg: Arg, or: Or): ReadingCli<{
+        [P in Arg | keyof Result]: P extends keyof Result ? Result[P] : boolean | Or
+    }> {
+        const readBooleanOr = (result: any, cliArgs: CliArgs) => {
+            const value = readingArgsOfString.readBoolOr(arg, cliArgs, undefined, or);
+            return { ...result, [arg]: value };
+        }
+        this.all.push(readBooleanOr);
+        return this as any;
+    }
+
+    stringFore<Arg extends string>(arg: Arg): ReadingCli<{
+        [P in Arg | keyof Result]: P extends keyof Result ? Result[P] : string
+    }> {
+        const readTextFore = (result: any, cliArgs: CliArgs) => {
+            const value = readingArgsOfString.readStrFore(arg, cliArgs, undefined);
+            return { ...result, [arg]: value };
+        }
+        this.all.push(readTextFore);
+        return this as any;
+    }
+
+    integerFore<Arg extends string>(arg: Arg): ReadingCli<{
+        [P in Arg | keyof Result]: P extends keyof Result ? Result[P] : number
+    }> {
+        const readIntegerFore = (result: any, cliArgs: CliArgs) => {
+            const value = readingArgsOfString.readIntegerFore(arg, cliArgs, undefined);
+            return { ...result, [arg]: value };
+        }
+        this.all.push(readIntegerFore);
+        return this as any;
+    }
+
+    dirFore<Arg extends string, Name extends string | undefined = undefined>(arg: Arg, name?: Name): ReadingCli<{
+        [P in (Name extends undefined ? Arg : Name) | keyof Result]: P extends keyof Result ? Result[P] : string
+    }> {
+        const readDirFore = (result: any, cliArgs: CliArgs) => {
+            const value = readingArgsOfString.readDirFore(arg, cliArgs, undefined);
+            return { ...result, [isDefined(name) ? name :  arg]: value };
+        }
+        this.all.push(readDirFore);
+        return this as any;
+    }
+
+    fromCliArgs(cliArgs: CliArgs): Result {
+        let result = {} as any;
+        for (const one of this.all) {
+            result = one(result, cliArgs);
+        }
+        return result;
+    }
+
+    fromProcessArgv() {
+        const text = process.argv.slice(2).join(' ');
+        console.log(text);
+        const parsed = readCliArgs(text, 0);
+        if (parsed.isBad) {
+            const error = `Bad args: ${text}`
+            console.log(error);
+            return fail(error);
+        }
+        const cliArgs = parsed.value;
+        console.log(cliArgs);
+        return this.fromCliArgs(cliArgs);
     }
 }
