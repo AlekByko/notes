@@ -1,4 +1,5 @@
-import { compareNumbers, fail, sureNonNull } from '../shared/core';
+import { compareNumbers, fail, isNull, sureNonNull } from '../shared/core';
+import { willLoadImageFromUrlOr } from './loading-images';
 
 /**
  * Cuts out an ImDa (ImageData) from given 2d canvas context using normalized coordinates and normalized size:
@@ -177,9 +178,17 @@ function getImagePixels(image: HTMLImageElement, width: number, height: number) 
     return pixels;
 }
 
+export async function willGetPhash(file: FileSystemFileHandle) {
+    const blob = await file.getFile();
+    const url = URL.createObjectURL(blob);
+    const image = await willLoadImageFromUrlOr(url, 1000 * 5, null);
+    if (isNull(image)) return null;
+    const phash = computePHash(image);
+    return phash;
+}
 
 // Generate pHash: 8x8 grayscale, DCT, binary hash
-export function computePHash(image: HTMLImageElement) {
+function computePHash(image: HTMLImageElement) {
     const width = 16;
     const height = 16;
 
