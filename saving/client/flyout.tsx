@@ -1,17 +1,54 @@
 import React from "react";
-import { addClassIf } from './reacting';
+import { isNull } from '../shared/core';
+import { addClassIfDefined } from './reacting';
 
 export interface FlyoutProps {
     text: string;
     timesRan: number;
+    className?: string;
 }
 
-export class Flyout extends React.PureComponent<FlyoutProps> {
+interface State {
+    lastTimesRanOfProps: number;
+    timesChanged: number;
+}
+
+function makeState(props: FlyoutProps): State {
+    return {
+        lastTimesRanOfProps: props.timesRan,
+        timesChanged: 0,
+    };
+}
+
+export class Flyout extends React.Component<FlyoutProps, State> {
+
+    state = makeState(this.props);
+
+    static getDerivedStateFromProps(props: FlyoutProps, state: State): State | null {
+        const { timesRan } = props;
+        if (state.lastTimesRanOfProps !== timesRan) {
+            let { timesChanged } = state;
+            timesChanged += 1;
+            state = { ...state, lastTimesRanOfProps: timesRan, timesChanged }
+        }
+        return state;
+    }
+
+    private element: HTMLDivElement | null = null;
+
+    componentDidUpdate(_: FlyoutProps, olderState: State): void {
+        const { state, element } = this;
+        if (isNull(element)) return;
+        if (state.timesChanged !== olderState.timesChanged) {
+            element.classList.remove('as-animated');
+            void element.offsetWidth;
+            element.classList.add('as-animated');
+        }
+    }
+
     render() {
-        const { text, timesRan } = this.props;
-        const isEven = timesRan % 2 === 0;
-        const isOdd = !isEven;
-        const classes = 'flyout' + addClassIf(isOdd, 'as-odd') + addClassIf(isEven, 'as-even');
-        return <div className={classes}>{text}</div>;
+        const { text, className } = this.props;
+        const classes = 'flyout' + addClassIfDefined(className);
+        return <div className={classes} ref={x => this.element = x}>{text}</div>;
     }
 }

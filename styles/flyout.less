@@ -1,32 +1,51 @@
 .flyout {
     position: fixed;
     top: 50%;
-    right: 0;
-    transform: translateX(100%); // <-- start off-screen 
-    transform: translateY(-50%);
-    background: #333;
-    color: #fff;
-    padding: 10px 20px;
+    left: 100%;
+    margin-left: -200px;
+    padding: 20px 30px;
     border-radius: 8px;
-    font-size: 32px;
+    font-size: 120px;
     white-space: nowrap;
+    background-color: black;
+    color: white;
+    &.as-meh {
+        background-color: @background-color-meh;
+        color: darken(@background-color-meh, 80%);
+    }
+    &.as-yes-or-pin {
+        background-color: white;
+        color: black;
+    }
 }
 
 .flyout {
+    @stay-time: 0.5s;
+    @fly-time: 0.05s;
 
-    &.as-odd,
-    &.as-even {
-        animation: flyLeft 2s ease-in forwards;
+    &.as-animated {
+        animation:
+            flyIn @fly-time ease-in forwards,
+            flyOut @stay-time ease-out forwards (@stay-time+@fly-time);
     }
 }
 
-@keyframes flyLeft {
+@keyframes flyIn {
     from {
-        transform: translateX(100%);
+        left: 100%;
     }
 
     to {
-        transform: translateX(-100vw);
-        /* fly fully off to the left */
+        left: 50%;
+    }
+}
+
+@keyframes flyOut {
+    from {
+        left: 50%;
+    }
+
+    to {
+        left: -100%;
     }
 }
