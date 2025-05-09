@@ -5,6 +5,7 @@ export const dotWmv = '.wmv';
 export const dotMp4 = '.mp4';
 export const dotJpg = '.jpg';
 export const dotLog = '.log';
+export const dotTmp = '.tmp';
 export const dotJson = '.json';
 
 export const knownVideoExtensions = new Set([dotFlv, dotWmv, dotMp4]);
