@@ -143,9 +143,39 @@ export function henceReadingArgsOf<Key extends string>() {
             const dirArg = cliArgs[argKey] ?? configValue;
             if (isDefined(dirArg)) {
                 const doesExist = fs.existsSync(dirArg);
-                if (doesExist) return dirArg;
-                console.log(`Bad argument: ${argKey}. Dir doesn't exist: ${dirArg}`);
-                throw noLuckWithArgs;
+                if (!doesExist) {
+                    console.log(`Bad argument: ${argKey}. Nothing exist at: ${dirArg}`);
+                    throw noLuckWithArgs;
+                }
+                const stats = fs.statSync(dirArg);
+                if (!stats.isDirectory()) {
+                    console.log(`Bad argument: ${argKey}. Not a dir.`);
+                    throw noLuckWithArgs;
+                }
+                return dirArg;
+            } else {
+                return missingArgByeBye<Key>(argKey);
+            }
+        },
+
+        readFileFore(
+            argKey: Key,
+            cliArgs: CliArgs<Key>,
+            configValue: string | undefined,
+        ): string {
+            const fileArg = cliArgs[argKey] ?? configValue;
+            if (isDefined(fileArg)) {
+                const doesExist = fs.existsSync(fileArg);
+                if (!doesExist) {
+                    console.log(`Bad argument: ${argKey}. Nothing exists at: ${fileArg}`);
+                    throw noLuckWithArgs;
+                }
+                const stats = fs.statSync(fileArg);
+                if (!stats.isFile()) {
+                    console.log(`Bad argument: ${argKey}. Not a file.`);
+                    throw noLuckWithArgs;
+                }
+                return fileArg;
             } else {
                 return missingArgByeBye<Key>(argKey);
             }
@@ -259,12 +289,12 @@ class ReadingCli<Result = {}> {
         return this as any;
     }
 
-    boolFore<Arg extends string, Name extends string | undefined = undefined>(arg: Arg,  name?: Name): ReadingCli<{
+    boolFore<Arg extends string, Name extends string | undefined = undefined>(arg: Arg, name?: Name): ReadingCli<{
         [P in (Name extends undefined ? Arg : Name) | keyof Result]: P extends keyof Result ? Result[P] : boolean
     }> {
         const readBooleanFore = (result: any, cliArgs: CliArgs) => {
             const value = readingArgsOfString.readBooleanFore(arg, cliArgs, undefined);
-            return { ...result, [isDefined(name) ? name :  arg]: value };
+            return { ...result, [isDefined(name) ? name : arg]: value };
         }
         this.all.push(readBooleanFore);
         return this as any;
@@ -275,7 +305,7 @@ class ReadingCli<Result = {}> {
     }> {
         const readTextFore = (result: any, cliArgs: CliArgs) => {
             const value = readingArgsOfString.readStrFore(arg, cliArgs, undefined);
-            return { ...result, [isDefined(name) ? name :  arg]: value };
+            return { ...result, [isDefined(name) ? name : arg]: value };
         }
         this.all.push(readTextFore);
         return this as any;
@@ -286,7 +316,7 @@ class ReadingCli<Result = {}> {
     }> {
         const readIntegerOr = (result: any, cliArgs: CliArgs) => {
             const value = readingArgsOfString.readIntegerOr(arg, cliArgs, undefined, or);
-            return { ...result, [isDefined(name) ? name :  arg]: value };
+            return { ...result, [isDefined(name) ? name : arg]: value };
         }
         this.all.push(readIntegerOr);
         return this as any;
@@ -297,7 +327,7 @@ class ReadingCli<Result = {}> {
     }> {
         const readIntegerFore = (result: any, cliArgs: CliArgs) => {
             const value = readingArgsOfString.readIntegerFore(arg, cliArgs, undefined);
-            return { ...result, [isDefined(name) ? name :  arg]: value };
+            return { ...result, [isDefined(name) ? name : arg]: value };
         }
         this.all.push(readIntegerFore);
         return this as any;
@@ -308,9 +338,20 @@ class ReadingCli<Result = {}> {
     }> {
         const readDirFore = (result: any, cliArgs: CliArgs) => {
             const value = readingArgsOfString.readDirFore(arg, cliArgs, undefined);
-            return { ...result, [isDefined(name) ? name :  arg]: value };
+            return { ...result, [isDefined(name) ? name : arg]: value };
         }
         this.all.push(readDirFore);
+        return this as any;
+    }
+
+    fileFore<Arg extends string, Name extends string | undefined = undefined>(arg: Arg, name?: Name): ReadingCli<{
+        [P in (Name extends undefined ? Arg : Name) | keyof Result]: P extends keyof Result ? Result[P] : string
+    }> {
+        const readFileFore = (result: any, cliArgs: CliArgs) => {
+            const value = readingArgsOfString.readFileFore(arg, cliArgs, undefined);
+            return { ...result, [isDefined(name) ? name : arg]: value };
+        }
+        this.all.push(readFileFore);
         return this as any;
     }
 

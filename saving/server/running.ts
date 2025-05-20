@@ -2,7 +2,7 @@
 import { ChildProcess, spawn, SpawnOptions } from 'child_process';
 import * as fs from 'fs';
 import { PassThrough } from 'stream';
-import { fix, isDefined, isNull } from '../shared/core';
+import { fix, isDefined, isNonNull, isNull } from '../shared/core';
 
 
 export type AppRun = NoCodeAppRun | CodedAppRun | ErroredAppRun;
@@ -165,9 +165,10 @@ export function willRunChildAttachedExt1(command: string, args: string[]): Promi
 export function willRunChildAttachedAndLogFile(
     command: string,
     args: string[],
-    logPath: string,
+    logPath_: string | null,
 ) {
-
+    const chunksOfStdout: string[] = [];
+    const chunksOfStderr: string[] = [];
     console.log(command, args);
     const options: SpawnOptions = {
         detached: false,
@@ -181,7 +182,7 @@ export function willRunChildAttachedAndLogFile(
         // - "inherit": means stdout and stderr are null, and parent process gets all output of the child to its console
         stdio: ['inherit', 'pipe', 'pipe'],
     };
-    const logFile = fs.createWriteStream(logPath);
+    const logFile = isNull(logPath_) ? null : fs.createWriteStream(logPath_);
     // https://nodejs.org/dist./v0.10.44/docs/api/child_process.html#child_process_child_stdio
     const child = spawn(command, args, options);
 
@@ -191,54 +192,74 @@ export function willRunChildAttachedAndLogFile(
     const stdoutPassThrough = new StdoutPassThrough();
     child.stdout!.pipe(stdoutPassThrough);
     stdoutPassThrough.pipe(process.stdout);
-    stdoutPassThrough.pipe(logFile);
+    if (isNonNull(logFile)) {
+        stdoutPassThrough.pipe(logFile);
+    }
     stdoutPassThrough.on('error', e => {
         console.log('Error in child stdout.', e);
         disconnect('Error in stdout path through.');
     });
-
-    logFile.on('close', (e: any) => {
-        console.log('Log file closed.');
-        console.log(e);
-        console.trace();
-        disconnect('Log file closed.');
+    stdoutPassThrough.on('data', chunk => {
+        chunksOfStdout.push(chunk);
     });
-    logFile.on('error', e => {
-        console.log('Log file errored.');
-        console.log(e);
-        console.trace();
-        disconnect('Log file errored.');
-    });
+    if (isNonNull(logFile)) {
+        logFile.on('close', (e: any) => {
+            console.log('Log file closed.');
+            console.log(e);
+            console.trace();
+            disconnect('Log file closed.');
+        });
+        logFile.on('error', e => {
+            console.log('Log file errored.');
+            console.log(e);
+            console.trace();
+            disconnect('Log file errored.');
+        });
+    }
 
     const stderrPassThrough = new StderrPassThrough();
     child.stderr!.pipe(stderrPassThrough)
     stderrPassThrough.pipe(process.stderr);
-    stderrPassThrough.pipe(logFile);
+    if (isNonNull(logFile)) {
+        stderrPassThrough.pipe(logFile);
+    }
     stderrPassThrough.on('error', e => {
         console.log('Error in child stderr.', e);
         disconnect('Error in stderr-pass-though.');
+    });
+    stderrPassThrough.on('data', chunk => {
+        chunksOfStderr.push(chunk);
     });
 
     function disconnect(reason: string) {
         console.log('Unpiping: ' + reason);
         child.stdout!.unpipe(stdoutPassThrough);
         stdoutPassThrough.unpipe(process.stdout);
-        stdoutPassThrough.unpipe(logFile);
+        if (isNonNull(logFile)) {
+            stdoutPassThrough.unpipe(logFile);
+        }
 
         child.stderr!.unpipe(stderrPassThrough)
         stderrPassThrough.unpipe(process.stderr);
-        stderrPassThrough.unpipe(logFile);
-        logFile.end();
-        // logFile.close(); // <- abrupt closing no flushing
+        if (isNonNull(logFile)) {
+            stderrPassThrough.unpipe(logFile);
+            logFile.end();
+            // logFile.close(); // <- abrupt closing no flushing
+        }
     }
 
-    return new Promise<{ kind: 'error', e: any } | { kind: 'exit', code: number | null, signal: NodeJS.Signals | null }>(resolve => {
+    return new Promise<
+        | { kind: 'error'; e: any; stdout: string; stderr: string; }
+        | { kind: 'exit'; code: number | null; signal: NodeJS.Signals | null; stdout: string; stderr: string; }
+    >(resolve => {
         child.on('close', _e => {
             disconnect('Child closed.');
+            const stdout = chunksOfStdout.join('');
+            const stderr = chunksOfStderr.join('');
             if (isDefined(lastE)) {
-                resolve(fix({ kind: 'error', e: lastE }));
+                resolve(fix({ kind: 'error', e: lastE, stdout, stderr }));
             } else {
-                resolve(fix({ kind: 'exit', code: lastCode, signal: lastSignal }));
+                resolve(fix({ kind: 'exit', code: lastCode, signal: lastSignal, stdout, stderr }));
             }
         });
 
