@@ -440,6 +440,13 @@ export function cast(_name: any): void { }
 
 
 export function fix<const T>(value: T) { return value; }
+export const ok = { isOk: true, isBad: false } as const;
+export const bad = { isOk: false, isBad: true } as const;
+export function unableOver<const Args extends object, const Kind extends string>(kind: Kind, args: Args) {
+    return function unable<const Why extends { kind: string }>(why: Why) {
+        return { ...args, ...bad, kind, why } as const;
+    }
+}
 
 export function run<T>(run: () => T): T {
     return run();
