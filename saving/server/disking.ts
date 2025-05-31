@@ -169,16 +169,25 @@ export function readTextFile(path: string & AsFile) {
     }
 }
 
+export function fsCheckIfFileExists(path: string) {
+    const pathExists = fsCheckIfExists(path);
+    if (pathExists.isBad) return pathExists;
+    const args = { path } as const;
+    if (!pathExists.isThere) return fix({ ...args, ...bad, kind: 'path-does-not-exist', why: pathExists });
+    const pathStats = fsStat(pathExists);
+    if (pathStats.isBad) return pathStats;
+    if (!pathStats.isFile) return fix({ ...args, ...bad, kind: 'path-exists-but-not-file', why: pathStats });
+    return pathStats;
+}
+
 export function readJsonFileAs<T>(path: string) {
     const args = { path } as const;
     const unable = unableOver('unable-to-read-file-as-json', args);
 
-    const pathExists = fsCheckIfExists(path);
-    if (pathExists.isBad || !pathExists.isThere) return unable(pathExists);
-    const pathStats = fsStat(pathExists);
-    if (pathStats.isBad || !pathStats.isFile) return unable(pathStats);
+    const pathChecked = fsCheckIfFileExists(path);
+    if (pathChecked.isBad) return unable(pathChecked);
 
-    const read = readTextFile(pathStats.path);
+    const read = readTextFile(pathChecked.path);
     if (read.isBad) return unable(read);
     const { text } = read;
     const parsed = parseJsonAs<T>(text);
