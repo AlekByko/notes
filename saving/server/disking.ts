@@ -39,7 +39,7 @@ export function combinePath(path1: string, path2: string): string {
 }
 
 
-export function moveFile(filePath: string, targetPath: string, isDryRun: boolean) {
+export function renamePath(filePath: string, targetPath: string, isDryRun: boolean) {
     if (isDryRun) return fix({ kind: 'dry-run-nothing-copied' });
     try {
         if (fs.existsSync(targetPath)) {
@@ -55,7 +55,7 @@ export function moveFile(filePath: string, targetPath: string, isDryRun: boolean
     try {
         fs.renameSync(filePath, targetPath);
         const stats = fs.statSync(targetPath, {});
-        return fix({ kind: 'moved', size: stats.size });
+        return fix({ kind: 'renamed', size: stats.size });
     } catch (err: any) {
         if (err.code === 'ENOSPC') {
             return fix({ kind: 'no-space-left' });
