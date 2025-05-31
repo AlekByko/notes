@@ -1,7 +1,7 @@
 import child from 'child_process';
 import * as fs from 'fs';
 import { join } from 'path';
-import { bad, cast, fail, fix, ok, unableOver } from '../shared/core';
+import { bad, cast, fix, ok, unableOver } from '../shared/core';
 
 export interface DirFile {
     dir: string;
@@ -217,24 +217,11 @@ declare const asDir: unique symbol;
 export interface AsDir extends AsExists {
     'as-dir': typeof asDir;
 }
-export function sureIsFile<Path extends string & AsExists>(path: Path, assertion: FsStat): asserts path is Path & AsFile {
-    if (assertion.path !== path) {
-        console.log({ path, assertion });
-        return fail(`Unable to assert that "${path}" is a file. Assertion points at different path "${assertion.path}"`);
-    }
-    if (assertion.isBad) {
-        console.log({ path, assertion });
-        return fail(`Unable to assert that "${path}" is a file. Assertion is bad.`);
-    }
-    if (!assertion.stats.isFile()) {
-        console.log({ path, assertion });
-        return fail(`Unable to assert that "${path}" is a file, because it is not.`);
-    }
-}
+
 export function fsStat(exists: { isOk: true, path: string & AsExists; isThere: true }) {
-    return fsStat_(exists.path);
+    return _fsStat(exists.path);
 }
-export function fsStat_(path: string & AsExists) {
+function _fsStat(path: string & AsExists) {
     try {
         const stats = fs.statSync(path);
         if (stats.isFile()) {
@@ -257,22 +244,6 @@ export interface AsExists {
     'as-exists': typeof asExists;
 }
 
-export function sureExists(path: string, assertion: FsCheckIfExists): asserts path is string & AsExists {
-    if (assertion.path !== path) {
-        console.log({ path, assertion });
-        return fail(`Unable to assert that "${path}" extists. Assertion points at different path "${assertion.path}"`);
-    }
-    if (assertion.isBad) {
-        console.log({ path, assertion });
-        return fail(`Unable to assert that "${path}" exists. Assertion is bad.`);
-    }
-    if (!assertion.isThere) {
-        console.log({ path, assertion });
-        return fail(`Unable to assert that "${path}" exists, because it does not.`);
-    }
-}
-
-type FsCheckIfExists = ReturnType<typeof fsCheckIfExists>;
 function fsCheckIfExists<Path extends string>(path: AsExists extends Path ? never : string) {
     try {
         const isThere = fs.existsSync(path);
