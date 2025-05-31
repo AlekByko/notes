@@ -1,7 +1,7 @@
 import child from 'child_process';
 import * as fs from 'fs';
 import { join } from 'path';
-import { bad, broke, fail, fix, ok } from '../shared/core';
+import { bad, broke, cast, fail, fix, ok, unableOver } from '../shared/core';
 
 export interface DirFile {
     dir: string;
@@ -46,53 +46,53 @@ export function moveFile(filePath: string, targetPath: string, isDryRun: boolean
             return fix({ kind: 'target-file-exists' });
         }
     }
-    catch (e: any) {
+    catch (err: any) {
         console.log(`Unable to check if the target ${targetPath} for the source ${filePath} already exists. Unexpected error.`);
-        console.log(e);
-        return fix({ kind: 'unexpected-error', e });
+        console.log(err);
+        return fix({ kind: 'unexpected-error', err });
     }
 
     try {
         fs.renameSync(filePath, targetPath);
         const stats = fs.statSync(targetPath, {});
         return fix({ kind: 'moved', size: stats.size });
-    } catch (e: any) {
-        if (e.code === 'ENOSPC') {
+    } catch (err: any) {
+        if (err.code === 'ENOSPC') {
             return fix({ kind: 'no-space-left' });
         } else {
             console.log(`Unable to move ${filePath} to ${targetPath}. Unexpected error.`);
-            console.log(e);
-            return fix({ kind: 'unexpected-error', e });
+            console.log(err);
+            return fix({ kind: 'unexpected-error', err });
         }
     }
 }
 
 
 
-export function copyFile(filePath: string, targetPath: string, isDryRun: boolean) {
+export function copyFile(sourcePath: string, targetPath: string, isDryRun: boolean) {
     if (isDryRun) return fix({ kind: 'dry-run-nothing-copied' });
-    try {
-        if (fs.existsSync(targetPath)) {
-            return fix({ kind: 'target-file-exists' });
-        }
-    }
-    catch (e: any) {
-        console.log(`Unable to check if the target ${targetPath} for the source ${filePath} already exists. Unexpected error.`);
-        console.log(e);
-        return fix({ kind: 'unexpected-error', e });
+    const args = { sourcePath, targetPath, isDryRun } as const;
+    const unable = unableOver('unable-to-copy-file', args);
+    const targetExists = fsCheckIfExists(targetPath);
+    if (targetExists.isBad) return unable({ kind: 'unable-to-check-if-target-exists', why: targetExists });
+    if (targetExists.isThere) {
+        const targetStats = fsStat(targetExists);
+        if (targetStats.isBad) return unable({ kind: 'unable-to-stat-target', why: targetStats });
+        if (targetStats.isFile) return fix({ ...args, ...ok, kind: 'target-file-exists' });
+        return unable({ kind: 'target-exists-but-not-file', why: targetStats });
     }
 
     try {
-        fs.copyFileSync(filePath, targetPath);
+        fs.copyFileSync(sourcePath, targetPath);
         const stats = fs.statSync(targetPath, {});
         return fix({ kind: 'copied', size: stats.size });
-    } catch (e: any) {
-        if (e.code === 'ENOSPC') {
+    } catch (err: any) {
+        if (err.code === 'ENOSPC') {
             return fix({ kind: 'no-space-left' });
         } else {
-            console.log(`Unable to copy ${filePath} to ${targetPath}. Unexpected error.`);
-            console.log(e);
-            return fix({ kind: 'unexpected-error', e });
+            console.log(`Unable to copy ${sourcePath} to ${targetPath}. Unexpected error.`);
+            console.log(err);
+            return fix({ kind: 'unexpected-error', err });
         }
     }
 }
@@ -187,7 +187,11 @@ declare const asFile: unique symbol;
 export interface AsFile {
     'as-file': typeof asFile;
 }
-export function sureFile<Path extends string & AsExists>(path: Path, assertion: FsStat): asserts path is Path & AsFile {
+declare const asDir: unique symbol;
+export interface AsDir {
+    'as-dir': typeof asDir;
+}
+export function sureIsFile<Path extends string & AsExists>(path: Path, assertion: FsStat): asserts path is Path & AsFile {
     if (assertion.path !== path) {
         console.log({ path, assertion });
         return fail(`Unable to assert that "${path}" is a file. Assertion points at different path "${assertion.path}"`);
@@ -201,10 +205,21 @@ export function sureFile<Path extends string & AsExists>(path: Path, assertion: 
         return fail(`Unable to assert that "${path}" is a file, because it is not.`);
     }
 }
-export function fsStat(path: string & AsExists) {
+export function fsStat(exists: { isOk: true, path: string & AsExists; isThere: true }) {
+    return fsStat_(exists.path);
+}
+export function fsStat_(path: string & AsExists) {
     try {
         const stats = fs.statSync(path);
-        return fix({ path, ...ok, kind: 'path-statted', stats });
+        if (stats.isFile()) {
+            cast<typeof path & AsFile>(path);
+            return fix({ path, ...ok, kind: 'path-statted', stats, isFile: true, isDir: false });
+        } else if (stats.isDirectory()) {
+            cast<typeof path & AsDir>(path);
+            return fix({ path, ...ok, kind: 'path-statted', stats, isFile: false, isDir: true });
+        } else {
+            return fix({ path, ...ok, kind: 'path-statted', stats, isFile: false, isDir: false });
+        }
     } catch (err: any) {
         return fix({ path, ...bad, kind: 'unable-to-stat-path', why: { kind: 'unexpected-error', err } });
     }
@@ -235,7 +250,12 @@ type FsCheckIfExists = ReturnType<typeof fsCheckIfExists>;
 function fsCheckIfExists<Path extends string>(path: AsExists extends Path ? never : string) {
     try {
         const isThere = fs.existsSync(path);
-        return fix({ path, ...ok, kind: 'path-existence-checked', isThere });
+        cast<typeof path & AsExists>(path);
+        if (isThere) {
+            return fix({ path, ...ok, kind: 'path-existence-checked', isThere: true });
+        } else {
+            return fix({ path, ...ok, kind: 'path-existence-checked', isThere: false });
+        }
     } catch (err: any) {
         return fix({ path, ...bad, kind: 'unable-to-check-path-existence', why: { kind: 'unexpected-error', err } });
     }
