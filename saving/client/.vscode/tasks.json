@@ -11,6 +11,13 @@
         {
             "type": "shell",
             "group": "build",
+            "label": "build-client",
+            "command": "cmd /C build-client.bat",
+            "problemMatcher": "$tsc-watch"
+        },
+        {
+            "type": "shell",
+            "group": "build",
             "label": "build-styles",
             "command": "cmd /C build-styles.bat"
         }

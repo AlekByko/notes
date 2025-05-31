@@ -1,1 +1,1 @@
-node ../../node_modules/typescript/bin/tsc --build
+node ../../node_modules/typescript/bin/tsc --build --pretty

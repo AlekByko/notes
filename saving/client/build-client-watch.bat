@@ -1,2 +1,2 @@
 rmdir /Q/S .\client
-node ../../node_modules/typescript/bin/tsc  --build --pretty --watch
+node ../../node_modules/typescript/bin/tsc --build --pretty --watch
