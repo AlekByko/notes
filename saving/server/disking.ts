@@ -242,7 +242,7 @@ export interface AsExists {
     'as-exists': typeof asExists;
 }
 
-function fsCheckIfExists<Path extends string>(path: AsExists extends Path ? never : string) {
+export function fsCheckIfExists<Path extends string>(path: AsExists extends Path ? never : string) {
     try {
         const isThere = fs.existsSync(path);
         cast<typeof path & AsExists>(path);
