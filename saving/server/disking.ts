@@ -39,35 +39,33 @@ export function combinePath(path1: string, path2: string): string {
 }
 
 
-export function renamePath(filePath: string, targetPath: string, isDryRun: boolean) {
-    if (isDryRun) return fix({ kind: 'dry-run-nothing-copied' });
+export function renamePath(sourcePath: string, targetPath: string, isDryRun: boolean) {
+    if (isDryRun) return fix({ kind: 'dry-run-nothing-renamed' });
     try {
         if (fs.existsSync(targetPath)) {
             return fix({ kind: 'target-file-exists' });
         }
     }
     catch (err: any) {
-        console.log(`Unable to check if the target ${targetPath} for the source ${filePath} already exists. Unexpected error.`);
+        console.log(`Unable to check if the target ${targetPath} for the source ${sourcePath} already exists. Unexpected error.`);
         console.log(err);
         return fix({ kind: 'unexpected-error', err });
     }
 
     try {
-        fs.renameSync(filePath, targetPath);
+        fs.renameSync(sourcePath, targetPath);
         const stats = fs.statSync(targetPath, {});
         return fix({ kind: 'renamed', size: stats.size });
     } catch (err: any) {
         if (err.code === 'ENOSPC') {
             return fix({ kind: 'no-space-left' });
         } else {
-            console.log(`Unable to move ${filePath} to ${targetPath}. Unexpected error.`);
+            console.log(`Unable to move ${sourcePath} to ${targetPath}. Unexpected error.`);
             console.log(err);
             return fix({ kind: 'unexpected-error', err });
         }
     }
 }
-
-
 
 export function copyFile(sourcePath: string, targetPath: string, isDryRun: boolean) {
     if (isDryRun) return fix({ kind: 'dry-run-nothing-copied' });
