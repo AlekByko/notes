@@ -155,7 +155,7 @@ export function parseJsonAs<T>(text: string) {
         const data = JSON.parse(text);
         return fix({ ...args, ...ok, kind: 'json-parsed', data: data as T, });
     } catch (err) {
-        return fix({ ...args, ...bad, kind: 'unable-to-parse-json', err });
+        return fix({ ...args, ...bad, kind: 'unable-to-parse-json', why: { kind: 'unexpected-error', err } });
     }
 }
 
@@ -169,7 +169,7 @@ export function readTextFile(path: string & AsFile) {
     }
 }
 
-export function fsCheckIfFileExists(path: string) {
+export function fsCheckIfFile(path: string) {
     const pathExists = fsCheckIfExists(path);
     if (pathExists.isBad) return pathExists;
     const args = { path } as const;
@@ -180,11 +180,24 @@ export function fsCheckIfFileExists(path: string) {
     return pathStats;
 }
 
+export function fsCheckIfFileOrNone(path: string) {
+    const pathExists = fsCheckIfExists(path);
+    if (pathExists.isBad) return pathExists;
+    const args = { path } as const;
+    if (!pathExists.isThere) {
+         return fix({ ...args, ...ok, kind: 'path-does-not-exist-but-its-ok', isThere: false, why: pathExists });
+    }
+    const pathStats = fsStat(pathExists);
+    if (pathStats.isBad) return pathStats;
+    if (!pathStats.isFile) return fix({ ...args, ...bad, kind: 'path-exists-but-not-file', why: pathStats });
+    return {...pathStats, isThere: true };
+}
+
 export function readJsonFileAs<T>(path: string) {
     const args = { path } as const;
     const unable = unableOver('unable-to-read-file-as-json', args);
 
-    const pathChecked = fsCheckIfFileExists(path);
+    const pathChecked = fsCheckIfFile(path);
     if (pathChecked.isBad) return unable(pathChecked);
 
     const read = readTextFile(pathChecked.path);
