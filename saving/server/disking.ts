@@ -154,14 +154,13 @@ export function parseJsonAs<T>(text: string) {
     try {
         const data = JSON.parse(text);
         return fix({ ...args, ...ok, kind: 'json-parsed', data: data as T, });
-    } catch (e) {
-        return fix({ ...args, ...bad, kind: 'bad-json', e });
+    } catch (err) {
+        return fix({ ...args, ...bad, kind: 'unable-to-parse-json', err });
     }
 }
 
-export function readTextFile(path: string) {
+export function readTextFile(path: string & AsFile) {
     const args = { path } as const;
-    if (!fs.existsSync(path)) return fix({ ...args, ...bad, kind: 'file-does-not-exist', path });
     try {
         const text = fs.readFileSync(path, { encoding: 'utf-8' });
         return fix({ ...args, ...ok, kind: 'file-read', text });
@@ -173,7 +172,13 @@ export function readTextFile(path: string) {
 export function readJsonFileAs<T>(path: string) {
     const args = { path } as const;
     const unable = unableOver('unable-to-read-file-as-json', args);
-    const read = readTextFile(path);
+
+    const pathExists = fsCheckIfExists(path);
+    if (pathExists.isBad || !pathExists.isThere) return unable(pathExists);
+    const pathStats = fsStat(pathExists);
+    if (pathStats.isBad || !pathStats.isFile) return unable(pathStats);
+
+    const read = readTextFile(pathStats.path);
     if (read.isBad) return unable(read);
     const { text } = read;
     const parsed = parseJsonAs<T>(text);
