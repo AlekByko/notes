@@ -36,5 +36,7 @@
     "workbench.colorCustomizations": {
         "titleBar.activeBackground": "#c00",
         "titleBar.activeForeground": "#fff"
-    }
+    },
+    "editor.detectIndentation": false,
+    "editor.indentSize": "tabSize"
 }
