@@ -1,4 +1,4 @@
-import { compareRandom } from './core';
+import { compareRandom, isUndefined, logAndFail } from './core';
 
 module arrays {
 
@@ -185,7 +185,7 @@ module arrays {
 
 
     export function partition<T>(values: T[], isThat: (value: T, index: number) => boolean, thoseThatAre: T[], thoseThatAreNot: T[]): void {
-        for (let index = 0; index < values.length; index ++) {
+        for (let index = 0; index < values.length; index++) {
             const value = values[index];
             if (isThat(value, index)) {
                 thoseThatAre.push(value);
@@ -207,6 +207,46 @@ module arrays {
         }
         return pairs;
     }
+
+
+
+    type Unmatched<T, U> = { hasOne: true; hasAnother: false; one: T; } | { hasOne: false; hasAnother: true; another: U; };
+    export function mergeByKey<T, U, K, M>(
+        ones: T[],
+        oneKeyOf: (one: T) => K,
+        anothers: U[],
+        anotherKeyOf: (another: U) => K,
+        merge: (one: T, another: U, key: K) => M,
+        sort: (merged: M[]) => M[],
+    ) {
+        const onesByKey = ones.toMap(x => oneKeyOf(x), x => x, newer => newer);
+        const anothersByKey = anothers.toMap(x => anotherKeyOf(x), x => x, newer => newer);
+        const keys = [...onesByKey.keys(), ...anothersByKey.keys()].toSet().toArray();
+        let merged: M[] = [];
+        const unmatched: Unmatched<T, U>[] = [];
+
+        for (const key of keys) {
+            const one = onesByKey.get(key);
+            const another = anothersByKey.get(key);
+            if (isUndefined(one)) {
+                // unmatched another
+                if (isUndefined(another)) {
+                    return logAndFail('Unable to merge by key. Both one and another are unmatched.', { one, another, key });
+                } else {
+                    unmatched.push({ hasOne: false, hasAnother: true, another });
+                }
+            } else if (isUndefined(another)) {
+                // unmatched one
+                unmatched.push({ hasOne: true, hasAnother: false, one });
+            } else {
+                const merged_ = merge(one, another, key);
+                merged.push(merged_);
+            }
+        }
+        merged = sort(merged);
+        return { merged, unmatched };
+    }
+
 
 }
 export = arrays;
