@@ -3,6 +3,7 @@ import { ChildProcess, spawn, SpawnOptions } from 'child_process';
 import * as fs from 'fs';
 import { PassThrough } from 'stream';
 import { fix, isDefined, isNonNull, isNull } from '../shared/core';
+import { willCreateAndOpenWriteStream } from './disking';
 
 
 export type AppRun = NoCodeAppRun | CodedAppRun | ErroredAppRun;
@@ -163,22 +164,6 @@ export function willRunChildAttachedExt1(command: string, args: string[]): Promi
     });
 }
 
-interface LogOnly {
-    kind: 'log-only';
-    logPath: string;
-}
-
-/** path-through can split the stream by allowing multiple .pipe(...) invocations wherease child.strout.pipe can only be called once */
-interface SlowLogAndParentViaPassThrough {
-    kind: 'log-and-parent-via-pass-through';
-    logPath: string;
-}
-interface ParentOnly {
-    kind: 'parent-only';
-}
-
-export type LogParam = LogOnly | SlowLogAndParentViaPassThrough | ParentOnly;
-
 /** it is a BAD IDEA to collect output from std-err and std-out into strings, simply because,
  * given 200 child processes, it will hog all your resoures ESPECIALLY cpu */
 export function willRunChildAttachedAndLogFile(
@@ -267,7 +252,7 @@ export function willRunChildAttachedAndLogFile(
 
     return new Promise<
         | { kind: 'error'; e: any; }
-        | { kind: 'exit'; code: number | null; signal: NodeJS.Signals | null;  }
+        | { kind: 'exit'; code: number | null; signal: NodeJS.Signals | null; }
     >(resolve => {
         child.on('close', _e => {
             setTimeout(() => { // <-- giving extra time to flush
@@ -301,6 +286,48 @@ export function willRunChildAttachedAndLogFile(
             disconnect('Child exited.');
         });
     });
+}
+
+
+
+
+/** it is a BAD IDEA to collect output from std-err and std-out into strings, simply because,
+ * given 200 child processes, it will hog all your resoures ESPECIALLY cpu */
+export async function willRunChildLogToFile(
+    command: string,
+    args: string[],
+    logPath: string,
+) {
+    console.log(command + ' ' + args.join(' '));
+
+    const logFileStream = await willCreateAndOpenWriteStream(logPath);
+
+    const options: SpawnOptions = {
+        detached: false,
+        cwd: process.cwd(),
+        shell: false,
+        env: process.env,
+        windowsHide: true,
+        windowsVerbatimArguments: true,
+        stdio: ['inherit', logFileStream, logFileStream],
+    };
+
+    const child = spawn(command, args, options);
+
+    const onceDone = new Promise<
+        | { kind: 'error', err: any }
+        | { kind: 'exit'; code: number | null }
+    >(resolve => {
+        child.on('error', err => {
+            logFileStream.close();
+            resolve(fix({ kind: 'error', err }));
+        });
+        child.on('close', code => {
+            logFileStream.close();
+            resolve(fix({ kind: 'exit', code }));
+        });
+    });
+    return { child, onceDone };
 }
 
 export function setoffKillingProcess(pid: number): void {

@@ -183,12 +183,12 @@ export function fsCheckIfFileOrNone(path: string) {
     if (pathExists.isBad) return pathExists;
     const args = { path } as const;
     if (!pathExists.isThere) {
-         return fix({ ...args, ...ok, kind: 'path-does-not-exist-but-its-ok', isThere: false, why: pathExists });
+        return fix({ ...args, ...ok, kind: 'path-does-not-exist-but-its-ok', isThere: false, why: pathExists });
     }
     const pathStats = fsStat(pathExists);
     if (pathStats.isBad) return pathStats;
     if (!pathStats.isFile) return fix({ ...args, ...bad, kind: 'path-exists-but-not-file', why: pathStats });
-    return {...pathStats, isThere: true };
+    return { ...pathStats, isThere: true };
 }
 
 export function readJsonFileAs<T>(path: string) {
@@ -254,4 +254,13 @@ export function fsCheckIfExists<Path extends string>(path: AsExists extends Path
     } catch (err: any) {
         return fix({ path, ...bad, kind: 'unable-to-check-path-existence', why: { kind: 'unexpected-error', err } });
     }
+}
+
+export function willCreateAndOpenWriteStream(path: string, options: BufferEncoding | Parameters<typeof fs.createWriteStream>[1] = {}) {
+    const stream = fs.createWriteStream(path, options);
+    return new Promise<fs.WriteStream>((resolve, reject) => {
+
+        stream.on('open', () => resolve(stream));
+        stream.on('error', reject);
+    });
 }
