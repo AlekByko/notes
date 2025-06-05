@@ -1,6 +1,7 @@
 import * as fs from 'fs';
-import { alwaysNull, broke, fail, isDefined, isUndefined, same } from '../shared/core';
+import { alwaysNull, broke, fail, fix, isDefined, isUndefined, same } from '../shared/core';
 import { capturedFrom, chokedFrom, readRegOver, wholeThing } from '../shared/reading-basics';
+import { makeBytes, withBytesRead } from '../shared/reading-bytes';
 import { readLoopOver } from '../shared/reading-loop';
 import { OptionsReader } from '../shared/reading-options';
 import { SequenceReader } from '../shared/reading-sequence';
@@ -299,6 +300,7 @@ class ReadingCli<Result = {}> {
         return this as any;
     }
 
+
     integerFore<Arg extends string, Name extends string | undefined = undefined>(arg: Arg, name?: Name): ReadingCli<{
         [P in (Name extends undefined ? Arg : Name) | keyof Result]: P extends keyof Result ? Result[P] : number;
     }> {
@@ -307,6 +309,28 @@ class ReadingCli<Result = {}> {
             return { ...result, [isDefined(name) ? name : arg]: value };
         }
         this.all.push(readIntegerFore);
+        return this as any;
+    }
+
+    bytesFore<Arg extends string, Name extends string | undefined = undefined>(arg: Arg, name?: Name): ReadingCli<{
+        [P in (Name extends undefined ? Arg : Name) | keyof Result]: P extends keyof Result ? Result[P] : number;
+    }> {
+        const readBytesFore = (result: any, cliArgs: CliArgs) => {
+            const text = readingArgsOfString.readStrFore(arg, cliArgs, undefined);
+            const xxx = withBytesRead(
+                text,
+                (value, unit) => fix({ isOk: true, bytes: makeBytes(value, unit) }),
+                (reason, text) => fix({ isOk: false, reason, text }),
+            );
+            if (!xxx.isOk) {
+                const { reason, text } = xxx;
+                console.log(`Bad argument: ${arg}. Not a byte: ${text}, ${reason}.`);
+                throw noLuckWithArgs;
+            }
+            const { bytes } = xxx;
+            return { ...result, [isDefined(name) ? name : arg]: bytes };
+        }
+        this.all.push(readBytesFore);
         return this as any;
     }
 
