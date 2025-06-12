@@ -20,3 +20,13 @@ export async function willReadJsonFromFileHandle<T = any>(handle: FileSystemFile
     const obj = JSON.parse(json);
     return obj as T;
 }
+
+
+export function parseJsonOr<Or>(text: string, or: Or) {
+    try {
+        return JSON.parse(text);
+    }
+    catch {
+        return or;
+    }
+}

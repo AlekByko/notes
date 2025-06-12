@@ -167,6 +167,13 @@ export async function willGetFileHandleOr<Or>(dir: FileSystemDirectoryHandle, na
         return or;
     }
 }
+export async function willGetDirHandleOr<Or>(dir: FileSystemDirectoryHandle, name: string, or: Or) {
+    try {
+        return await dir.getDirectoryHandle(name);
+    } catch {
+        return or;
+    }
+}
 
 export async function willReadAllFileHandles(dir: FileSystemDirectoryHandle) {
     const files: FileSystemFileHandle[] = [];
