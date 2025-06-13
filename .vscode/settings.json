@@ -39,5 +39,7 @@
         "typescript",
         "typescriptreact"
     ],
-    "workbench.colorTheme": "Default Light+"
+    "workbench.colorTheme": "Default Light+",
+    "editor.indentSize": 4,
+    "editor.autoIndent": "none"
 }
