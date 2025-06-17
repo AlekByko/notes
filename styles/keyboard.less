@@ -1,18 +1,16 @@
-* {
-    box-sizing: border-box;
-}
-
-body {
-    background: #f7f7f7;
-    font-family: sans-serif;
-    padding: 40px;
-}
-
 .keyboard-wrapper {
     display: flex;
     gap: 30px;
     align-items: stretch;
     justify-content: center;
+    background: #f7f7f7;
+    font-family: sans-serif;
+    padding: 40px;
+
+    * {
+        box-sizing: border-box;
+    }
+
 }
 
 .keyboard {
@@ -53,7 +51,7 @@ body {
 }
 
 .gap {
-    width: 12px;
+    flex: 0.5;
 }
 
 .side-stack {

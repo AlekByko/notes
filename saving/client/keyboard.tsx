@@ -9,17 +9,17 @@ export class Keyboard extends React.Component {
                 <div className="keyboard">
                     <div className="row">
                         <div className="key">Esc</div>
-                        <div className="gap"></div>
+                        <div className="gap" style={{flex: 1.0}}></div>
                         <div className="key">F1</div>
                         <div className="key">F2</div>
                         <div className="key">F3</div>
                         <div className="key">F4</div>
-                        <div className="gap"></div>
+                        <div className="gap" style={{flex: 0.5}}></div>
                         <div className="key">F5</div>
                         <div className="key">F6</div>
                         <div className="key">F7</div>
                         <div className="key">F8</div>
-                        <div className="gap"></div>
+                        <div className="gap" style={{flex: 0.5}}></div>
                         <div className="key">F9</div>
                         <div className="key">F10</div>
                         <div className="key">F11</div>
