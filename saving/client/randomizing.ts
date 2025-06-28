@@ -12,5 +12,5 @@ function prng(n: number) {
     n = n ^ (n >>> 4);
     n = n * 0x27d4eb2d;
     n = n ^ (n >>> 15);
-    return (n >>> 0) / 0xFFFFFFFF;
+    return (n >>> 0);
 }

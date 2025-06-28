@@ -156,6 +156,18 @@ export function compareRandom(): number {
 export function compareStrings(one: string, another: string): number {
     return one > another ? 1 : another > one ? -1 : 0;
 }
+
+export function compareOverBooleanOf<T>(
+    sign: number, booleanOf: (x: T) => boolean,
+) {
+    const compareBooleans = compareBooleansOverWhatComesFirstAndSign('true', sign);
+    return function compareCammersByPinned(one: T, another: T): number {
+        const isOnePinned = booleanOf(one);
+        const isAnotherPinned = booleanOf(another);
+        return compareBooleans(isOnePinned, isAnotherPinned);
+    };
+}
+
 export function compareBooleansOverWhatComesFirstAndSign(whatComesFirst: 'true' | 'false', sign: number) {
     return function compareBooleansUnder(isOne: boolean, isAnother: boolean) {
         return compareBooleans(isOne, isAnother, whatComesFirst) * sign;

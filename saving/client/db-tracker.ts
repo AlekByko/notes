@@ -1,5 +1,6 @@
 import { fail, isUndefined, same } from '../shared/core';
 import { Timestamp, toTimestamp } from '../shared/time-stamping';
+import { ReadOnlyTracker } from './readonly-tracker';
 
 export function thusDbTracker<Config, Key extends string, Context>(
     delay: number,
@@ -8,7 +9,7 @@ export function thusDbTracker<Config, Key extends string, Context>(
     willPull: (context: Context, key: Key[]) => Promise<Config[]>,
     willSave: (context: Context, configs: Config[]) => Promise<void>,
 ) {
-    return class DbTracker {
+    return class DbTracker implements ReadOnlyTracker<Config, Key> {
         private dirty = new Set<Key>();
         private all = new Map<Key, Config>();
 
