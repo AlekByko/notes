@@ -141,7 +141,7 @@ export function compareOver<T>(
     compares: Compare<T>[],
 ) {
     return function compare(one: T, another: T) {
-        for (let index = 0; index < compares.length; index ++) {
+        for (let index = 0; index < compares.length; index++) {
             const compare = compares[index];
             const compared = compare(one, another);
             if (compared < 0 || compared > 0) return compared;
@@ -156,29 +156,75 @@ export function compareRandom(): number {
 export function compareStrings(one: string, another: string): number {
     return one > another ? 1 : another > one ? -1 : 0;
 }
-export function compareBooleans(isOne: boolean, isAnother: boolean): number {
-    return isOne
-        ? isAnother
-            ? 0
-            : 1
-        : isAnother
-            ? -1
-            : 0;
+export function compareBooleansOverWhatComesFirstAndSign(whatComesFirst: 'true' | 'false', sign: number) {
+    return function compareBooleansUnder(isOne: boolean, isAnother: boolean) {
+        return compareBooleans(isOne, isAnother, whatComesFirst) * sign;
+    };
+}
+export function compareBooleans(isOne: boolean, isAnother: boolean, whatComesFirst: 'true' | 'false'): number {
+    switch (whatComesFirst) {
+        case 'true': {
+            return isOne
+                ? isAnother
+                    ? 0
+                    : -1 // one true, another false, one is lighter, it comes first
+                : isAnother
+                    ? 1 // one false, another true, one is havier, it comes last
+                    : 0;
+        }
+        case 'false': {
+            return isOne
+                ? isAnother
+                    ? 0
+                    : 1 // one true, another false, one is havier, it comes last
+                : isAnother
+                    ? -1 // one false, another true, one is lighter, it comes first
+                    : 0;
+        }
+        default: return broke(whatComesFirst);
+    }
+}
+export function compareNumbersOverSign(sign: number) {
+    return function compareNumbers<N extends number>(one: N, another: N): number {
+        return (one - another) * sign;
+    };
 }
 export function compareNumbers<N extends number>(one: N, another: N): number {
     return one - another;
 }
 
-export function compareUndefinables<T extends LikeUndefined<T>>(
-    one: T, another: T, compare: Compare<Exclude<T, undefined>>,
+export function compareUndefinablesDefaulted<T extends LikeUndefined<T>>(
+    one: T, another: T, defaulted: T, compare: Compare<Exclude<T, undefined>>
 ): number {
-    return isUndefined(one)
-        ? isUndefined(another)
-            ? 0
-            : -1
-        : isUndefined(another)
-            ? 1
-            : compare(one, another);
+    const oneDefaulted = asDefinedOr(one, defaulted);
+    const anotheDefaulted = asDefinedOr(another, defaulted);
+    return compare(oneDefaulted, anotheDefaulted);
+}
+export function compareUndefinables<T extends LikeUndefined<T>>(
+    one: T, another: T, whatComeFirst: 'undefined' | 'defined', compare: Compare<Exclude<T, undefined>>
+): number {
+    switch (whatComeFirst) {
+        case 'undefined': {
+            return isUndefined(one)
+                ? isUndefined(another)
+                    ? 0 // both undefined
+                    : -1 // one undefined another defined
+                : isUndefined(another)
+                    ? 1 // one defined another undefined
+                    : compare(one, another);
+        }
+        case 'defined': {
+            return isUndefined(one)
+                ? isUndefined(another)
+                    ? 0 // both undefined
+                    : 1 // one undefined another not
+                : isUndefined(another)
+                    ? -1 // one defined another not
+                    : compare(one, another);
+
+        }
+        default: return broke(whatComeFirst);
+    }
 }
 
 export function compareNullables<T extends LikeNull<T>>(
