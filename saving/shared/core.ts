@@ -200,6 +200,9 @@ export function compareUndefinablesDefaulted<T extends LikeUndefined<T>>(
     const anotheDefaulted = asDefinedOr(another, defaulted);
     return compare(oneDefaulted, anotheDefaulted);
 }
+
+
+
 export function compareUndefinables<T extends LikeUndefined<T>>(
     one: T, another: T, whatComeFirst: 'undefined' | 'defined', compare: Compare<Exclude<T, undefined>>
 ): number {
@@ -585,3 +588,4 @@ export function sureNonNull<T>(x: T | null, unto: string): asserts x is T & {} {
     }
     return fail(message);
 }
+
