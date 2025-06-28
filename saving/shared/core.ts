@@ -134,6 +134,22 @@ export function compareViaOver<T, U>(of: (value: T) => U, compare: (one: U, anot
         return compared;
     };
 }
+
+
+
+export function compareOver<T>(
+    compares: Compare<T>[],
+) {
+    return function compare(one: T, another: T) {
+        for (let index = 0; index < compares.length; index ++) {
+            const compare = compares[index];
+            const compared = compare(one, another);
+            if (compared < 0 || compared > 0) return compared;
+        }
+        return 0;
+    }
+}
+
 export function compareRandom(): number {
     return Math.random() - 0.5;
 }
