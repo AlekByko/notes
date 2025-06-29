@@ -1,88 +1,153 @@
 import * as React from 'react';
+import { DragEventHandler } from 'react';
 import ReactDOM from 'react-dom';
-import { broke, isNull } from '../shared/core';
+import { areStringsEqual, broke, isNull } from '../shared/core';
 import { addClassIfDefined } from './reacting';
 
-export function thusReorderList() {
+
+export interface ReorderListProps<Item> {
+    items: Item[];
+}
+
+export function thusReorderList<Item>(
+    defaults: {
+        keyOf: (item: Item) => string;
+        nameOf: (item: Item) => string;
+    }
+) {
+
+    type HoldingPlace = 'top' | 'bottom';
+
+    interface Hovered { key: string; where: HoldingPlace; }
 
     interface State {
-        items: string[];
+        items: Item[];
         draggedKey: string | null;
-        hover: { key: string; where: 'top' | 'bottom' } | null;
+        hovered: Hovered | null;
     }
 
-    function makeState(): State {
-        return { items: ['a', 'b', 'c'], draggedKey: null, hover: null };
+    function makeState(props: Props): State {
+        const { items } = props;
+        return { items, draggedKey: null, hovered: null };
     }
 
-    return class ReorderList extends React.Component<{}, State> {
-        state = makeState();
+    type Props = ReorderListProps<Item>;
+
+    return class ReorderList extends React.Component<Props, State> {
+
+        static Props: Props;
+
+        state = makeState(this.props);
+
+        whenDragLeave: DragEventHandler<HTMLDivElement> = e => {
+            const isStillInside = (e.relatedTarget as HTMLElement)?.closest('.reorder-list-item');
+            if (!isStillInside) {
+                this.setState({ hovered: null });
+            }
+        };
+
+        whenDrop: DragEventHandler<HTMLDivElement> = _e => {
+            const { draggedKey, hovered, items } = this.state;
+            if (isNull(draggedKey)) return;
+            if (isNull(hovered)) return;
+            const draggedAt = items.findIndex(item => areStringsEqual(defaults.keyOf(item), draggedKey));
+            if (draggedAt < 0) return;
+            let holdingAt = items.findIndex(x => areStringsEqual(defaults.keyOf(x), hovered.key));
+            if (holdingAt < 0) return;
+            switch (hovered.where) {
+                case 'top': break;
+                case 'bottom': holdingAt += 1; break;
+                default: return broke(hovered.where);
+            }
+            const dragged = items[draggedAt];
+            items.splice(draggedAt, 1);
+            items.splice(holdingAt > draggedAt ? holdingAt - 1 : holdingAt, 0, dragged);
+        };
+
+        whenDragOver: DragEventHandler<HTMLDivElement> = e => {
+            e.preventDefault();
+            const key = e.currentTarget.getAttribute('data-key');
+            if (isNull(key)) return;
+            const { clientY } = e;
+            const { top, height } = e.currentTarget.getBoundingClientRect();
+            const midY = top + height / 2;
+            let where;
+            if (clientY > midY) {
+                where = 'bottom' as const;
+            } else {
+                where = 'top' as const;
+            }
+            this.setState({ hovered: { key, where } });
+        };
+
+        whenDragEnd: DragEventHandler<HTMLDivElement> = _e => {
+            this.setState({ draggedKey: null, hovered: null });
+        };
+
+        whenDragStart: DragEventHandler<HTMLDivElement> = e => {
+            const key = e.currentTarget.getAttribute('data-key');
+            if (isNull(key)) return;
+            this.setState({ draggedKey: key });
+        };
+
         render() {
-            const { items, draggedKey, hover } = this.state;
+            const { items, draggedKey, hovered } = this.state;
             return <div className="reorder-list">
-                {items.map(key => {
-                    const isDragged = draggedKey === key;
-                    const className = isNull(hover)
-                        ? undefined
-                        : hover.key !== key || hover.key === draggedKey
-                            ? undefined
-                            : 'as-holding-place-' + hover.where;
+                {items.map(item => {
+                    const key = defaults.keyOf(item);
+                    const draggedClass = draggedKey === key ? 'as-dragged' : undefined;
+                    const hoveredClass = seeWhatHoveredClassIs(hovered, key, draggedKey);
+                    const name = defaults.nameOf(item);
                     return <div
                         key={key}
-                        className={"reorder-list-item" + addClassIfDefined(className)}
+                        className={"reorder-list-item" + addClassIfDefined(draggedClass) + addClassIfDefined(hoveredClass)}
                         draggable
                         data-key={key}
-                        onDragStart={_e => {
-                            this.setState({ draggedKey: key });
-                        }}
-                        onDragEnd={_e => {
-                            this.setState({ draggedKey: null, hover: null });
-                        }}
-                        onDragOver={e => {
-                            e.preventDefault();
-                            const { clientY } = e;
-                            const { top, height } = e.currentTarget.getBoundingClientRect();
-                            const midY = top + height / 2;
-                            let where;
-                            if (clientY > midY) {
-                                where = 'bottom' as const;
-                            } else {
-                                where = 'top' as const;
-                            }
-                            this.setState({ hover: { key, where } });
-                        }}
-                        onDrop={_e => {
-                            if (isNull(draggedKey)) return;
-                            if (isNull(hover)) return;
-                            const removeAt = items.findIndex(x => x === draggedKey);
-                            if (removeAt < 0) return;
-                            let insertAt = items.findIndex(x => x === hover.key);
-                            if (insertAt < 0) return;
-                            switch(hover.where) {
-                                case 'top': break;
-                                case 'bottom': insertAt += 1; break;
-                                default: return broke(hover.where);
-                            }
-                            items.splice(removeAt, 1);
-                            items.splice(insertAt > removeAt ? insertAt - 1 : insertAt, 0, draggedKey);
-                        }}
-
-                        style={{
-                            opacity: isDragged ? 0 : 1,
-                        }}
-                    ><div className="reorder-list-item-drag-handle"></div> {key}</div>;
+                        onDragStart={this.whenDragStart}
+                        onDragEnd={this.whenDragEnd}
+                        onDragOver={this.whenDragOver}
+                        onDrop={this.whenDrop}
+                        onDragLeave={this.whenDragLeave}
+                    ><div className="reorder-list-item-drag-handle"></div>{name}</div>;
                 })}
             </div>;
         }
     };
+
+    function seeWhatHoveredClassIs(hovered: Hovered | null, key: string, draggedKey: string | null) {
+        if (isNull(hovered)) return undefined;
+        if (hovered.key !== key) return undefined;
+        if (hovered.key === draggedKey) return undefined;
+        const { where } = hovered;
+        switch (where) {
+            case 'top': return 'as-holding-place-at-top';
+            case 'bottom': return 'as-holding-place-at-bottom';
+            default: return broke(where);
+        }
+    }
 }
 
 if (window.sandbox === 'reorder-list') {
-    const ReorderList = thusReorderList();
+
+    interface Item {
+        key: string;
+        name: string;
+    }
+    const ReorderList = thusReorderList({
+        keyOf: (x: Item) => x.key,
+        nameOf: x => x.name,
+    });
 
     class App extends React.Component<{}, {}> {
         render() {
-            return <ReorderList />;
+            const props: typeof ReorderList.Props = {
+                items: [
+                    { key: 'A', name: 'Alpha' },
+                    { key: 'B', name: 'Beta' },
+                    { key: 'C', name: 'Gamma' },
+                ],
+            };
+            return <ReorderList {...props} />;
         }
     }
     const rootElement = document.getElementById('root')!

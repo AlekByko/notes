@@ -7,11 +7,15 @@
     padding: 10px;
     border: solid 1px gray;
 
-    &.as-holding-place-top {
+    &.as-dragged {
+        opacity: 0.1;
+    }
+
+    &.as-holding-place-at-top {
         border-top-width: 4px;
     }
 
-    &.as-holding-place-bottom {
+    &.as-holding-place-at-bottom {
         border-bottom-width: 4px;
 
     }
@@ -27,8 +31,7 @@
     top: 0px;
     bottom: 0px;
 
-    background-image: repeating-linear-gradient(
-            45deg,
+    background-image: repeating-linear-gradient(45deg,
             /* 👈 angle here */
             #999,
             #999 2px,
