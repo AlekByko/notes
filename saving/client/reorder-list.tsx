@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DragEventHandler } from 'react';
 import ReactDOM from 'react-dom';
-import { areStringsEqual, broke, isNull } from '../shared/core';
+import { areStringsEqual, broke, compareRandom, isNull } from '../shared/core';
 import { addClassIfDefined } from './reacting';
 
 
@@ -22,13 +22,14 @@ export function thusReorderList<Item>(
 
     interface State {
         items: Item[];
+        baselineItems: Item[];
         draggedKey: string | null;
         hovered: Hovered | null;
     }
 
     function makeState(props: Props): State {
         const { items } = props;
-        return { items, draggedKey: null, hovered: null };
+        return { items, baselineItems: items, draggedKey: null, hovered: null };
     }
 
     type Props = ReorderListProps<Item>;
@@ -38,6 +39,14 @@ export function thusReorderList<Item>(
         static Props: Props;
 
         state = makeState(this.props);
+
+        static getDerivedStateFromProps(props: Props, state: State): State | null {
+            const { items } = props;
+            if (items !== state.baselineItems) {
+                return { ...state, baselineItems: items, items } satisfies State;
+            }
+            return null;
+        }
 
         whenDragLeave: DragEventHandler<HTMLDivElement> = e => {
             const isStillInside = (e.relatedTarget as HTMLElement)?.closest('.reorder-list-item');
@@ -137,20 +146,36 @@ if (window.sandbox === 'reorder-list') {
         keyOf: (x: Item) => x.key,
         nameOf: x => x.name,
     });
+    interface AppState { items: Item[] }
+    class App extends React.Component<AppState, AppState> {
 
-    class App extends React.Component<{}, {}> {
+        state = this.props;
+
+        componentDidMount(): void {
+            setTimeout(() => {
+                this.setState(state => {
+                    let { items } = state;
+                    items = [...items].sort(compareRandom);
+                    alert('BOOM! rearanged!');
+                    return {...state, items } satisfies AppState;
+                });
+            }, 5000);
+        }
+
         render() {
-            const props: typeof ReorderList.Props = {
-                items: [
-                    { key: 'A', name: 'Alpha' },
-                    { key: 'B', name: 'Beta' },
-                    { key: 'C', name: 'Gamma' },
-                ],
-            };
+            const { items } = this.state;
+            const props: typeof ReorderList.Props = { items };
             return <ReorderList {...props} />;
         }
     }
+
+
     const rootElement = document.getElementById('root')!
-    ReactDOM.render(<App />, rootElement);
+    const items: Item[] = [
+        { key: 'A', name: 'Alpha' },
+        { key: 'B', name: 'Beta' },
+        { key: 'C', name: 'Gamma' },
+    ];
+    ReactDOM.render(<App items={items} />, rootElement);
     rootElement.style.padding = '10px';
 }
