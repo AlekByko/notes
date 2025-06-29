@@ -106,10 +106,11 @@ export function thusReorderList<Item>(
                     const key = defaults.keyOf(item);
                     const draggedClass = draggedKey === key ? 'as-dragged' : undefined;
                     const hoveredClass = seeWhatHoveredClassIs(hovered, key, draggedKey);
+                    const itemClass = 'reorder-list-item' + addClassIfDefined(draggedClass) + addClassIfDefined(hoveredClass);
                     const name = defaults.nameOf(item);
                     return <div
                         key={key}
-                        className={"reorder-list-item" + addClassIfDefined(draggedClass) + addClassIfDefined(hoveredClass)}
+                        className={itemClass}
                         draggable
                         data-key={key}
                         onDragStart={this.whenDragStart}
