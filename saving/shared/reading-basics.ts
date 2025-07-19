@@ -55,7 +55,7 @@ export function readReg<T>(
     if (!regexp.sticky) return fail('Regexp has to be sticky to respect the lastIndex./gy: ' + regexp.source);
     regexp.lastIndex = index;
     const matched = regexp.exec(text);
-    if (isNull(matched)) return chokedFrom(index);
+    if (isNull(matched)) return chokedFrom(index, regexp.source);
     const [all] = matched;
     const parsed = parse(matched);
     return capturedFrom(index + all.length, parsed);
