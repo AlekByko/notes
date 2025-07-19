@@ -131,14 +131,19 @@ export function diagnose<Actual>(
 ): void {
     if (!shouldRun) return;
     const tried = read(text, index);
+    console.log(text);
     if (tried.isBad) {
-        console.log(text);
         console.log(tried);
+        console.log('-2:', text[tried.index - 2]);
+        console.log('-1:', text[tried.index - 1]);
+        console.log('~0:', text[tried.index]);
+        console.log('+1:', text[tried.index + 1]);
+        console.log('+2:', text[tried.index + 2]);
+
         console.log(text.substr(tried.index, 10) + '...');
     } else {
         console.log('passed ' + read.toDebugName());
         console.log(tried);
-        console.log(text);
     }
 }
 
