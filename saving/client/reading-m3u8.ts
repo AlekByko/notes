@@ -26,9 +26,30 @@ function read_m3u8(text: string, index: number) {
     if (br.isBad) return chokedFrom(startIndex, 'br', br);
     index = br.nextIndex;
 
-    const allStreams = scanList(text, index, readExtXSteamInfAndUrl, readBrs);
-    if (allStreams.isBad) return chokedFrom(startIndex, 'stream list', allStreams);
-    return allStreams;
+    return readStreamList(text, startIndex, index);
+}
+
+function readStreamList(text: string, startIndex: number, index: number) {
+    const scanned = scanList(text, index, readExtXSteamInfAndUrl, readBrs);
+    switch (scanned.kind) {
+        case 'captured':
+            return scanned;
+        case 'choked':
+            return chokedFrom(startIndex, 'stream list', scanned);
+        case 'scanned': switch (scanned.subkind) {
+            case 'no-items-scanned': {
+                const { attemptedIndex } = scanned;
+                return capturedFrom(attemptedIndex, []);
+            }
+            case 'few-but-bad-delim':
+            case 'few-but-bad-item': {
+                const { attemptedIndex, fewItemsSofar } = scanned;
+                return capturedFrom(attemptedIndex, fewItemsSofar);
+            }
+            default: return broke(scanned);
+        }
+        default: return broke(scanned);
+    }
 }
 
 function readExtXSteamInfAndUrl(text: string, index: number) {
@@ -57,9 +78,8 @@ function readExtXSteamInf(text: string, index: number) {
     if (prefix.isBad) return chokedFrom(startIndex, 'prefix', prefix);
     index = prefix.nextIndex;
 
-    type X = ReturnType<typeof readExtXStreamInfToken> extends ParsedOrNot<infer M> ? Read<M> : never;
-    const tokens = scanList(text, index, readExtXStreamInfToken as X, readLitOver(','));
-    if (tokens.isBad) return chokedFrom(startIndex, 'tokens', tokens);
+    const tokens = readStreamTokens(text, index);
+    if (tokens.isBad) return chokedFrom(startIndex, 'stream tokens', tokens);
     index = tokens.nextIndex;
 
     const draft: Partial<ExtXSteamInf> = {};
@@ -77,6 +97,23 @@ function readExtXSteamInf(text: string, index: number) {
     if (isUndefined(resolution)) return chokedFrom(startIndex, 'No resolution.');
     const result: ExtXSteamInf = { bandwidth, resolution, codecs };
     return capturedFrom(index, result);
+}
+
+function readStreamTokens(text: string, index: number) {
+    type NoDistributivity = ReturnType<typeof readExtXStreamInfToken> extends ParsedOrNot<infer M> ? Read<M> : never;
+    const tokens = scanList(text, index, readExtXStreamInfToken as NoDistributivity, readLitOver(','));
+    switch (tokens.kind) {
+        case 'choked':
+        case 'captured':
+            return tokens;
+        case 'scanned': switch(tokens.subkind) {
+            case 'few-but-bad-item':
+            case 'few-but-bad-delim': return capturedFrom(tokens.attemptedIndex, tokens.fewItemsSofar);
+            case 'no-items-scanned': return chokedFrom(tokens.attemptedIndex, 'no stream tokens');
+            default: return broke(tokens);
+        }
+        default: return broke(tokens);
+    }
 }
 
 function readBandwidth(text: string, index: number) {
