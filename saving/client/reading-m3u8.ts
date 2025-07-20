@@ -20,11 +20,11 @@ function read_m3u8(text: string, index: number) {
 
     const title = readReg(text, index, /#EXTM3U/y, alwaysNull);
     if (title.isBad) return chokedFrom(startIndex, 'title', title);
-    index = title.index;
+    index = title.nextIndex;
 
     let br = readBrs(text, index);
     if (br.isBad) return chokedFrom(startIndex, 'br', br);
-    index = br.index;
+    index = br.nextIndex;
 
     const allStreams = scanList(text, index, readExtXSteamInfAndUrl, readBrs);
     if (allStreams.isBad) return chokedFrom(startIndex, 'stream list', allStreams);
@@ -37,15 +37,15 @@ function readExtXSteamInfAndUrl(text: string, index: number) {
 
     const tokens = readExtXSteamInf(text, index);
     if (tokens.isBad) return chokedFrom(startIndex, 'STREAM-INF', tokens);
-    index = tokens.index;
+    index = tokens.nextIndex;
 
     let br = readBr(text, index);
     if (br.isBad) return chokedFrom(startIndex, 'br', br);
-    index = br.index;
+    index = br.nextIndex;
 
     const url = readLine(text, index);
     if (url.isBad) return chokedFrom(startIndex, 'URL', url);
-    index = url.index;
+    index = url.nextIndex;
 
     return capturedFrom(index, { ...tokens.value, url: url.value });
 }
@@ -55,12 +55,12 @@ function readExtXSteamInf(text: string, index: number) {
 
     const prefix = readReg(text, index, /#EXT-X-STREAM-INF:/y, x => x);
     if (prefix.isBad) return chokedFrom(startIndex, 'prefix', prefix);
-    index = prefix.index;
+    index = prefix.nextIndex;
 
     type X = ReturnType<typeof readExtXStreamInfToken> extends ParsedOrNot<infer M> ? Read<M> : never;
     const tokens = scanList(text, index, readExtXStreamInfToken as X, readLitOver(','));
     if (tokens.isBad) return chokedFrom(startIndex, 'tokens', tokens);
-    index = tokens.index;
+    index = tokens.nextIndex;
 
     const draft: Partial<ExtXSteamInf> = {};
     for (const token of tokens.value) {
@@ -101,7 +101,7 @@ function readExtXStreamInfToken(text: string, index: number) {
     const regx = /(\w+)=/y;
     const head = readReg(text, index, regx, ([_, textToken]) => textToken);
     if (head.isBad) return head;
-    index = head.index;
+    index = head.nextIndex;
 
     const token = head.value;
     cast<ExtXStreamInfTokenName>(token);
@@ -109,17 +109,17 @@ function readExtXStreamInfToken(text: string, index: number) {
         case 'BANDWIDTH': {
             const bandwidth = readBandwidth(text, index);
             if (bandwidth.isBad) return chokedFrom(startIndex, 'bandwidth', bandwidth);
-            return capturedFrom(bandwidth.index, { kind: 'bandwidth' as const, bandwidth: bandwidth.value });
+            return capturedFrom(bandwidth.nextIndex, { kind: 'bandwidth' as const, bandwidth: bandwidth.value });
         }
         case 'RESOLUTION': {
             const resolution = readResolution(text, index);
             if (resolution.isBad) return chokedFrom(startIndex, 'resolution', resolution);
-            return capturedFrom(resolution.index, { kind: 'resolution' as const, resolution: resolution.value });
+            return capturedFrom(resolution.nextIndex, { kind: 'resolution' as const, resolution: resolution.value });
         }
         case 'CODECS': {
             const codecs = readQuotedString(text, index);
             if (codecs.isBad) return chokedFrom(startIndex, 'codecs', codecs);
-            return capturedFrom(codecs.index, { kind: 'codecs' as const, codecs: codecs.value });
+            return capturedFrom(codecs.nextIndex, { kind: 'codecs' as const, codecs: codecs.value });
         }
         default: return otherwise(token, chokedFrom(startIndex, `Unexpected token: ${token}`));
     }

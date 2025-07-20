@@ -25,13 +25,13 @@ export interface Captured<T = string> {
     kind: 'captured';
     isBad: false;
     isScanned: false;
-    index: number;
+    nextIndex: number;
     value: T;
 }
 
 
-export function capturedFrom<T>(index: number, value: T): Captured<T> {
-    return { kind: 'captured', isBad: false, isScanned: false, index, value };
+export function capturedFrom<T>(nextIndex: number, value: T): Captured<T> {
+    return { kind: 'captured', isBad: false, isScanned: false, nextIndex, value };
 }
 export type Read<T> = (text: string, index: number) => Choked | Captured<T>;
 export function readLitOver<Liteal extends string>(literal: Liteal) {
@@ -60,7 +60,8 @@ export function readReg<T>(
     if (isNull(matched)) return chokedFrom(index, reason);
     const [all] = matched;
     const parsed = parse(matched);
-    return capturedFrom(index + all.length, parsed);
+    const nextIndex = index + all.length;
+    return capturedFrom(nextIndex, parsed);
 }
 
 export function readInto<Value, Result>(
@@ -73,9 +74,9 @@ export function readInto<Value, Result>(
         if (tried1st.isBad) return tried1st;
         const tried2nd = read2nd(tried1st.value, 0);
         if (tried2nd.isBad) return chokedFrom(index);
-        if (tried2nd.index < tried1st.value.length) return chokedFrom(index);
+        if (tried2nd.nextIndex < tried1st.value.length) return chokedFrom(index);
         const result = add(tried1st.value, tried2nd.value);
-        return capturedFrom(tried1st.index, result);
+        return capturedFrom(tried1st.nextIndex, result);
     }
     readAfter.debugName = read1st.toDebugName + '~>' + read2nd.toDebugName();
     return readAfter;
@@ -101,7 +102,7 @@ export function parseOver<T, U>(
         if (tried.isBad) return tried;
         const parsed = parse(tried.value);
         if (parsed === unparsed) return chokedFrom(index);
-        return capturedFrom(tried.index, parsed);
+        return capturedFrom(tried.nextIndex, parsed);
     };
     parseUnder.debugName = read.toDebugName() + '->' + parse.toDebugName();
     return parseUnder;
@@ -143,7 +144,7 @@ export function diagnose<Actual>(
         dumpAt(text, least.index, +1);
         dumpAt(text, least.index, +2);
 
-    console.log(text.substr(tried.index, 10) + '...');
+        console.log(text.substr(tried.index, 10) + '...');
     } else {
         console.log('passed ' + read.toDebugName());
         console.log(tried);

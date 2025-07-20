@@ -17,15 +17,15 @@ export function readIf<Seen, Thened, Elseed, SeenThened, SeenElsed>(
             return chokedFrom(elsed.index);
         } else {
             const had = haveElsed(elsed.value);
-            return capturedFrom(elsed.index, had);
+            return capturedFrom(elsed.nextIndex, had);
         }
     } else {
-        const thened = readThen(text, seen.index);
+        const thened = readThen(text, seen.nextIndex);
         if (thened.isBad) {
             return chokedFrom(thened.index);
         } else {
             const had = haveThen(seen.value, thened.value);
-            return capturedFrom(thened.index, had);
+            return capturedFrom(thened.nextIndex, had);
         }
     }
 }

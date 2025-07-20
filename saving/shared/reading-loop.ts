@@ -15,8 +15,8 @@ export function readLoopOver<T, R>(
         const first = read(text, start);
         if (first.isBad) return first;
 
-        let pastLastIndex = first.index;
-        let index = first.index;
+        let pastLastIndex = first.nextIndex;
+        let index = first.nextIndex;
 
         let result = makeResult(first.value);
         let times = 1;
@@ -27,14 +27,14 @@ export function readLoopOver<T, R>(
                 if (times < min) return delim;
                 return capturedFrom(pastLastIndex, result);
             } else {
-                index = delim.index;
+                index = delim.nextIndex;
             }
             const next = read(text, index);
             if (next.isBad) {
                 if (times < min) return next;
                 return capturedFrom(pastLastIndex, result);
             } else {
-                pastLastIndex = index = next.index;
+                pastLastIndex = index = next.nextIndex;
                 result = add(result, next.value);
             }
 

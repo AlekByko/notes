@@ -56,7 +56,7 @@ export class SequenceReader<OlderResult> {
                     return newer;
                 }
                 older = add(older, newer.value);
-                index = newer.index;
+                index = newer.nextIndex;
             }
             const final = finish(older as any);
             // console.log(final);
