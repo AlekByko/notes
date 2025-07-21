@@ -136,14 +136,15 @@ function readExtXSteamInf(text: string, index: number) {
             case 'frame-rate': draft.frameRate = token.frameRate; break;
             case 'closed-captions': draft.closedCaptions = token.closedCaptions; break;
             case 'name': draft.name = token.name; break;
+            case 'language': draft.language = token.language; break;
             default: return broke(token);
         }
     }
 
-    const { bandwidth, resolution, codecs } = draft;
-    if (isUndefined(bandwidth)) return chokedFrom(startIndex, 'No bandwidth.');
-    if (isUndefined(resolution)) return chokedFrom(startIndex, 'No resolution.');
-    const result: ExtXSteamInf = { bandwidth, resolution, codecs };
+    const { bandwidth, resolution, codecs, frameRate, closedCaptions, language, name } = draft;
+    if (isUndefined(bandwidth)) return chokedFrom(startIndex, 'no bandwidth');
+    if (isUndefined(resolution)) return chokedFrom(startIndex, 'no resolution');
+    const result: ExtXSteamInf = { bandwidth, resolution, codecs, frameRate, closedCaptions, language, name };
     return capturedFrom(index, result);
 }
 
@@ -239,7 +240,7 @@ function readExtXStreamInfTokenList(text: string, index: number) {
     return tokens;
 }
 
-type ExtXStreamInfTokenName = 'RESOLUTION' | 'BANDWIDTH' | 'CODECS' | 'FRAME-RATE' | 'CLOSED-CAPTIONS' | 'NAME';
+type ExtXStreamInfTokenName = 'RESOLUTION' | 'BANDWIDTH' | 'CODECS' | 'FRAME-RATE' | 'CLOSED-CAPTIONS' | 'NAME' | 'LANGUAGE';
 function readExtXStreamInfToken(text: string, index: number) {
     const startIndex = index;
 
@@ -286,6 +287,11 @@ function readExtXStreamInfToken(text: string, index: number) {
             const name = readQuotedString(text, index);
             if (name.isBad) return chokedFrom(startIndex, 'name', name);
             return capturedFrom(name.nextIndex, { kind: 'name' as const, name: name.value });
+        }
+        case 'LANGUAGE': {
+            const language = readQuotedString(text, index);
+            if (language.isBad) return chokedFrom(startIndex, 'language', language);
+            return capturedFrom(language.nextIndex, { kind: 'language' as const, language: language.value });
         }
         default: return otherwise(token, chokedFrom(startIndex, `Unexpected token: ${token}`));
     }
