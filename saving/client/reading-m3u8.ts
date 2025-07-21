@@ -2,7 +2,7 @@ import { alwaysNull, broke, cast, isUndefined, otherwise } from '../shared/core'
 import { at1st, atFull, capturedFrom, chokedFrom, diagnose, ParsedOrNot, Read, readLitOver, readReg } from '../shared/reading-basics';
 import { readQuotedString } from '../shared/reading-quoted-string';
 import { scanList } from '../shared/scanning-list';
-import { ExtTag, ExtXMedia, ExtXSteamInf, M3U8 } from './m3u8';
+import { ExtXMedia, ExtXSteamInf, M3U8 } from './m3u8';
 
 
 function readLine(text: string, index: number) {
@@ -50,6 +50,7 @@ function read_m3u8(text: string, index: number) {
     return capturedFrom(index, result);
 }
 
+type ExtTag = '#EXT-X-STREAM-INF' | '#EXT-X-MEDIA' | '#EXT-X-VERSION';
 function readTagBlock(text: string, index: number) {
     const startIndex = index;
     const name = readTagName(text, index);
@@ -132,6 +133,9 @@ function readExtXSteamInf(text: string, index: number) {
             case 'bandwidth': draft.bandwidth = token.bandwidth; break;
             case 'codecs': draft.codecs = token.codecs; break;
             case 'resolution': draft.resolution = token.resolution; break;
+            case 'frame-rate': draft.frameRate = token.frameRate; break;
+            case 'closed-captions': draft.closedCaptions = token.closedCaptions; break;
+            case 'name': draft.name = token.name; break;
             default: return broke(token);
         }
     }
@@ -257,11 +261,11 @@ function readExtXStreamInfTokenList(text: string, index: number) {
     }
 }
 
-type ExtXStreamInfTokenName = 'RESOLUTION' | 'BANDWIDTH' | 'CODECS';
+type ExtXStreamInfTokenName = 'RESOLUTION' | 'BANDWIDTH' | 'CODECS' | 'FRAME-RATE' | 'CLOSED-CAPTIONS' | 'NAME';
 function readExtXStreamInfToken(text: string, index: number) {
     const startIndex = index;
 
-    const head = readReg(text, index, /(\w+)=/y, ([_, textToken]) => textToken);
+    const head = readReg(text, index, /([-\w]+)=/y, ([_, textToken]) => textToken);
     if (head.isBad) return head;
     index = head.nextIndex;
 
@@ -290,6 +294,21 @@ function readExtXStreamInfToken(text: string, index: number) {
             if (codecs.isBad) return chokedFrom(startIndex, 'codecs', codecs);
             return capturedFrom(codecs.nextIndex, { kind: 'codecs' as const, codecs: codecs.value });
         }
+        case 'FRAME-RATE': {
+            const frameRate = readReg(text, index, /\d+(\.\d+)/y, atFull);
+            if (frameRate.isBad) return chokedFrom(startIndex, 'frame-rate', frameRate);
+            return capturedFrom(frameRate.nextIndex, { kind: 'frame-rate' as const, frameRate: frameRate.value });
+        }
+        case 'CLOSED-CAPTIONS': {
+            const closedCaptions = readReg(text, index, /\w+/y, atFull);
+            if (closedCaptions.isBad) return chokedFrom(startIndex, 'closed-captions', closedCaptions);
+            return capturedFrom(closedCaptions.nextIndex, { kind: 'closed-captions' as const, closedCaptions: closedCaptions.value });
+        }
+        case 'NAME': {
+            const name = readQuotedString(text, index);
+            if (name.isBad) return chokedFrom(startIndex, 'name', name);
+            return capturedFrom(name.nextIndex, { kind: 'name' as const, name: name.value });
+        }
         default: return otherwise(token, chokedFrom(startIndex, `Unexpected token: ${token}`));
     }
 }
@@ -316,7 +335,7 @@ https://cdn.example.com/480p/index.m3u8
 #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",NAME="English",URI="audio_eng.m3u8"
 `;
         text = text.trim();
-        diagnose(read_m3u8, text, 0, true);
+        diagnose(read_m3u8, text, 0, false);
     }
 
     {
