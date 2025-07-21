@@ -1,8 +1,8 @@
 import { alwaysNull, broke, cast, isUndefined, otherwise } from '../shared/core';
-import { atFull, capturedFrom, chokedFrom, diagnose, ParsedOrNot, Read, readLitOver, readReg } from '../shared/reading-basics';
+import { at1st, atFull, capturedFrom, chokedFrom, diagnose, ParsedOrNot, Read, readLitOver, readReg } from '../shared/reading-basics';
 import { readQuotedString } from '../shared/reading-quoted-string';
 import { scanList } from '../shared/scanning-list';
-import { ExtXMedia, ExtXSteamInf, M3U8 } from './m3u8';
+import { ExtTag, ExtXMedia, ExtXSteamInf, M3U8 } from './m3u8';
 
 
 function readLine(text: string, index: number) {
@@ -22,45 +22,50 @@ function read_m3u8(text: string, index: number) {
     if (title.isBad) return chokedFrom(startIndex, 'title', title);
     index = title.nextIndex;
 
-    let br = readBrs(text, index);
-    if (br.isBad) return chokedFrom(startIndex, 'br', br);
-    index = br.nextIndex;
+    const draft: Partial<M3U8> = {};
+    draft.streams = [];
+    while (true) {
+        const br = readBrs(text, index);
+        if (br.isBad) break;
+        index = br.nextIndex;
 
-    const streams = readStreamList(text, startIndex, index);
-    if (streams.isBad) return chokedFrom(startIndex, 'streams', streams);
-    index = streams.nextIndex;
+        if (index >= text.length) break;
 
-    const media = readExtXMedia(text, index);
-    if (media.isBad) return chokedFrom(startIndex, 'media', media);
-    index = media.nextIndex;
+        const parsed = readExtTag(text, index);
+        if (parsed.isBad) break;
+        index = parsed.nextIndex;
 
-    const result: M3U8 = {
-        streams: streams.value,
-        media: media.value,
-    };
+        const tag = parsed.value;
+        switch (tag.kind) {
+            case 'media': draft.media = tag.media; break;
+            case 'stream': draft.streams.push(tag.stream); break;
+            default: return broke(tag);
+        }
+    }
+    const { media, streams } = draft;
+    const result: M3U8 = { streams, media };
     return capturedFrom(index, result);
 }
 
-function readStreamList(text: string, startIndex: number, index: number) {
-    const scanned = scanList(text, index, readExtXSteamInfAndUrl, readBrs);
-    switch (scanned.kind) {
-        case 'captured':
-            return scanned;
-        case 'choked':
-            return chokedFrom(startIndex, 'stream list', scanned);
-        case 'scanned': switch (scanned.subkind) {
-            case 'no-items-scanned': {
-                const { attemptedIndex } = scanned;
-                return capturedFrom(attemptedIndex, []);
-            }
-            case 'few-but-bad-delim':
-            case 'few-but-bad-item': {
-                const { attemptedIndex, fewItemsSofar } = scanned;
-                return capturedFrom(attemptedIndex, fewItemsSofar);
-            }
-            default: return broke(scanned);
+function readExtTag(text: string, index: number) {
+    const startIndex = index;
+    const tag = readReg(text, index, /(#EXT-X[\w+-]+):/y, at1st);
+    if (tag.isBad) return chokedFrom(startIndex, 'tag', tag);
+    index = tag.nextIndex;
+    const name = tag.value;
+    cast<ExtTag>(name);
+    switch (name) {
+        case '#EXT-X-MEDIA': {
+            const media = readExtXMedia(text, startIndex);
+            if (media.isBad) return chokedFrom(startIndex, 'media', media);
+            return capturedFrom(media.nextIndex, { kind: 'media' as const, media: media.value });
         }
-        default: return broke(scanned);
+        case '#EXT-X-STREAM-INF': {
+            const stream = readExtXSteamInfAndUrl(text, startIndex);
+            if (stream.isBad) return chokedFrom(startIndex, 'stream', stream);
+            return capturedFrom(stream.nextIndex, { kind: 'stream' as const, stream: stream.value });
+        }
+        default: return otherwise(name, chokedFrom(startIndex, `Unknown tag: ${tag}`));
     }
 }
 
@@ -273,8 +278,13 @@ https://cdn.example.com/480p/index.m3u8
     }
 
     {
-        // const text = `#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=640x360,CODECS="avc1.4d401f,mp4a.40.2"`;
-        // diagnose(readExtXSteamInf, text, 0, true);
+        let text = `#EXTM3U
+#EXT-X-VERSION:6
+#EXT-X-MOUFLON:PSCH:v1:Zokee2OhPh9kugh4
+#EXT-X-STREAM-INF:BANDWIDTH=1766195,CODECS="avc1.64001f,mp4a.40.2",RESOLUTION=720x960,FRAME-RATE=30.000,CLOSED-CAPTIONS=NONE,NAME="source"
+https://media-hls.doppiocdn.com/b-hls-14/84207531/84207531.m3u8
+`;
+        diagnose(read_m3u8, text, 0, true);
     }
 
     {
