@@ -335,7 +335,7 @@ https://cdn.example.com/480p/index.m3u8
 #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",NAME="English",URI="audio_eng.m3u8"
 `;
         text = text.trim();
-        diagnose(read_m3u8, text, 0, false);
+        diagnose(read_m3u8, text, 0, true);
     }
 
     {
@@ -345,10 +345,6 @@ https://cdn.example.com/480p/index.m3u8
 #EXT-X-STREAM-INF:BANDWIDTH=1766195,CODECS="avc1.64001f,mp4a.40.2",RESOLUTION=720x960,FRAME-RATE=30.000,CLOSED-CAPTIONS=NONE,NAME="source"
 https://media-hls.doppiocdn.com/b-hls-14/84207531/84207531.m3u8
 `;
-        diagnose(read_m3u8, text, 0, true);
-    }
-
-    {
-        // diagnose(readLine, `abc\n`, 0, true);
+        diagnose(read_m3u8, text, 0, false);
     }
 }
