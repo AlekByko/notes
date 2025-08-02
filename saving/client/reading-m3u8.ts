@@ -14,7 +14,7 @@ function readBrs(text: string, index: number) {
 function readBr(text: string, index: number) {
     return readReg(text, index, /(\r?\n)/y, alwaysNull);
 }
-function read_m3u8(text: string, index: number) {
+export function readM3U8(text: string, index: number) {
 
     const startIndex = index;
 
@@ -157,7 +157,7 @@ function readExtXSteamInf(text: string, index: number) {
     const { bandwidth, resolution, ...rest } = draft;
     if (isUndefined(bandwidth)) return chokedFrom(startIndex, 'no bandwidth');
     if (isUndefined(resolution)) return chokedFrom(startIndex, 'no resolution');
-    const result: ExtXSteamInf = { bandwidth, resolution, ...rest };
+    const result: ExtXSteamInf = { bandwidth, resolution, ...rest, url: '' };
     return capturedFrom(index, result);
 }
 
@@ -353,7 +353,7 @@ https://cdn.example.com/480p/index.m3u8
 #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",NAME="English",URI="audio_eng.m3u8"
 `;
         text = text.trim();
-        diagnose(read_m3u8, text, 0, false);
+        diagnose(readM3U8, text, 0, false);
     }
 
     {
@@ -363,7 +363,7 @@ https://cdn.example.com/480p/index.m3u8
 #EXT-X-STREAM-INF:BANDWIDTH=1766195,CODECS="avc1.64001f,mp4a.40.2",RESOLUTION=720x960,FRAME-RATE=30.000,CLOSED-CAPTIONS=NONE,NAME="source"
 https://media-hls.doppiocdn.com/b-hls-14/84207531/84207531.m3u8
 `;
-        diagnose(read_m3u8, text, 0, false);
+        diagnose(readM3U8, text, 0, false);
     }
     {
         let text = `#EXTM3U
@@ -375,7 +375,7 @@ chunklist_ra23a4E56jh_session91717477_b1000000.m3u8
 #EXT-X-STREAM-INF:BANDWIDTH=500000,NAME="180p 500kbps",LANGUAGE="en-us",CODECS="avc1.4d400a,mp4a.40.02",RESOLUTION=320x180
 chunklist_rAg0a80ac4F_session91717477_b500000.m3u8
 `;
-        diagnose(read_m3u8, text, 0, false);
+        diagnose(readM3U8, text, 0, false);
     }
     {
         let text = `#EXTM3U
@@ -385,7 +385,7 @@ https://streaming-edge-front.livemediahost.com/edge2-cad/cam_obs/rocket-bunnyy-f
 #EXT-X-STREAM-INF:AVERAGE-BANDWIDTH=340000,BANDWIDTH=420000,RESOLUTION=426x240,FRAME-RATE=30.000,CODECS="avc1.42c01f,mp4a.40.2",CLOSED-CAPTIONS=NONE
 https://streaming-edge-front.livemediahost.com/edge2-cad/cam_obs/rocket-bunnyy-flu_v1/tracks-v1a2/index.ll.m3u8?filter.tracks=v4v3v2v1a1a2&multitrack=true&token=eyJpdiI6IkpJZGJGcHZwSlJZaHltenhhTXpJZ2c9PSIsInZhbHVlIjoiaFRPMzBuYkpuXC9uWmt1Mm90RGFPM1E9PSIsIm1hYyI6IjI3ZjgzYmU3ZWE0ZjRkMmY2Nzk3ZjNhNDgwZGYwMWE2OGZiY2U3ZWE0NzhhNjU2ZDFjZWUxNjdiMWUxNjI2NTEifQ%3D%3D
 `;
-        diagnose(read_m3u8, text, 0, true);
+        diagnose(readM3U8, text, 0, true);
     }
     /*
         {
