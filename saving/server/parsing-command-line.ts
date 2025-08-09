@@ -1,10 +1,11 @@
 import * as fs from 'fs';
-import { alwaysNull, broke, fail, fix, isDefined, isUndefined, same } from '../shared/core';
+import { alwaysNull, broke, fail, fix, isDefined, isUndefined, keysOf, same } from '../shared/core';
 import { capturedFrom, chokedFrom, readRegOver, wholeThing } from '../shared/reading-basics';
 import { makeBytes, withBytesRead } from '../shared/reading-bytes';
 import { readLoopOver } from '../shared/reading-loop';
 import { OptionsReader } from '../shared/reading-options';
 import { SequenceReader } from '../shared/reading-sequence';
+import { LikeCliParams, noLuckWithArgs, TypeOfCliParam } from '../shared/structuring-cli';
 import { readJsonFileAs } from './disking';
 
 const readNonWhitespace = readRegOver(/[^\s]+/y, wholeThing);
@@ -64,7 +65,7 @@ export const readCliArgs = readLoopOver<{}, CliArgs>(
     1, 40,
 );
 
-export const noLuckWithArgs = Symbol('no-luck-with-args');
+
 
 export function henceReadingArgsOf<Key extends string>() {
     return {
@@ -256,72 +257,82 @@ class ReadingCli<Result = {}> {
         private all: Take<any, any>[] = [],
     ) { }
 
-    boolOr<Arg extends string, Or>(arg: Arg, or: Or): ReadingCli<{
-        [P in Arg | keyof Result]: P extends keyof Result ? Result[P] : boolean | Or
+    boolOr<Name extends string, Or>(name: Name, or: Or): ReadingCli<{
+        [P in Name | keyof Result]: P extends keyof Result ? Result[P] : boolean | Or
     }> {
         const readBooleanOr = (result: any, cliArgs: CliArgs) => {
-            const value = readingArgsOfString.readBoolOr(arg, cliArgs, undefined, or);
-            return { ...result, [arg]: value };
+            const value = readingArgsOfString.readBoolOr(name, cliArgs, undefined, or);
+            return { ...result, [name]: value };
         }
         this.all.push(readBooleanOr);
         return this as any;
     }
 
-    boolFore<Arg extends string, Name extends string | undefined = undefined>(arg: Arg, name?: Name): ReadingCli<{
-        [P in (Name extends undefined ? Arg : Name) | keyof Result]: P extends keyof Result ? Result[P] : boolean
+    boolFore<Name extends string, Key extends string | undefined = undefined>(
+        name: Name, key?: Key,
+    ): ReadingCli<{
+        [P in (Key extends undefined ? Name : Key) | keyof Result]: P extends keyof Result ? Result[P] : boolean
     }> {
         const readBooleanFore = (result: any, cliArgs: CliArgs) => {
-            const value = readingArgsOfString.readBooleanFore(arg, cliArgs, undefined);
-            return { ...result, [isDefined(name) ? name : arg]: value };
+            const value = readingArgsOfString.readBooleanFore(name, cliArgs, undefined);
+            return { ...result, [isDefined(key) ? key : name]: value };
         }
         this.all.push(readBooleanFore);
         return this as any;
     }
 
-    stringFore<Arg extends string, Name extends string | undefined = undefined, Output = string>(arg: Arg, name?: Name, transform?: (text: string) => Output): ReadingCli<{
-        [P in (Name extends undefined ? Arg : Name) | keyof Result]: P extends keyof Result ? Result[P] : Output;
+    stringFore<Name extends string, Key extends string | undefined = undefined, Output = string>(
+        name: Name, key?: Key, transform?: (text: string) => Output
+    ): ReadingCli<{
+        [P in (Key extends undefined ? Name : Key) | keyof Result]: P extends keyof Result ? Result[P] : Output;
     }> {
         const readTextFore = (result: any, cliArgs: CliArgs) => {
-            const value = readingArgsOfString.readStrFore(arg, cliArgs, undefined);
+            const value = readingArgsOfString.readStrFore(name, cliArgs, undefined);
             if (isDefined(transform)) {
                 const transformed = transform(value);
-                return { ...result, [isDefined(name) ? name : arg]: transformed };
+                return { ...result, [isDefined(key) ? key : name]: transformed };
             } else {
-                return { ...result, [isDefined(name) ? name : arg]: value };
+                return { ...result, [isDefined(key) ? key : name]: value };
             }
         }
         this.all.push(readTextFore);
         return this as any;
     }
 
-    integerOr<Arg extends string, Or, Name extends string | undefined = undefined>(arg: Arg, or: Or, name?: Name): ReadingCli<{
-        [P in (Name extends undefined ? Arg : Name) | keyof Result]: P extends keyof Result ? Result[P] : number | Or;
+    integerOr<Name extends string, Or, Key extends string | undefined = undefined>(
+        name: Name, or: Or, key?: Key,
+    ): ReadingCli<{
+        [P in (Key extends undefined ? Name : Key) | keyof Result]: P extends keyof Result ? Result[P] : number | Or;
     }> {
         const readIntegerOr = (result: any, cliArgs: CliArgs) => {
-            const value = readingArgsOfString.readIntegerOr(arg, cliArgs, undefined, or);
-            return { ...result, [isDefined(name) ? name : arg]: value };
+            const value = readingArgsOfString.readIntegerOr(name, cliArgs, undefined, or);
+            return { ...result, [isDefined(key) ? key : name]: value };
         }
         this.all.push(readIntegerOr);
         return this as any;
     }
 
 
-    integerFore<Arg extends string, Name extends string | undefined = undefined>(arg: Arg, name?: Name): ReadingCli<{
-        [P in (Name extends undefined ? Arg : Name) | keyof Result]: P extends keyof Result ? Result[P] : number;
+    integerFore<Name extends string, Key extends string | undefined = undefined>(
+        name: Name, key?: Key,
+    ): ReadingCli<{
+        [P in (Key extends undefined ? Name : Key) | keyof Result]: P extends keyof Result ? Result[P] : number;
     }> {
         const readIntegerFore = (result: any, cliArgs: CliArgs) => {
-            const value = readingArgsOfString.readIntegerFore(arg, cliArgs, undefined);
-            return { ...result, [isDefined(name) ? name : arg]: value };
+            const value = readingArgsOfString.readIntegerFore(name, cliArgs, undefined);
+            return { ...result, [isDefined(key) ? key : name]: value };
         }
         this.all.push(readIntegerFore);
         return this as any;
     }
 
-    bytesFore<Arg extends string, Name extends string | undefined = undefined>(arg: Arg, name?: Name): ReadingCli<{
-        [P in (Name extends undefined ? Arg : Name) | keyof Result]: P extends keyof Result ? Result[P] : number;
+    bytesFore<Name extends string, Key extends string | undefined = undefined>(
+        name: Name, key?: Key,
+    ): ReadingCli<{
+        [P in (Key extends undefined ? Name : Key) | keyof Result]: P extends keyof Result ? Result[P] : number;
     }> {
         const readBytesFore = (result: any, cliArgs: CliArgs) => {
-            const text = readingArgsOfString.readStrFore(arg, cliArgs, undefined);
+            const text = readingArgsOfString.readStrFore(name, cliArgs, undefined);
             const xxx = withBytesRead(
                 text,
                 (value, unit) => fix({ isOk: true, bytes: makeBytes(value, unit) }),
@@ -329,33 +340,37 @@ class ReadingCli<Result = {}> {
             );
             if (!xxx.isOk) {
                 const { reason, text } = xxx;
-                console.log(`Bad argument: ${arg}. Not a byte: ${text}, ${reason}.`);
+                console.log(`Bad argument: ${name}. Not a byte: ${text}, ${reason}.`);
                 throw noLuckWithArgs;
             }
             const { bytes } = xxx;
-            return { ...result, [isDefined(name) ? name : arg]: bytes };
+            return { ...result, [isDefined(key) ? key : name]: bytes };
         }
         this.all.push(readBytesFore);
         return this as any;
     }
 
-    dirFore<Arg extends string, Name extends string | undefined = undefined>(arg: Arg, name?: Name): ReadingCli<{
-        [P in (Name extends undefined ? Arg : Name) | keyof Result]: P extends keyof Result ? Result[P] : string
+    dirFore<Name extends string, Key extends string | undefined = undefined>(
+        name: Name, key?: Key,
+    ): ReadingCli<{
+        [P in (Key extends undefined ? Name : Key) | keyof Result]: P extends keyof Result ? Result[P] : string
     }> {
         const readDirFore = (result: any, cliArgs: CliArgs) => {
-            const value = readingArgsOfString.readDirFore(arg, cliArgs, undefined);
-            return { ...result, [isDefined(name) ? name : arg]: value };
+            const value = readingArgsOfString.readDirFore(name, cliArgs, undefined);
+            return { ...result, [isDefined(key) ? key : name]: value };
         }
         this.all.push(readDirFore);
         return this as any;
     }
 
-    fileFore<Arg extends string, Name extends string | undefined = undefined>(arg: Arg, name?: Name): ReadingCli<{
-        [P in (Name extends undefined ? Arg : Name) | keyof Result]: P extends keyof Result ? Result[P] : string
+    fileFore<Name extends string, Key extends string | undefined = undefined>(
+        name: Name, key?: Key,
+    ): ReadingCli<{
+        [P in (Key extends undefined ? Name : Key) | keyof Result]: P extends keyof Result ? Result[P] : string
     }> {
         const readFileFore = (result: any, cliArgs: CliArgs) => {
-            const value = readingArgsOfString.readFileFore(arg, cliArgs, undefined);
-            return { ...result, [isDefined(name) ? name : arg]: value };
+            const value = readingArgsOfString.readFileFore(name, cliArgs, undefined);
+            return { ...result, [isDefined(key) ? key : name]: value };
         }
         this.all.push(readFileFore);
         return this as any;
@@ -381,5 +396,35 @@ class ReadingCli<Result = {}> {
         const cliArgs = parsed.value;
         console.log(cliArgs);
         return this.fromCliArgs(cliArgs);
+    }
+
+    viaCliParams<T extends LikeCliParams<T>>(params: T) {
+        const keys = keysOf(params);
+        for (const key of keys) {
+            const param = params[key];
+            switch (param.kind) {
+                case 'integer': {
+                    this.integerFore(param.name, param.key);
+                    break;
+                }
+                case 'boolean': {
+                    this.boolFore(param.name, param.key);
+                    break;
+                }
+                case 'directory': {
+                    this.dirFore(param.name, param.key);
+                    break;
+                }
+                case 'other': {
+                    this.stringFore(param.name, param.key, param.read);
+                    break;
+                }
+                default: return broke(param);
+            }
+        }
+
+        return this as ReadingCli<{
+            [P in keyof T | keyof Result]: P extends keyof Result ? Result[P] : P extends keyof T ? TypeOfCliParam<T[P]> : 'have no idea';
+        }>;
     }
 }

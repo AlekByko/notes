@@ -606,3 +606,7 @@ export function sureNonNull<T>(x: T | null, unto: string): asserts x is T & {} {
 
 export function assureUndefined<T>(_: [undefined] extends [T] ? T : never) {}
 export type NoDistribute<T> = [T] extends [infer U] ? U : never;
+
+export function keysOf<T extends object>(value: T): (keyof T)[] {
+    return Object.keys(value) as (keyof T)[];
+}
