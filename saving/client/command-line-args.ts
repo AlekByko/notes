@@ -6,5 +6,5 @@ export interface CliArg {
 
 export interface CliCommand {
     name: string;
-    params: CliArg[];
+    args: CliArg[];
 }
