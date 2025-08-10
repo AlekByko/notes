@@ -21,8 +21,8 @@ export function thusValuePickerOf<T>(
         static Concern: ValuePickerConcern<T>;
 
         private whenPicked: React.ChangeEventHandler<HTMLSelectElement> = e => {
-            const {values, regarding} = this.props;
-            const {selectedIndex} = e.currentTarget;
+            const { values, regarding } = this.props;
+            const { selectedIndex } = e.currentTarget;
             if (selectedIndex < 0) return;
             const picked = values[selectedIndex];
             regarding({ about: 'be-picked', picked });

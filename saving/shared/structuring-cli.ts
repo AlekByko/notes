@@ -14,7 +14,7 @@ export type TypeOfCliParam<P> = P extends CliParam<any>
     ? F
     : never;
 
-export type OtherCliParam<K, S> = { kind: 'other'; key: K & string; name: string; read: (text: string) => S };
+export type OtherCliParam<K, S> = { kind: 'other'; key: K & string; name: string; read: (text: string) => S; defaultValues: S[]; };
 
 export function makeCliParams<T extends LikeCliParams<T>>(params: T): T {
     return params;
