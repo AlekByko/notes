@@ -1,6 +1,6 @@
 import { isNull } from '../shared/core';
 
-export function readQueryStringParam<S extends string, Or>(
+export function readQueryStringLiteralParam<S extends string, Or>(
     regexp: RegExp, seeIfValid: (x: string) => x is S, or: Or
 ): S | Or {
     const matched = regexp.exec(window.location.search);
