@@ -57,7 +57,7 @@ export async function willCheckIfPermitted(
     return true;
 }
 
-export async function willTryGetDirDeep(
+export async function willTryGetDirDeepSlowChecks(
     baseDir: FileSystemDirectoryHandle | null,
     path: string[]
 ): Promise<FileSystemDirectoryHandle | null> {
@@ -81,6 +81,33 @@ export async function willTryGetDir(
     const handle = await baseDir.getDirectoryHandle(name, createOption);
     if (isNull(handle)) return null;
     if (!await willCheckIfPermitted(handle, 'readwrite')) return null;
+
+    return handle;
+}
+
+
+export async function willTryGetDirDeepFastNoChecks(
+    baseDir: FileSystemDirectoryHandle | null,
+    path: string[]
+): Promise<FileSystemDirectoryHandle | null> {
+    let at = baseDir;
+    if (isNull(at)) return null;
+
+    for (const name of path) {
+        at = await willTryGetDirFastNoChecks(at, name);
+        if (isNull(at)) return null;
+    }
+
+    return at;
+}
+export async function willTryGetDirFastNoChecks(
+    baseDir: FileSystemDirectoryHandle | null,
+    name: string,
+): Promise<FileSystemDirectoryHandle | null> {
+    if (isNull(baseDir)) return null;
+
+    const handle = await baseDir.getDirectoryHandle(name, createOption);
+    if (isNull(handle)) return null;
 
     return handle;
 }
