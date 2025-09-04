@@ -1,8 +1,8 @@
 import { alwaysNull, broke, cast, isUndefined, otherwise } from '../shared/core';
+import { ExtXMedia, ExtXSteamInf, M3U8 } from '../shared/m3u8';
 import { at1st, atFull, capturedFrom, chokedFrom, diagnose, ParsedOrNot, Read, readLitOver, readReg } from '../shared/reading-basics';
 import { readList } from '../shared/reading-list';
 import { readQuotedString } from '../shared/reading-quoted-string';
-import { ExtXMedia, ExtXSteamInf, M3U8 } from './m3u8';
 
 
 function readLine(text: string, index: number) {
