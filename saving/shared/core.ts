@@ -610,3 +610,12 @@ export type NoDistribute<T> = [T] extends [infer U] ? U : never;
 export function keysOf<T extends object>(value: T): (keyof T)[] {
     return Object.keys(value) as (keyof T)[];
 }
+
+export function defaultAndWhine<V extends number, D>(name: string, defaulted: D, value: V | null): D | V {
+    if (isNull(value)) {
+        console.log(`No ${name}, using default: ${defaulted}`);
+        return defaulted;
+    } else {
+        return value;
+    }
+}
