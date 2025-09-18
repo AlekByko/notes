@@ -2,17 +2,17 @@ import * as React from 'react';
 import { DragEventHandler } from 'react';
 import ReactDOM from 'react-dom';
 import { areStringsEqual, broke, compareRandom, isNull } from '../shared/core';
-import { addClassIfDefined } from './reacting';
+import { addClassIfDefined, ReactConstructor } from './reacting';
 
 
 export interface ReorderListProps<Item> {
     items: Item[];
 }
 
-export function thusReorderList<Item>(
+export function thusReorderList<ItemProps extends object>(
     defaults: {
-        keyOf: (item: Item) => string;
-        nameOf: (item: Item) => string;
+        Item: ReactConstructor<ItemProps>,
+        keyOf: (item: ItemProps) => string;
     }
 ) {
 
@@ -21,8 +21,8 @@ export function thusReorderList<Item>(
     interface Hovered { key: string; where: HoldingPlace; }
 
     interface State {
-        items: Item[];
-        baselineItems: Item[];
+        items: ItemProps[];
+        baselineItems: ItemProps[];
         draggedKey: string | null;
         hovered: Hovered | null;
     }
@@ -32,7 +32,7 @@ export function thusReorderList<Item>(
         return { items, baselineItems: items, draggedKey: null, hovered: null };
     }
 
-    type Props = ReorderListProps<Item>;
+    type Props = ReorderListProps<ItemProps>;
 
     return class ReorderList extends React.Component<Props, State> {
 
@@ -107,7 +107,6 @@ export function thusReorderList<Item>(
                     const draggedClass = draggedKey === key ? 'as-dragged' : undefined;
                     const hoveredClass = seeWhatHoveredClassIs(hovered, key, draggedKey);
                     const itemClass = 'reorder-list-item' + addClassIfDefined(draggedClass) + addClassIfDefined(hoveredClass);
-                    const name = defaults.nameOf(item);
                     return <div
                         key={key}
                         className={itemClass}
@@ -118,7 +117,7 @@ export function thusReorderList<Item>(
                         onDragOver={this.whenDragOver}
                         onDrop={this.whenDrop}
                         onDragLeave={this.whenDragLeave}
-                    ><div className="reorder-list-item-drag-handle"></div>{name}</div>;
+                    ><div className="reorder-list-item-drag-handle"></div><defaults.Item {...item} /></div>;
                 })}
             </div>;
         }
@@ -139,15 +138,21 @@ export function thusReorderList<Item>(
 
 if (window.sandbox === 'reorder-list') {
 
-    interface Item {
+    interface ItemProps {
         key: string;
         name: string;
     }
+    class Item extends React.Component<ItemProps> {
+        render() {
+            const { name } = this.props;
+            return <div>{name}</div>
+        }
+    }
     const ReorderList = thusReorderList({
-        keyOf: (x: Item) => x.key,
-        nameOf: x => x.name,
+        Item: Item,
+        keyOf: (x: ItemProps) => x.key,
     });
-    interface AppState { items: Item[] }
+    interface AppState { items: ItemProps[] }
     class App extends React.Component<AppState, AppState> {
 
         state = this.props;
@@ -170,7 +175,7 @@ if (window.sandbox === 'reorder-list') {
 
 
     const rootElement = document.getElementById('root')!
-    const items: Item[] = [
+    const items: ItemProps[] = [
         { key: 'A', name: 'Alpha' },
         { key: 'B', name: 'Beta' },
         { key: 'C', name: 'Gamma' },
