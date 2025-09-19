@@ -74,6 +74,9 @@ export function kindedLogAndFail(payload: { kind: string }): never {
 export function asFiniteOr<Or>(value: number, or: Or): number | Or {
     return isFinite(value) ? value : or;
 }
+export function maxOf2By<T>(left: T, right: T, weighOf: (value: T) => number): T {
+    return weighOf(left) > weighOf(right) ? left : right;
+}
 export function maxOf2(left: number, right: number): number {
     return left > right ? left : right;
 }
