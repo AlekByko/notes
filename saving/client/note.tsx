@@ -1,10 +1,13 @@
 import React, { FormEventHandler } from 'react';
 import { broke, fail, isNull } from '../shared/core';
 import { Drop } from './drop';
+import { NotesGlob } from './notes-glob';
 
 const plainTextOnly = 'plaintext-only' as never;
 
 export interface NoteProps {
+    key: string;
+    glob: NotesGlob;
     drop: Drop;
 }
 
@@ -53,8 +56,10 @@ export function thusNote() {
         }
 
         render() {
+            const {drop} = this.props;
             const { state } = this;
             return <div>
+                <div>{drop.dir.name}/{drop.filename}</div>
                 {(() => {
                     switch (state.kind) {
                         case 'have-no-idea': return <div>Loading...</div>;

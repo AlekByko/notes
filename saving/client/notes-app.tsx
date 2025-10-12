@@ -1,10 +1,9 @@
 import React from 'react';
-import { Drop } from './drop';
-import { thusNote } from './note';
+import { NoteProps, thusNote } from './note';
 import { NotesGlob } from './notes-glob';
 
 export interface NotesAppProps {
-    drop: Drop;
+    notes: NoteProps[];
     glob: NotesGlob;
 }
 
@@ -12,10 +11,11 @@ export function thusNotesApp() {
     const Note = thusNote();
     return class NotesApp extends React.Component<NotesAppProps> {
         render() {
-            const { drop, glob: { notesDir } } = this.props;
+            const { notes } = this.props;
             return <div>
-                <div>{notesDir.name}/{drop.filename}</div>
-                <div><Note drop={drop} /></div>
+                {notes.map(note => {
+                    return <div key={note.key}><Note {...note} /></div>;
+                })}
             </div>;
         }
     };
