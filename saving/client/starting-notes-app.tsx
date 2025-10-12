@@ -32,7 +32,7 @@ async function run() {
     const notesDir = await willClaimDir(db, rootElement, knownNotesDirRef);
 
     const glob: NotesGlob = { db, notesDir };
-    const dump = new Drop(notesDir, 'test.txt');
+    const drop = new Drop(notesDir, 'test.txt');
     const props: NotesAppProps = { drop, glob };
     const NotesApp = thusNotesApp();
     ReactDOM.render(<NotesApp {...props} />, rootElement)
