@@ -29,11 +29,6 @@ export function thusNote() {
 
         async componentDidMount() {
 
-            const { state } = this;
-            if (state.kind !== 'have-no-idea') return fail(`Fuck what: ${state.kind}`);
-
-
-
             const { drop } = this.props;
             const text = await drop.willLoad();
             if (isNull(text)) {
@@ -61,7 +56,7 @@ export function thusNote() {
                 {(() => {
                     switch (state.kind) {
                         case 'have-no-idea': return <div>Loading...</div>;
-                        case 'not-there': return <div>No Name!</div>;
+                        case 'not-there': return <div>Not there</div>;
                         case 'there': return <div contentEditable={plainTextOnly} onInput={this.whenChangedContent}>{state.text}</div>
                         default: return broke(state);
                     }
