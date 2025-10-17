@@ -1,13 +1,6 @@
 import { atFirst, capturedFrom, chokedFrom, readReg } from './reading-basics';
-import { TimeInterval } from './time-interval';
+import { TimeInterval, TimeIntervalRead } from './time-interval';
 
-interface TimeInternalRead {
-    days?: number;
-    hours?: number;
-    minutes?: number;
-    seconds?: number;
-    milliseconds?: number;
-}
 export function readTimeInternal(
     text: string, startIndex: number,
 ) {
@@ -15,7 +8,7 @@ export function readTimeInternal(
     let index = startIndex;
     const daysRead = readReg(text, index, /\s*(\d+)d/y, atFirst);
     let hasAnything = false;
-    const result: TimeInternalRead = {};
+    const result: TimeIntervalRead = {};
     if (!daysRead.isBad) {
         hasAnything = true;
         index = daysRead.nextIndex;

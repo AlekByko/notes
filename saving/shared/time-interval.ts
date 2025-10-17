@@ -1,3 +1,5 @@
+import { asDefinedOr } from './core';
+
 export interface TimeInterval {
     days: number;
     hours: number;
@@ -5,7 +7,17 @@ export interface TimeInterval {
     seconds: number;
     milliseconds: number;
 }
-
+export type TimeIntervalRead = Partial<TimeInterval>;
+export function solidifyTimeIntervalRead(interval: TimeIntervalRead): TimeInterval {
+    const { days, hours, milliseconds, minutes, seconds } = interval;
+    return {
+        days: asDefinedOr(days, 0),
+        hours: asDefinedOr(hours, 0),
+        minutes: asDefinedOr(minutes, 0),
+        seconds: asDefinedOr(seconds, 0),
+        milliseconds: asDefinedOr(milliseconds, 0),
+    };
+}
 export function makeTimeIntervalOfMs(ms: number): TimeInterval {
     const milliseconds = ms % 1000;
     ms = (ms - milliseconds) / 1000;
