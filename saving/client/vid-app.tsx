@@ -46,7 +46,7 @@ export function thusVidApp() {
 
         private makeState(): State {
             const { vids } = this.props;
-            const items = vids.slice(0, 10).map(file => ({ file, isSelected: false, onToggled: this.whenTogglingItem } satisfies VidItemProps));
+            const items = vids.map(file => ({ file, isSelected: false, onToggled: this.whenTogglingItem } satisfies VidItemProps));
             return { items };
         }
 
