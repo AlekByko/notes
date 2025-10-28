@@ -1,6 +1,6 @@
 import React, { MouseEventHandler } from 'react';
 import { countAllThat } from '../shared/arrays';
-import { isNull } from '../shared/core';
+import { isNull, isUndefined } from '../shared/core';
 import { willTryMakePostRequest } from './ajaxing';
 import { willTryGetDir } from './reading-writing-files';
 import { thusVidItem, VidItemProps } from './vid-item';
@@ -9,6 +9,8 @@ export interface VidAppProps {
     vids: FileSystemFileHandle[];
     vidsDirPath: string;
     vidsDir: FileSystemDirectoryHandle;
+    seedNodeId: number;
+    promptNodeId: number;
 }
 export function thusVidApp() {
 
@@ -45,14 +47,15 @@ export function thusVidApp() {
             const json = JSON.parse(text); // parsing second time
             console.log(json);
             const result = { seed: -1, template: 'No template.', size: 'No size', prompt: `No prompt` };
+            const { promptNodeId, seedNodeId } = this.props;
             for (const node of json.nodes) {
-                if (node.title === 'Seed') {
+                if (node.id === seedNodeId) {
                     result.seed = node.widgets_values[0];
                 }
                 if (node.type === 'PresetSizeNode') {
                     result.size = node.widgets_values[0];
                 }
-                if (node.title === 'Intestinals') {
+                if (node.id === promptNodeId) {
                     result.template = node.widgets_values[0];
                 }
             }
@@ -101,6 +104,16 @@ export function thusVidApp() {
                 return { ...state, items } satisfies State;
             });
         };
+        whenDeleting = async (filename: string) => {
+            const found = this.state.items.find(x => x.file.name === filename);
+            if (isUndefined(found)) return;
+            await found.file.remove();
+            this.setState(state => {
+                let { items } = state;
+                items = items.filter(x => found !== x);
+                return { ...state, items } satisfies State;
+            });
+        };
 
 
         private makeState(): State {
@@ -110,6 +123,7 @@ export function thusVidApp() {
                 isSelected: false,
                 onToggled: this.whenTogglingItem,
                 onRequestedPrompt: this.whenRequestedPrompt,
+                onDeleting: this.whenDeleting
             } satisfies VidItemProps));
             return { items };
         }

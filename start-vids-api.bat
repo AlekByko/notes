@@ -1,0 +1,1 @@
+uvicorn vids_api:app --reload --port 8080

@@ -7,6 +7,7 @@ export interface VidItemProps {
     file: FileSystemFileHandle;
     onToggled: (filename: string) => void;
     onRequestedPrompt: (filename: string) => Promise<any>;
+    onDeleting: (filename: string) => void;
 }
 export function thusVidItem() {
     return class VidItem extends React.PureComponent<VidItemProps> {
@@ -33,8 +34,12 @@ export function thusVidItem() {
         private videoUrl: string | null = null;
         private isLoading = false;
         whenRequestingPrompt: MouseEventHandler<HTMLButtonElement> = async _e => {
-            const json = await this.props.onRequestedPrompt(this.props.file.name);
-            console.log(json);
+            const { seed, template } = await this.props.onRequestedPrompt(this.props.file.name);
+            console.log(seed);
+            console.log(template);
+        };
+        whenDeleting: MouseEventHandler<HTMLButtonElement> = _e => {
+            this.props.onDeleting(this.props.file.name);
         };
 
         componentWillUnmount(): void {
@@ -54,6 +59,7 @@ export function thusVidItem() {
                         <input type="checkbox" checked={isSelected} onChange={this.whenSelectingItem} /> Select
                     </label>
                     <button onClick={this.whenRequestingPrompt}>Prompt</button>
+                    <button onClick={this.whenDeleting}>Delete</button>
                 </div>
                 <div>
                     <video ref={this.whenVideoElement} />
