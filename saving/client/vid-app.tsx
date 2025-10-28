@@ -15,10 +15,10 @@ export interface VidAppProps {
     promptNodeId: number;
     onSkipping: (delta: number) => void;
 }
+
 interface State {
     items: VidItemProps[];
 }
-
 
 function makeState(
     props: VidAppProps,
@@ -90,9 +90,7 @@ export function thusVidApp() {
             // console.log(text);
             result.prompt = text;
             return result;
-        }
-
-
+        };
 
         whenSelectingAll: MouseEventHandler<HTMLButtonElement> = async _e => {
             this.setState(state => {
@@ -100,7 +98,8 @@ export function thusVidApp() {
                 items = items.map(x => ({ ...x, isSelected: true } satisfies VidItemProps));
                 return { ...state, items } satisfies State;
             });
-        }
+        };
+
         whenDeletingSelected: MouseEventHandler<HTMLButtonElement> = async _e => {
             if (!confirm('Are you sure?')) return;
             const removedNames = new Set<string>();
@@ -115,6 +114,7 @@ export function thusVidApp() {
                 return { ...state, items } satisfies State;
             });
         };
+
         whenMovingSelected: MouseEventHandler<HTMLButtonElement> = async _e => {
             if (!confirm('Are you sure?')) return;
             const where = prompt('Where?');
@@ -134,6 +134,7 @@ export function thusVidApp() {
                 return { ...state, items } satisfies State;
             });
         };
+
         whenDeleting = async (filename: string) => {
             const found = this.state.items.find(x => x.file.name === filename);
             if (isUndefined(found)) return;
@@ -144,19 +145,27 @@ export function thusVidApp() {
                 return { ...state, items } satisfies State;
             });
         };
+
         whenSkippingPlus10: MouseEventHandler<HTMLAnchorElement> = e => {
             e.preventDefault();
             e.stopPropagation();
             this.props.onSkipping(10);
         };
+
         whenSkippingPlus05: MouseEventHandler<HTMLAnchorElement> = e => {
             e.preventDefault();
             e.stopPropagation();
             this.props.onSkipping(5);
         };
 
-        whenHering = (filename: string) => {
-            this.props.onHering(filename);
+        whenPinpointing = (filename: string) => {
+            const { allVids, skip } = this.props;
+            const foundAt = allVids.findIndex(x => x.name === filename);
+            if (foundAt < 0) return console.warn(`Cannot find ${filename}.`);
+            const olderSkip = skip;
+            const newerSkip = foundAt;
+            const delta = newerSkip - olderSkip;
+            this.props.onSkipping(delta);
         };
 
         private _makeItem = (file: FileSystemFileHandle) => {
@@ -166,7 +175,7 @@ export function thusVidApp() {
                 onToggled: this.whenTogglingItem,
                 onRequestedPromptSettings: this.whenRequestedPrompt,
                 onDeleting: this.whenDeleting,
-                onHering: this.whenHering,
+                onPinpointing: this.whenPinpointing,
             } satisfies VidItemProps;
         }
 
