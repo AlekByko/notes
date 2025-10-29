@@ -2,14 +2,14 @@ import React, { MouseEventHandler } from 'react';
 import ReactDOM from 'react-dom';
 import { isNonNull, isNull } from '../shared/core';
 import { KnownPickedDirRef } from '../shared/identities';
-import { willSaveDirRef, willTryGetDirFromDb } from './reading-writing-files';
+import { willSaveDirRef, willTryLoadDirRef } from './reading-writing-files';
 
 
 export async function willClaimDir(
     db: IDBDatabase, element: HTMLElement, ref: KnownPickedDirRef,
 ) {
     return new Promise<FileSystemDirectoryHandle>(async resolve => {
-        const dir = await willTryGetDirFromDb(db, ref);
+        const dir = await willTryLoadDirRef(db, ref);
         if (isNonNull(dir)) {
             resolve(dir);
             return;

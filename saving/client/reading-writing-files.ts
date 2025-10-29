@@ -14,7 +14,7 @@ export async function willTryGetAllDirsFromDb(db: IDBDatabase): Promise<KnownPic
     );
     return found;
 }
-export async function willTryGetDirFromDb(
+export async function willTryLoadDirRef(
     db: IDBDatabase,
     ref: KnownPickedDirRef,
 ): Promise<FileSystemDirectoryHandle | null> {
