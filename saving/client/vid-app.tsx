@@ -1,6 +1,6 @@
 import React, { MouseEventHandler } from 'react';
 import { countAllThat } from '../shared/arrays';
-import { isNull, isUndefined } from '../shared/core';
+import { isNull } from '../shared/core';
 import { willTryMakePostRequest } from './ajaxing';
 import { willTryGetDir } from './reading-writing-files';
 import { thusVidItem, VidItemProps, VidPromptSettings } from './vid-item';
@@ -102,18 +102,32 @@ export function thusVidApp() {
 
         whenDeletingSelected: MouseEventHandler<HTMLButtonElement> = async _e => {
             if (!confirm('Are you sure?')) return;
-            const removedNames = new Set<string>();
+            const names = new Set<string>();
             for (const item of this.state.items) {
                 if (!item.isSelected) continue;
-                await item.file.remove();
-                removedNames.add(item.file.name);
+                names.add(item.file.name);
             }
+            return this._willRemoveByNames(names);
+        };
+
+        private async _willRemoveByNames(names: Set<string>) {
+            for (const handle of this.props.allVids) {
+                if (!names.has(handle.name)) continue;
+                await handle.remove();
+            }
+            names.forEach(filename => {
+                const foundAt = this.props.allVids.findIndex(x => x.name === filename);
+                if (foundAt < 0) return console.warn(`Unable to remove ${filename}.`);
+                this.props.allVids.splice(foundAt, 1);
+            });
             this.setState(state => {
                 let { items } = state;
-                items = items.filter(x => !removedNames.has(x.file.name));
+                items = items.filter(x => !names.has(x.file.name));
                 return { ...state, items } satisfies State;
             });
         };
+
+
 
         whenMovingSelected: MouseEventHandler<HTMLButtonElement> = async _e => {
             if (!confirm('Are you sure?')) return;
@@ -136,14 +150,7 @@ export function thusVidApp() {
         };
 
         whenDeleting = async (filename: string) => {
-            const found = this.state.items.find(x => x.file.name === filename);
-            if (isUndefined(found)) return;
-            await found.file.remove();
-            this.setState(state => {
-                let { items } = state;
-                items = items.filter(x => found !== x);
-                return { ...state, items } satisfies State;
-            });
+            await this._willRemoveByNames(new Set([filename]));
         };
 
         whenSkippingPlus10: MouseEventHandler<HTMLAnchorElement> = e => {
