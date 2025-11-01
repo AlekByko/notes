@@ -48,9 +48,17 @@ export function thusVidItem() {
         private isLoading = false;
         whenRequestingPrompt: MouseEventHandler<HTMLButtonElement> = async _e => {
             const filename = this.props.file.name;
-            const settings = await this.props.onRequestedPromptSettings(this.props.file.name);
-            if (isNull(settings)) return console.log(`No prompt settings for ${filename}.`);
-            this.setState({ settings });
+
+            const mostRecentSettings = await this.props.onRequestedPromptSettings(this.props.file.name);
+            if (isNull(mostRecentSettings)) return console.log(`No prompt settings for ${filename}.`);
+            this.setState(state => {
+                let { settings } = state;
+                if (isNonNull(settings)) {
+                    return { ...state, settings: null } satisfies State;
+                } else {
+                    return { ...state, settings: mostRecentSettings } satisfies State;
+                }
+            });
         };
         whenDeleting: MouseEventHandler<HTMLButtonElement> = e => {
             if (!e.shiftKey && !confirm(`Are you sure?`)) return;
