@@ -1,5 +1,3 @@
-
-
 def strip_slash_star_comments(text: str):
 
     at = 0
@@ -18,21 +16,29 @@ def strip_slash_star_comments(text: str):
 def strip_rest_line_comments(text: str, pattern: str):
     at = 0
     while True:
-        startAt = text.find(pattern, at)
-        if startAt < 0: return text
-        at = startAt + len(pattern)
+        start_at = text.find(pattern, at)
+        if start_at < 0: return text
+        at = start_at + len(pattern)
 
-        endAt = text.find("\r\n", at)
-        if endAt < 0:
-            endAt = text.find("\n", at)
-            if endAt < 0: return text[:startAt] # comment, but no line break
+        end_at = text.find("\r\n", at)
+        end_size = 2
+        if end_at < 0:
+            end_at = text.find("\n", at)
+            end_size = 1
+            if end_at < 0:
+                return text[:start_at] # comment, but no line break
 
-        at = endAt # <-- we want to preserve line ending chars so we don't skip them
-        text = text[:startAt] + text[endAt:]
+        before_text = text[:start_at]
+        after_text = text[end_at:]
+        text = before_text + after_text # <-- we want to preserve line ending chars so we don't skip them
+        at = start_at + end_size
 
+def strip_comments(text: str) -> str:
+    text = strip_slash_star_comments(text)
+    text = strip_rest_line_comments(text, '//')
+    return text
 
-
-def test_slash_star():
+def try_slash_star():
     raw = """a b c/*
     fuck off
 */ d e
@@ -41,14 +47,17 @@ def test_slash_star():
     print(fixed)
 
 
-def test_rest_line():
+def try_rest_line():
     text = """
-    //
-        hey // sis
-        whatup // dog"""
+// test
+// another test
+// yet another test
+fucker
+shit
+"""
     text = strip_rest_line_comments(text, '//')
     print(text)
 
 if __name__ == '__main__':
-    # test_slash_star()
-    test_rest_line()
+    try_slash_star()
+    try_rest_line()
