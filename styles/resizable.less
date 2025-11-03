@@ -1,0 +1,40 @@
+.resizable {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+@resize-bar-area-size: 10px;
+
+.resizable-top-bar {
+    position: absolute;
+    top: -@resize-bar-area-size/2;
+    left: 0px;
+    right: 0px;
+    height: @resize-bar-area-size;
+    background-color: red;
+}
+.resizable-left-bar {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: -@resize-bar-area-size/2;
+    width: @resize-bar-area-size;
+    background-color: green;
+}
+.resizable-right-bar {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    right: -@resize-bar-area-size/2;
+    width: @resize-bar-area-size;
+    background-color: blue;
+}
+.resizable-bottom-bar {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    bottom: -@resize-bar-area-size/2;
+    height: @resize-bar-area-size;
+    background-color: orange;
+}

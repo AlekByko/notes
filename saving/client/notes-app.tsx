@@ -34,11 +34,11 @@ export function thusNotesApp() {
         };
         render() {
             const { notes } = this.state;
-            return <div>
+            return <div className="notes">
                 {notes.map(note => {
                     return <Note {...note} />;
                 })}
-                <div>
+                <div className="notes-toolbar">
                     <button onClick={this.whenAddingNote}>Add</button>
                 </div>
             </div>;
