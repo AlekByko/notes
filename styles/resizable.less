@@ -13,7 +13,9 @@
     right: 0px;
     height: @resize-bar-area-size;
     background-color: red;
+    cursor: ns-resize;
 }
+
 .resizable-left-bar {
     position: absolute;
     top: 0px;
@@ -21,7 +23,9 @@
     left: -@resize-bar-area-size/2;
     width: @resize-bar-area-size;
     background-color: green;
+    cursor: ew-resize;
 }
+
 .resizable-right-bar {
     position: absolute;
     top: 0px;
@@ -29,7 +33,9 @@
     right: -@resize-bar-area-size/2;
     width: @resize-bar-area-size;
     background-color: blue;
+    cursor: ew-resize;
 }
+
 .resizable-bottom-bar {
     position: absolute;
     left: 0px;
@@ -37,4 +43,5 @@
     bottom: -@resize-bar-area-size/2;
     height: @resize-bar-area-size;
     background-color: orange;
+    cursor: ns-resize;
 }
