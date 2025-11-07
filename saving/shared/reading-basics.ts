@@ -138,19 +138,23 @@ export function diagnose<Actual>(
     const tried = read(text, index);
     console.log(text);
     if (tried.isBad) {
-        console.log(tried);
-        const least = dumpChoked(tried);
-        dumpAt(text, least.index, -2);
-        dumpAt(text, least.index, -1);
-        dumpAt(text, least.index, 0);
-        dumpAt(text, least.index, +1);
-        dumpAt(text, least.index, +2);
-
-        console.log(text.substr(tried.index, 10) + '...');
+        dumpChockedAndContext(tried, text);
     } else {
         console.log('passed ' + read.toDebugName());
         console.log(tried);
     }
+}
+
+export function dumpChockedAndContext(choked: Choked, text: string) {
+    console.log(choked);
+    const least = dumpChoked(choked);
+    dumpAt(text, least.index, -2);
+    dumpAt(text, least.index, -1);
+    dumpAt(text, least.index, 0);
+    dumpAt(text, least.index, +1);
+    dumpAt(text, least.index, +2);
+
+    console.log(text.substr(choked.index, 10) + '...');
 }
 
 function dumpAt(text: string, index: number, delta: number) {
@@ -211,7 +215,7 @@ export function compose<T, U, V>(
     return composeUnder;
 }
 
-function dumpChoked(choked: Choked): Choked {
+export function dumpChoked(choked: Choked): Choked {
     const { index, reason, child } = choked;
     console.group(index + ': ' + reason);
     if (isDefined(child)) {
