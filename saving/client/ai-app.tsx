@@ -1,16 +1,19 @@
 import React, { ChangeEventHandler, MouseEventHandler } from 'react';
+import { makeSeed } from './ed-backend';
+import { executeTemplate } from './executing-prompt-template';
 import { InferenceParams } from './inference-params';
-import { executeTemplate } from './reading-prompt-template';
 
 
 export interface AiAppProps {
     text: string;
-    onGenerating: (params: InferenceParams) => void;
+    onScheduling: (params: InferenceParams) => void;
 }
 export function thusAiApp() {
 
     interface State {
-        text: string;
+        template: string;
+        seed: number;
+        prompt: string;
     }
 
     return class AiApp extends React.Component<AiAppProps, State> {
@@ -18,34 +21,50 @@ export function thusAiApp() {
         static Props: AiAppProps;
 
         whenChangingText: ChangeEventHandler<HTMLTextAreaElement> = _e => {
-            const text = _e.currentTarget.value;
+            const template = _e.currentTarget.value;
             this.setState(state => {
-                return { ...state, text } satisfies State;
+                return { ...state, template } satisfies State;
             });
         };
 
-        whenTesting: MouseEventHandler<HTMLButtonElement> = _e => {
-            const { text: template } = this.state;
-            const { onGenerating } = this.props;
-            const prompt = executeTemplate(template);
-            onGenerating({ prompt, width: 640, height: 640, template });
+        whenScheduling: MouseEventHandler<HTMLButtonElement> = _e => {
+            const { template, seed, prompt } = this.state;
+            if (seed < 1) return;
+            const { onScheduling } = this.props;
+            onScheduling({ prompt, width: 640, height: 640, template, seed });
+        };
+        whenSpinning: MouseEventHandler<HTMLButtonElement> = _e => {
+            this.setState(state => {
+                const { template } = state;
+                const seed = makeSeed();
+                const prompt = executeTemplate(template, seed);
+                return { ...state, seed, prompt } satisfies State;
+            });
         };
 
         makeState(): State {
-            const { text } = this.props;
-            return { text };
+            const { text: template } = this.props;
+            return { template, seed: 0, prompt: '' };
         }
 
         state = this.makeState();
 
         render() {
-            const { text } = this.state;
-            return <div>
+            const { template, seed, prompt } = this.state;
+            const canSchedule = seed > 0;
+            return <div className="ai-inputs">
                 <div>
-                    <textarea onChange={this.whenChangingText} value={text}></textarea>
+                    <textarea rows={20} cols={100} onChange={this.whenChangingText} value={template}></textarea>
                 </div>
                 <div>
-                    <button onClick={this.whenTesting}>Test</button>
+                    Seed: <input value={seed} disabled />
+                </div>
+                <div>
+                    <textarea rows={10} cols={100} value={prompt} disabled></textarea>
+                </div>
+                <div className="ai-buttons">
+                    <button onClick={this.whenScheduling} disabled={!canSchedule}>Schedule</button>
+                    <button onClick={this.whenSpinning}>Spin</button>
                 </div>
             </div>;
         }

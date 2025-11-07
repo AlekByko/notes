@@ -3,4 +3,5 @@ export interface InferenceParams {
     prompt: string;
     width: number;
     height: number;
+    seed: number;
 }

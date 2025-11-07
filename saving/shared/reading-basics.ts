@@ -18,6 +18,9 @@ export interface Choked {
 export function chokedFrom(index: number, reason?: string, child?: Choked): Choked {
     return { kind: 'choked', isBad: true, index, reason, child };
 }
+export function eofAt(index: number) {
+    return chokedFrom(index, 'EOF');
+}
 
 export type ParsedOrNot<T> = Choked | Captured<T>;
 

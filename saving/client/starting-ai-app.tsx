@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { isNonNull, isNull, isUndefined } from '../shared/core';
 import { thusAiApp } from './ai-app';
 import { CuiWorkflow, findNodesThat } from './comfyui-info';
+import { makeSeed } from './ed-backend';
 import { knownConfigsDirRef } from './file-system-entries';
 import { willOpenKnownDb } from './known-database';
 import { willReadJsonFromFileHandle } from './reading-from-file-handles';
@@ -19,11 +20,7 @@ if (window.sandbox === 'starting-ai-app') {
 
 
 
-    function makeRandom() {
-        const a = Math.random() * 0x200000; // upper 21 bits
-        const b = Math.random() * 0x100000000; // lower 32 bits
-        return ((a | 0) * 0x100000000) + (b >>> 0);
-    }
+
 
     const App = thusAiApp();
     const rootElement = document.getElementById('root')!;
@@ -46,8 +43,8 @@ if (window.sandbox === 'starting-ai-app') {
 
         const props: typeof App.Props = {
             text: window.name,
-            onGenerating: async params => {
-                const { prompt, height, template, width } = params;
+            onScheduling: async params => {
+                const { prompt, height, template, width, seed } = params;
                 console.log(params);
                 window.name = template;
 
@@ -57,7 +54,6 @@ if (window.sandbox === 'starting-ai-app') {
                 node.inputs.text = prompt;
 
                 const samplers = findNodesThat(workflow, x => x.class_type === 'KSamplerAdvanced');
-                const seed = makeRandom();
                 samplers.forEach(x => {
                     x.inputs.noise_seed = seed;
                 });
@@ -68,7 +64,7 @@ if (window.sandbox === 'starting-ai-app') {
                     x.inputs.width = width;
                 });
 
-                const ticketId = makeRandom();
+                const ticketId = makeSeed();
                 const payload = {
                     prompt: workflow,
                     client_id: ticketId,
