@@ -1,9 +1,11 @@
 import React, { ChangeEventHandler, MouseEventHandler } from 'react';
+import { InferenceParams } from './inference-params';
+import { executeTemplate } from './reading-prompt-template';
 
 
 export interface AiAppProps {
     text: string;
-    onTested: (text: string) => void;
+    onGenerating: (params: InferenceParams) => void;
 }
 export function thusAiApp() {
 
@@ -23,9 +25,10 @@ export function thusAiApp() {
         };
 
         whenTesting: MouseEventHandler<HTMLButtonElement> = _e => {
-            const { text } = this.state;
-            const { onTested } = this.props;
-            onTested(text);
+            const { text: template } = this.state;
+            const { onGenerating } = this.props;
+            const prompt = executeTemplate(template);
+            onGenerating({ prompt, width: 640, height: 640, template });
         };
 
         makeState(): State {

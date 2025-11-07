@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { isNonNull, isNull, isUndefined } from '../shared/core';
 import { thusAiApp } from './ai-app';
-import { CuiWorkflow, findNodesAllThat } from './comfyui-info';
+import { CuiWorkflow, findNodesThat } from './comfyui-info';
 import { knownConfigsDirRef } from './file-system-entries';
 import { willOpenKnownDb } from './known-database';
 import { willReadJsonFromFileHandle } from './reading-from-file-handles';
@@ -29,6 +29,8 @@ if (window.sandbox === 'starting-ai-app') {
     const rootElement = document.getElementById('root')!;
 
     async function run() {
+
+
         const templatePath = readPathFromQueryStringOr('templatePath', null);
         if (isNull(templatePath)) return alert(`No templatePath.`);
 
@@ -37,31 +39,33 @@ if (window.sandbox === 'starting-ai-app') {
         if (isNull(configsDir)) return alert(`No config dir.`);
 
 
-        const [templateName, ...templateSubDirnames] = templatePath.split(/[\\/]/g).map(x => x.trim()).filter(x => x).reverse();
-        templateSubDirnames.reverse();
-        const templateDir = await willTryGetDirDeepFastNoChecks(configsDir, templateSubDirnames);
-        if (isNull(templateDir)) return alert(`No dir at: ${templateSubDirnames.join('/')}`);
-        const templateHandle = await willGetFileHandleOr(templateDir, templateName, null);
-        if (isNull(templateHandle)) return alert(`No file at: ${templateSubDirnames.join('/')} ${templateName}`);
-        const workflow: CuiWorkflow = await willReadJsonFromFileHandle(templateHandle);
-
+        const workflow = await willLoadWorkflow(configsDir, templatePath);
+        if (isNull(workflow)) return alert(`No workflow.`);
         console.log(workflow);
-        // if (2 > 1) return;
+
+
         const props: typeof App.Props = {
             text: window.name,
-            onTested: async text => {
-                console.log(text);
-                window.name = text;
+            onGenerating: async params => {
+                const { prompt, height, template, width } = params;
+                console.log(params);
+                window.name = template;
 
-                const nodes = findNodesAllThat(workflow, x => x.class_type === 'CLIPTextEncode');
+                const nodes = findNodesThat(workflow, x => x.class_type === 'CLIPTextEncode');
                 const node = nodes.find(x => x._meta.title === 'Positive Prompt');
                 if (isUndefined(node)) return alert(`No positive prompt node.`);
-                node.inputs.text = text;
+                node.inputs.text = prompt;
 
-                const samplers = findNodesAllThat(workflow, x => x.class_type === 'KSamplerAdvanced');
+                const samplers = findNodesThat(workflow, x => x.class_type === 'KSamplerAdvanced');
                 const seed = makeRandom();
                 samplers.forEach(x => {
                     x.inputs.noise_seed = seed;
+                });
+
+                const latent = findNodesThat(workflow, x => x.class_type === 'EmptyHunyuanLatentVideo');
+                latent.forEach(x => {
+                    x.inputs.height = height;
+                    x.inputs.width = width;
                 });
 
                 const ticketId = makeRandom();
@@ -86,3 +90,16 @@ if (window.sandbox === 'starting-ai-app') {
     run();
 }
 
+async function willLoadWorkflow(
+    configsDir: FileSystemDirectoryHandle,
+    templatePath: string
+) {
+    const [templateName, ...templateSubDirnames] = templatePath.split(/[\\/]/g).map(x => x.trim()).filter(x => x).reverse();
+    templateSubDirnames.reverse();
+    const templateDir = await willTryGetDirDeepFastNoChecks(configsDir, templateSubDirnames);
+    if (isNull(templateDir)) return (alert(`No dir at: ${templateSubDirnames.join('/')}`), null);
+    const templateHandle = await willGetFileHandleOr(templateDir, templateName, null);
+    if (isNull(templateHandle)) return (alert(`No file at: ${templateSubDirnames.join('/')} ${templateName}`), null);
+    const workflow: CuiWorkflow = await willReadJsonFromFileHandle(templateHandle);
+    return workflow;
+}

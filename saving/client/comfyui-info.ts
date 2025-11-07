@@ -44,7 +44,7 @@ export interface CuiKSamplerAdvanced extends CuiBase {
 
 }
 
-export function findNodesAllThat<T extends CuiNode>(
+export function findNodesThat<T extends CuiNode>(
     workflow: CuiWorkflow,
     seeIfItIs: (value: CuiNode) => value is T,
 ): T[] {
