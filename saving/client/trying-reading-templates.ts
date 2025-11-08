@@ -27,4 +27,14 @@ testMarch(
     `$color = {red|green|blue}`,
     `[AS: $color = [OP: "red" | "green" | "blue"]]`
 );
+testMarch(
+    `$color = {red|{green|teal}|blue}`,
+    `[AS: $color = [OP: "red" | [OP: "green" | "teal"] | "blue"]]`
+);
+
+testMarch(
+    `$color = {red|green|blue} abc {big|small}`,
+    `[AS: $color = [OP: "red" | "green" | "blue"] " abc " [OP: "big" | "small"]]`
+);
+
 
