@@ -23,13 +23,13 @@ export function testMarch(text: string, expected: string) {
         dumpChockedAndContext(march, text);
     } else {
         const input = march.value;
-        console.log(input);
         const output = formatMarch(input);
         if (output === expected) {
             console.log('PASSED:', text);
         } else {
             console.log('DIFFRENT!');
             console.log(text);
+            console.log(input);
             console.log(expected);
             console.log(output);
         }
