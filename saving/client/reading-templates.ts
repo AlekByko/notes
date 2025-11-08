@@ -96,7 +96,7 @@ export function readMarch<Unexpected>(
                         const { operator, march } = assignment.value;
                         march.push({
                             kind: 'assignment',
-                            identifier: identifier.value,
+                            name: identifier.value,
                             operator,
                             value: march,
                         });

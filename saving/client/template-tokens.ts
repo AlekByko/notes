@@ -19,7 +19,7 @@ export interface IdentifierToken {
 
 export interface AssignmentToken {
     kind: 'assignment';
-    identifier: string;
+    name: string;
     operator: string;
     value: March;
 }
