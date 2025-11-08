@@ -1,6 +1,6 @@
 import React, { ChangeEventHandler, MouseEventHandler } from 'react';
 import { makeSeed } from './ed-backend';
-import { executeTemplate } from './executing-prompt-template';
+import { executeTemplate } from './executing-templates';
 import { InferenceParams } from './inference-params';
 
 
