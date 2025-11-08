@@ -77,6 +77,11 @@ export function readMarch<Unexpected>(
         if (index >= length) return capturedFrom(index, march);
         let at = text[index];
         switch (at) {
+            case '#': {
+                debugger;
+                index += 1;
+                continue;
+            }
             case '$':
                 const identifier = readReg(text, index, /\$[-_\w\d]+/, atFull);
                 if (identifier.isBad) return chokedFrom(startIndex, 'Bad identifier.', identifier);

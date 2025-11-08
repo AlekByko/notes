@@ -13,7 +13,7 @@ console.log(parsed);
 var parsed = readOptions('{}', 0, 0);
 console.log(parsed);
 
-tryMarch(`{abc|de fg|$hijk {lmn|$qrs|{tuv|wx|yz}}}`);
+tryMarch(`{abc|de fg|$hijk# {lmn|$qrs|{tuv|wx|yz}}}`);
 
 
 function tryMarch(text: string) {
