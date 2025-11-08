@@ -15,6 +15,10 @@ testMarch(
     `[OP: "test" | " another test" | "and we done"]`,
 );
 testMarch(
+    `{a|b}{c|d}`,
+    `[OP: "a" | "b"] [OP: "c" | "d"]`
+);
+testMarch(
     `{abc|de fg|$hijk {lmn|$qrs|{tuv|wx|yz}}}`,
     '[OP: "abc" | "de fg" | [ID: $hijk] " " [OP: "lmn" | [ID: $qrs] | [OP: "tuv" | "wx" | "yz"]]]'
 );
