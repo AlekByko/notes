@@ -54,14 +54,14 @@ function readAssignment(text: string, index: number, depth: number) {
     const march = readMarch(text, index, depth + 1, true, (_index, _march, chocked) => chocked);
     if (march.isBad) return chokedFrom(startIndex, 'Bad value.', march);
     index = march.nextIndex;
-    return capturedFrom(index, { operator: operator.value, march: march.value });
+    return capturedFrom(index, { operator: operator.value, value: march.value });
 }
 
 export function readMarch<Unexpected>(
     text: string, index: number, depth: number, shouldStopAtLineBreak: boolean,
     unexpected: (index: number, march: March, choked: Choked) => Unexpected
 ): ParsedOrNot<March> | Unexpected {
-    const march: March = [];
+    const result: March = [];
     const startIndex = index;
     const { length } = text;
     if (index > length) return chokedFrom(startIndex, 'Unstarted template.', eofAt(index)); // <--  using index > length, not index >= length, becuase empty string is a valid empty text
@@ -71,10 +71,10 @@ export function readMarch<Unexpected>(
             : readReg(text, index, /[-_\s\w\d]*/, atFull);
         if (literal.isBad) return chokedFrom(startIndex, 'Bad literal.', literal);
         if (literal.value.length > 0) {
-            march.push({ kind: 'literal', literal: literal.value });
+            result.push({ kind: 'literal', literal: literal.value });
         }
         index = literal.nextIndex;
-        if (index >= length) return capturedFrom(index, march);
+        if (index >= length) return capturedFrom(index, result);
         let at = text[index];
         switch (at) {
             case '#': {
@@ -90,21 +90,22 @@ export function readMarch<Unexpected>(
                     // assignments cannot be nested into anything, only at depth == 0 (top level)
                     // so here there could not be assignments, only identifiers
                     // so what we have here is an identifier
-                    march.push({ kind: 'identifier', identifier: identifier.value });
+                    result.push({ kind: 'identifier', identifier: identifier.value });
                     continue;
                 } else {
                     const assignment = readAssignment(text, index, depth);
                     if (assignment.isBad) {
-                        march.push({ kind: 'identifier', identifier: identifier.value });
+                        result.push({ kind: 'identifier', identifier: identifier.value });
                         continue;
                     } else {
-                        const { operator, march } = assignment.value;
-                        march.push({
+                        const { operator, value } = assignment.value;
+                        result.push({
                             kind: 'assignment',
                             name: identifier.value,
                             operator,
-                            value: march,
+                            value,
                         });
+                        index = assignment.nextIndex;
                         continue;
                     }
                 }
@@ -112,20 +113,19 @@ export function readMarch<Unexpected>(
                 const options = readOptions(text, index, depth + 1);
                 if (options.isBad) return chokedFrom(startIndex, 'Bad options.', options);
                 index = options.nextIndex;
-                march.push({ kind: 'options', options: options.value });
+                result.push({ kind: 'options', options: options.value });
                 continue;
             case '\n': {
                 if (shouldStopAtLineBreak) {
-                    return capturedFrom(index, march);
+                    return capturedFrom(index, result);
                 } else {
                     return fail('Cannot be here.');
                 }
             }
             default:
                 return unexpected(
-                    index, march,
-                    chokedFrom(startIndex, 'Bad march.', chokedFrom(index, 'Unexpected.')
-                    )
+                    index, result,
+                    chokedFrom(startIndex, 'Bad march.', chokedFrom(index, 'Unexpected.')),
                 );
         }
     }

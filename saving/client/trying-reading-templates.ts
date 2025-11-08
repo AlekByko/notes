@@ -19,3 +19,8 @@ testMarch(
     '[OP: "abc" | "de fg" | [ID: $hijk] " " [OP: "lmn" | [ID: $qrs] | [OP: "tuv" | "wx" | "yz"]]]'
 );
 
+testMarch(
+    `$color = {red|green|blue}`,
+    `[AS: $color = [OP: "red" | "green" | "blue"]]`
+);
+

@@ -17,7 +17,7 @@ export function tryMarch(text: string) {
 }
 
 export function testMarch(text: string, expected: string) {
-    var march = readMarch(text, 0, 0, false, (_index, _tokens, choked) => choked);
+    const march = readMarch(text, 0, 0, false, (_index, _tokens, choked) => choked);
     if (march.isBad) {
         console.log(text);
         dumpChockedAndContext(march, text);
@@ -27,11 +27,12 @@ export function testMarch(text: string, expected: string) {
         if (output === expected) {
             console.log('PASSED:', text);
         } else {
-            console.log('DIFFRENT!');
-            console.log(text);
+            console.log('FAILED!');
+            console.group(text);
             console.log(input);
             console.log(expected);
             console.log(output);
+            console.groupEnd();
         }
     }
 }
