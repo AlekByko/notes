@@ -3,6 +3,7 @@ import { KnownPickedDirRef } from '../shared/identities';
 import { willFindAllInStoreOf, willPutAllToStoreOf } from "./databasing";
 import { KnownPickedDirEntry } from "./file-system-entries";
 import { knownDbStores } from "./known-settings";
+import { willReadJsonFromFileHandle } from './reading-from-file-handles';
 
 // https://web.dev/file-system-access/
 export async function willTryGetAllDirsFromDb(db: IDBDatabase): Promise<KnownPickedDirEntry[]> {
@@ -232,3 +233,16 @@ export async function willMoveFiles(sourceDir: FileSystemDirectoryHandle, target
     }
 }
 
+export async function willReadJsonFromFileHandleAtPath(
+    dir: FileSystemDirectoryHandle,
+    path: string
+) {
+    const [fileName, ...subdirsNames] = path.split(/[\\/]/g).map(x => x.trim()).filter(x => x).reverse();
+    subdirsNames.reverse();
+    const fileDir = await willTryGetDirDeepFastNoChecks(dir, subdirsNames);
+    if (isNull(fileDir)) return (alert(`No dir at: ${subdirsNames.join('/')}`), null);
+    const fileHandle = await willGetFileHandleOr(fileDir, fileName, null);
+    if (isNull(fileHandle)) return (alert(`No file at: ${subdirsNames.join('/')} ${fileName}`), null);
+    const content = await willReadJsonFromFileHandle(fileHandle);
+    return content;
+}
