@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { isNonNull } from '../shared/core';
-import { Drop } from './drop';
 import { knownNotesDirRef } from './file-system-entries';
 import { willOpenKnownDb } from './known-database';
 import { NoteProps } from './note';
@@ -10,6 +9,7 @@ import { NotesGlob } from './notes-glob';
 import { toRandKey } from './reacting';
 import { readStringFromQueryStringOr } from './reading-query-string';
 import { willClaimDir } from './setting-up-notes-app';
+import { TextDrop } from './text-drop';
 
 async function run() {
     const db = await willOpenKnownDb();
@@ -22,7 +22,7 @@ async function run() {
     const rootElement = document.getElementById('root')!;
     const notesDir = await willClaimDir(db, rootElement, knownNotesDirRef);
     const glob: NotesGlob = { db, notesDir };
-    const drop = new Drop(notesDir, 'test.txt');
+    const drop = new TextDrop(notesDir, 'test.txt');
     const key = toRandKey();
     const note: NoteProps = { key, drop };
     const notes = [note];

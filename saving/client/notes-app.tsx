@@ -1,8 +1,8 @@
 import React, { MouseEventHandler } from 'react';
-import { Drop } from './drop';
 import { NoteProps, thusNote } from './note';
 import { NotesGlob } from './notes-glob';
 import { toRandKey } from './reacting';
+import { TextDrop } from './text-drop';
 
 export interface NotesAppProps {
     notes: NoteProps[];
@@ -26,7 +26,7 @@ export function thusNotesApp() {
                 let { notes } = state;
                 const { notesDir } = this.props.glob;
                 const filename = toRandKey() + '.txt';
-                const drop = new Drop(notesDir, filename);
+                const drop = new TextDrop(notesDir, filename);
                 const note: NoteProps = { key: toRandKey(), drop };
                 notes = [...notes, note];
                 return { ...state, notes } satisfies State;

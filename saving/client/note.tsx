@@ -1,13 +1,13 @@
 import React, { FormEventHandler } from 'react';
 import { broke, fail, isNull } from '../shared/core';
-import { Drop } from './drop';
 import { Resizable } from './resizable';
+import { TextDrop } from './text-drop';
 
 const plainTextOnly = 'plaintext-only' as never;
 
 export interface NoteProps {
     key: string;
-    drop: Drop;
+    drop: TextDrop;
 }
 
 type State = (

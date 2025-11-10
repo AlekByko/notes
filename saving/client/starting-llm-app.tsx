@@ -2,10 +2,10 @@ import React, { ChangeEventHandler, MouseEventHandler } from 'react';
 import ReactDOM from 'react-dom';
 import { isNull } from '../shared/core';
 import { formatTimestamp, toTimestamp } from '../shared/time-stamping';
-import { Drop } from './drop';
 import { knownNotesDirRef } from './file-system-entries';
 import { willOpenKnownDb } from './known-database';
 import { willTryLoadDirRef } from './reading-writing-files';
+import { TextDrop } from './text-drop';
 
 if (window.sandbox === 'starting-llm-app') {
 
@@ -24,7 +24,7 @@ if (window.sandbox === 'starting-llm-app') {
         const when = formatTimestamp(now);
         const salt = (~~(Math.random() * 999)).toFixed(0).padStart(3, '0');
         const noteFilename = `chat-${when}-${salt}.txt`
-        const drop = new Drop(notesDir, noteFilename);
+        const drop = new TextDrop(notesDir, noteFilename);
         const loaded = await drop.willLoad();
         void loaded;
         // if (isNull(loaded)) return exitLoud(`Unable to load saved text.`);
