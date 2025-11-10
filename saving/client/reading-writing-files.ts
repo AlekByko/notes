@@ -2,7 +2,6 @@ import { alwaysTrue, broke, fail, isNull } from '../shared/core';
 import { KnownPickedDirRef } from '../shared/identities';
 import { willFindAllInStoreOf, willPutAllToStoreOf } from "./databasing";
 import { KnownPickedDirEntry } from "./file-system-entries";
-import { JsonDrop } from './json-drop';
 import { knownDbStores } from "./known-settings";
 
 // https://web.dev/file-system-access/
@@ -244,7 +243,7 @@ export async function willMoveFiles(sourceDir: FileSystemDirectoryHandle, target
     }
 }
 
-export async function willMakeJsonDrop<Json extends object>(
+export async function willGetSubdirAndFilename(
     dir: FileSystemDirectoryHandle,
     path: string
 ) {
@@ -252,8 +251,5 @@ export async function willMakeJsonDrop<Json extends object>(
     subdirsNames.reverse();
     const fileDir = await willTryGetDirDeepFastNoChecks(dir, subdirsNames);
     if (isNull(fileDir)) return (alert(`No dir at: ${subdirsNames.join('/')}`), null);
-    const fileHandle = await willGetFileHandleOr(fileDir, fileName, null);
-    if (isNull(fileHandle)) return (alert(`No file at: ${subdirsNames.join('/')} ${fileName}`), null);
-    const drop = new JsonDrop<Json>(fileHandle);
-    return drop;
+    return { fileDir, fileName };
 }

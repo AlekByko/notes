@@ -6,9 +6,10 @@ import { AiWorkspace } from './ai-workspace';
 import { CuiWorkflow, findNodesThat } from './comfyui-info';
 import { makeSeed } from './ed-backend';
 import { knownConfigsDirRef } from './file-system-entries';
+import { thusJsonDrop } from './json-drop';
 import { willOpenKnownDb } from './known-database';
 import { readPathFromQueryStringOr, readStringFromQueryStringOr } from './reading-query-string';
-import { willMakeJsonDrop, willTryLoadDirRef } from './reading-writing-files';
+import { willTryLoadDirRef } from './reading-writing-files';
 
 if (window.sandbox === 'starting-ai-app') {
 
@@ -43,28 +44,31 @@ if (window.sandbox === 'starting-ai-app') {
         if (isNull(workspacePath)) return alert(`No workspace.`);
         console.log({ workspacePath });
 
-        const droppedWorkspace = await willMakeJsonDrop<AiWorkspace>(configsDir, workspacePath);
+        const droppedWorkspace = await thusJsonDrop<AiWorkspace>().willTryMake(configsDir, workspacePath);
         if (isNull(droppedWorkspace)) return alert(`No workspace drop.`);
-        console.log(droppedWorkspace);
-
-        const workspace = await droppedWorkspace.willLoad();
-        if (isUndefined(workspace)) return alert(`No workspace.`);
+        const workspace = droppedWorkspace.data;
         const { workflowPath } = workspace;
 
-        const droppedWorkflow = await willMakeJsonDrop<CuiWorkflow>(configsDir, workflowPath);
+        const droppedWorkflow = await thusJsonDrop<CuiWorkflow>().willTryMake(configsDir, workflowPath);
         if (isNull(droppedWorkflow)) return alert(`No workflow drop.`);
+        const workflow = droppedWorkflow.data;
 
-        const workflow = await droppedWorkflow.willLoad();
-        if (isUndefined(workflow)) return alert(`No workflow.`);
-        dump(`Got workflow at: ${workflowPath}`, workflow);
+        dump('workflow', workflow);
 
+        let scheduledSave = 0;
 
         const props: typeof App.Props = {
-            text: window.name,
+            text: workspace.template,
+            onSaveTemplate: text => {
+                window.clearTimeout(scheduledSave);
+                scheduledSave = window.setTimeout(async () => {
+                    workspace.template = text;
+                    await droppedWorkspace.willSave(workspace);
+                }, 500);
+            },
             onScheduling: async params => {
                 const { prompt, height, template, width, seed } = params;
                 console.log(params);
-                window.name = template;
 
                 const textNodes = findNodesThat(workflow, x => x.class_type === 'CLIPTextEncode');
 

@@ -7,6 +7,7 @@ import { InferenceParams } from './inference-params';
 export interface AiAppProps {
     text: string;
     onScheduling: (params: InferenceParams) => void;
+    onSaveTemplate: (template: string) => void;
 }
 export function thusAiApp() {
 
@@ -23,6 +24,7 @@ export function thusAiApp() {
         whenChangingText: ChangeEventHandler<HTMLTextAreaElement> = _e => {
             const template = _e.currentTarget.value;
             this.setState(state => {
+                this.props.onSaveTemplate(template);
                 return { ...state, template } satisfies State;
             });
         };
