@@ -1,8 +1,6 @@
-import React, { MouseEventHandler } from 'react';
+import React from 'react';
 import { NoteProps, thusNote } from './note';
 import { NotesGlob } from './notes-glob';
-import { toRandKey } from './reacting';
-import { TextDrop } from './text-drop';
 
 export interface NotesAppProps {
     notes: NoteProps[];
@@ -21,17 +19,7 @@ export function thusNotesApp() {
     const Note = thusNote();
     return class NotesApp extends React.Component<NotesAppProps, State> {
         state = makeState(this.props);
-        whenAddingNote: MouseEventHandler<HTMLButtonElement> = _e => {
-            this.setState(state => {
-                let { notes } = state;
-                const { notesDir } = this.props.glob;
-                const filename = toRandKey() + '.txt';
-                const drop = new TextDrop(notesDir, filename);
-                const note: NoteProps = { key: toRandKey(), drop };
-                notes = [...notes, note];
-                return { ...state, notes } satisfies State;
-            });
-        };
+
         render() {
             const { notes } = this.state;
             return <div className="notes">
@@ -39,7 +27,7 @@ export function thusNotesApp() {
                     return <Note {...note} />;
                 })}
                 <div className="notes-toolbar">
-                    <button onClick={this.whenAddingNote}>Add</button>
+                    Nothing here
                 </div>
             </div>;
         }

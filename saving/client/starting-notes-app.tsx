@@ -29,13 +29,14 @@ async function run() {
     const droppedWorkspace = await thusJsonDrop<NotesWorkspace>().willTryMake(notesDir, workspacePath);
     if (isNull(droppedWorkspace)) return alert(`No workspace at: ${workspacePath}`);
     const workspace = droppedWorkspace.data;
+    const workspaceDir = droppedWorkspace.dir;
     const notes = workspace.notes.map(config => {
         const { path, key } = config;
-        const drop = new TextDrop(notesDir, path);
+        const drop = new TextDrop(workspaceDir, path);
         const note: NoteProps = { key, drop };
         return note;
     });
-    const glob: NotesGlob = { db, notesDir };
+    const glob: NotesGlob = { db };
     const props: NotesAppProps = { notes, glob };
     const NotesApp = thusNotesApp();
     ReactDOM.render(<NotesApp {...props} />, rootElement)

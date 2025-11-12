@@ -16,13 +16,14 @@ export function thusJsonDrop<Json extends object>() {
 
         constructor(
             public data: Json,
-            private handle: FileSystemFileHandle,
+            public dir: FileSystemDirectoryHandle,
+            public file: FileSystemFileHandle,
         ) { }
 
         async willSave(json: Json) {
             const text = JSON.stringify(json, null, 4);
             const wasSaved = await willSaveFile(
-                this.handle, text
+                this.file, text
             );
             return wasSaved;
         }
@@ -38,7 +39,7 @@ export function thusJsonDrop<Json extends object>() {
             if (isNull(file)) return null;
             const data = await willLoad(file);
             if (isUndefined(data)) return null;
-            return new JsonDrop(data, file);
+            return new JsonDrop(data, fileDir, file);
         }
 
     };
