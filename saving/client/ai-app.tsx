@@ -15,6 +15,8 @@ export function thusAiApp() {
         template: string;
         seed: number;
         prompt: string;
+        lastSeed: number | null;
+        lastPrompt: string | null;
     }
 
     return class AiApp extends React.Component<AiAppProps, State> {
@@ -33,7 +35,12 @@ export function thusAiApp() {
             const { template, seed, prompt } = this.state;
             if (seed < 1) return;
             const { onScheduling } = this.props;
-            onScheduling({ prompt, width: 640, height: 640, template, seed });
+            this.setState(state => {
+                const { seed, prompt } = state;
+                return { ...state, lastSeed: seed, lastPrompt: prompt } satisfies State;
+            }, () => {
+                onScheduling({ prompt, width: 640, height: 640, template, seed });
+            });
         };
 
         whenScheduling4: MouseEventHandler<HTMLButtonElement> = _e => {
@@ -41,9 +48,9 @@ export function thusAiApp() {
         }
 
         whenSpinning: MouseEventHandler<HTMLButtonElement> = _e => {
+            const seed = makeSeed();
             this.setState(state => {
                 const { template } = state;
-                const seed = makeSeed();
                 const prompt = executeTemplate(template, seed);
                 return { ...state, seed, prompt } satisfies State;
             });
@@ -61,14 +68,17 @@ export function thusAiApp() {
 
         makeState(): State {
             const { text: template } = this.props;
-            return { template, seed: 0, prompt: '' };
+            return { template, seed: 0, prompt: '', lastSeed: null, lastPrompt: null };
         }
 
         state = this.makeState();
 
         render() {
-            const { template, seed, prompt } = this.state;
-            const canSchedule = seed > 0;
+            const { template, seed, prompt, lastSeed, lastPrompt } = this.state;
+            const canSchedule = true
+                && seed > 0
+                && lastSeed !== seed
+                && lastPrompt !== prompt;
             return <div className="ai-inputs">
                 <div>
                     <textarea rows={20} cols={100} onChange={this.whenChangingText} value={template}></textarea>
