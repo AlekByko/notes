@@ -15,7 +15,7 @@ export interface NoteProps {
     drop: TextDrop;
     box: Box;
     title: string;
-    onChangedBox: (key:NoteKey, box: Box) => void;
+    onChangedBox: (key: NoteKey, box: Box) => void;
 }
 
 
@@ -52,7 +52,10 @@ export function thusNote() {
             this.props.onChangedBox(noteKey, box)
         };
 
-        moving = enableMoving(this.props.box);
+        moving = enableMoving((() => {
+            const { x, y, width, height } = this.props.box;
+            return { x, y, width, height };
+        })());
 
         async componentDidMount() {
 

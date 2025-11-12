@@ -12,31 +12,32 @@ export function enableMoving<Pos>(
         reportPos: (pos: Pos, dx: number, dy: number) => void;
     },
 ) {
-    let startX = 0;
-    let startY = 0;
-    let startPos = defaults.readPos(contentElement);
 
-    function whenMouseup(e: MouseEvent) {
-        document.removeEventListener('mouseup', whenMouseup);
-        document.removeEventListener('mousemove', whenMousemove);
-        const dx = e.pageX - startX;
-        const dy = e.pageY - startY;
-        defaults.reportPos(startPos, dx, dy);
-    }
-
-    function whenMousemove(e: MouseEvent) {
-        const dx = e.pageX - startX;
-        const dy = e.pageY - startY;
-        defaults.applyDelta(contentElement, startPos, dx, dy);
-    }
     function whenMousedown(e: MouseEvent) {
+        const startX = e.pageX;
+        const startY = e.pageY;
+        const startPos = defaults.readPos(contentElement);
+
         document.addEventListener('mousemove', whenMousemove);
         document.addEventListener('mouseup', whenMouseup);
-        startX = e.pageX;
-        startY = e.pageY;
-        startPos = defaults.readPos(contentElement);
+
+        function whenMouseup(e: MouseEvent) {
+            document.removeEventListener('mouseup', whenMouseup);
+            document.removeEventListener('mousemove', whenMousemove);
+            const dx = e.pageX - startX;
+            const dy = e.pageY - startY;
+            defaults.reportPos(startPos, dx, dy);
+        }
+
+        function whenMousemove(e: MouseEvent) {
+            const dx = e.pageX - startX;
+            const dy = e.pageY - startY;
+            defaults.applyDelta(contentElement, startPos, dx, dy);
+        }
     }
+
     handleElement.addEventListener('mousedown', whenMousedown);
+
     return function dispose() {
         handleElement.removeEventListener('mousedown', whenMousedown);
     };
