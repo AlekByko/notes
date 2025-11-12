@@ -1,6 +1,5 @@
 import React, { FormEventHandler } from 'react';
 import { broke, fail, isNull } from '../shared/core';
-import { enableMoving } from './moving-by-mouse';
 import { NoteKey } from './notes-workspace';
 import { Box } from './reading-query-string';
 import { Resizable } from './resizable';
@@ -32,6 +31,46 @@ function makeState(_props: NoteProps): State {
     return { kind: 'have-no-idea', ...where };
 }
 
+export function enableMoving<Pos>(
+    headerElement: HTMLElement,
+    contentElement: HTMLElement,
+    defaults: {
+        readPos: (element: HTMLElement) => Pos;
+        applyDelta: (element: HTMLElement, pos: Pos, dx: number, dy: number) => void;
+        reportPos: (pos: Pos, dx: number, dy: number) => void;
+    },
+) {
+
+    function whenMousedown(e: MouseEvent) {
+        const startX = e.pageX;
+        const startY = e.pageY;
+        const startPos = defaults.readPos(contentElement);
+
+        document.addEventListener('mousemove', whenMousemove);
+        document.addEventListener('mouseup', whenMouseup);
+
+        function whenMouseup(e: MouseEvent) {
+            document.removeEventListener('mouseup', whenMouseup);
+            document.removeEventListener('mousemove', whenMousemove);
+            const dx = e.pageX - startX;
+            const dy = e.pageY - startY;
+            defaults.reportPos(startPos, dx, dy);
+        }
+
+        function whenMousemove(e: MouseEvent) {
+            const dx = e.pageX - startX;
+            const dy = e.pageY - startY;
+            defaults.applyDelta(contentElement, startPos, dx, dy);
+        }
+    }
+
+    headerElement.addEventListener('mousedown', whenMousedown);
+
+    return function dispose() {
+        headerElement.removeEventListener('mousedown', whenMousedown);
+    };
+}
+
 export function thusNote() {
     return class Note extends React.Component<NoteProps, State> {
 
@@ -49,12 +88,37 @@ export function thusNote() {
             this.props.onChangedBox(noteKey, box)
         };
 
-        moving = enableMoving((() => {
-            const { x, y, width, height } = this.props.box;
-            return { x, y, width, height };
-        })());
+        private headerElement: HTMLDivElement | null = null;
+        private contentElement: HTMLElement | null = null;
 
-        async componentDidMount() {
+        dispose = [] as Act[];
+        async componentDidMount(): Promise<void> {
+            const { contentElement, headerElement } = this;
+            if (isNull(contentElement) || isNull(headerElement)) return;
+            const { x, y, width, height } = this.props.box;
+            contentElement.style.left = x + 'px';
+            contentElement.style.top = y + 'px';
+            contentElement.style.width = width + 'px';
+            contentElement.style.height = height + 'px';
+            this.dispose.push(...[
+                enableMoving(headerElement, contentElement, {
+                    readPos: element => {
+                        const { top, left } = element.getBoundingClientRect();
+                        return { top, left };
+                    },
+                    applyDelta: (element, { top, left }, dx, dy) => {
+                        element.style.left = (left + dx) + 'px';
+                        element.style.top = (top + dy) + 'px';
+                    },
+                    reportPos: ({ left: x, top: y }, dx, dy) => {
+                        x += dx;
+                        y += dy;
+                        const { noteKey } = this.props;
+                        this.props.onChangedBox(noteKey, { y, x });
+                    },
+                }),
+            ]);
+
 
             const { drop } = this.props;
             const text = await drop.willLoad();
@@ -75,12 +139,16 @@ export function thusNote() {
             }
         }
 
+        componentWillUnmount(): void {
+            this.dispose.forEach(dispose => dispose());
+        }
+
         render() {
             const { noteKey, drop, title, box } = this.props;
             const { state } = this;
             const where = `${drop.dir.name}/${drop.filename}`;
-            return <Resizable key={noteKey} refin={this.moving.whenRootElement} className="note" onChanged={this.whenChangedBox} box={box}>
-                <div className="note-header" ref={this.moving.whenHandleElement} title={where}>{title}</div>
+            return <Resizable key={noteKey} refin={el => this.contentElement = el} className="note" onChanged={this.whenChangedBox} box={box}>
+                <div className="note-header" ref={el => this.headerElement = el} title={where}>{title}</div>
                 {(() => {
                     switch (state.kind) {
                         case 'have-no-idea': return <div>Loading...</div>;
