@@ -21,6 +21,7 @@ export function thusJsonDrop<Json extends object>() {
         ) { }
 
         async willSave(json: Json) {
+            this.data = json;
             const text = JSON.stringify(json, null, 4);
             const wasSaved = await willSaveFile(
                 this.file, text

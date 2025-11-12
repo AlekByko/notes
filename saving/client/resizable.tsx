@@ -1,5 +1,6 @@
 import React from 'react';
 import { isNull } from '../shared/core';
+import { Box } from '../shared/shapes';
 import { addClassIfDefined } from './reacting';
 
 export function enableMoving<Pos>(
@@ -8,6 +9,7 @@ export function enableMoving<Pos>(
     defaults: {
         readPos: (element: HTMLElement) => Pos;
         applyDelta: (element: HTMLElement, pos: Pos, dx: number, dy: number) => void;
+        reportPos: (pos: Pos, dx: number, dy: number) => void;
     },
 ) {
     let startX = 0;
@@ -19,7 +21,7 @@ export function enableMoving<Pos>(
         document.removeEventListener('mousemove', whenMousemove);
         const dx = e.pageX - startX;
         const dy = e.pageY - startY;
-        defaults.applyDelta(contentElement, startPos, dx, dy);
+        defaults.reportPos(startPos, dx, dy);
     }
 
     function whenMousemove(e: MouseEvent) {
@@ -41,6 +43,7 @@ export function enableMoving<Pos>(
 }
 export interface ResizableProps {
     className?: string;
+    onChanged: (box: Partial<Box>) => void;
     refin: (element: HTMLElement | null) => void;
 }
 export class Resizable extends React.Component<ResizableProps> {
@@ -65,6 +68,11 @@ export class Resizable extends React.Component<ResizableProps> {
                     element.style.top = (top + dy) + 'px';
                     element.style.height = (height - dy) + 'px';
                 },
+                reportPos: ({ top: y, height }, _dx, dy) => {
+                    y += dy;
+                    height -= dy;
+                    this.props.onChanged({ y, height });
+                },
             }),
             enableMoving(rightElement, contentElement, {
                 readPos: element => {
@@ -73,6 +81,10 @@ export class Resizable extends React.Component<ResizableProps> {
                 },
                 applyDelta: (element, width, dx, _dy) => {
                     element.style.width = (width + dx) + 'px';
+                },
+                reportPos: (width, dx, _dy) => {
+                    width += dx;
+                    this.props.onChanged({ width });
                 }
             }),
             enableMoving(bottomElement, contentElement, {
@@ -82,6 +94,10 @@ export class Resizable extends React.Component<ResizableProps> {
                 },
                 applyDelta: (element, height, _dx, dy) => {
                     element.style.height = (height + dy) + 'px';
+                },
+                reportPos: (height, _dx, dy) => {
+                    height += dy;
+                    this.props.onChanged({ height });
                 }
             }),
             enableMoving(leftElement, contentElement, {
@@ -92,6 +108,11 @@ export class Resizable extends React.Component<ResizableProps> {
                 applyDelta: (element, { left, width }, dx, _dy) => {
                     element.style.left = (left + dx) + 'px';
                     element.style.width = (width - dx) + 'px';
+                },
+                reportPos: ({ left: x, width }, dx, _dy) => {
+                    x += dx;
+                    width -= dx;
+                    this.props.onChanged({ x, width });
                 }
             }),
         ]);

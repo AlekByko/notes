@@ -1,18 +1,21 @@
 import React, { FormEventHandler } from 'react';
 import { broke, fail, isNull } from '../shared/core';
+import { BeingBox, henceBeingBox } from '../shared/shapes';
 import { enableMoving } from './moving-by-mouse';
 import { NoteKey } from './notes-workspace';
+import { Box } from './reading-query-string';
 import { Resizable } from './resizable';
 import { TextDrop } from './text-drop';
 
 const plainTextOnly = 'plaintext-only' as never;
 
 export interface NoteProps {
-    key: NoteKey;
+    /** @deprecated cannot be just `key` because React */
+    noteKey: NoteKey;
     drop: TextDrop;
-    x: number;
-    y: number;
+    box: Box;
     title: string;
+    onChangedBox: (key:NoteKey, box: Box) => void;
 }
 
 
@@ -29,7 +32,7 @@ const where = { x: 20, y: 100 };
 function makeState(_props: NoteProps): State {
     return { kind: 'have-no-idea', ...where };
 }
-
+const beingBox: BeingBox = henceBeingBox({ x: 100, y: 100, width: 200, height: 400 });
 export function thusNote() {
     return class Note extends React.Component<NoteProps, State> {
 
@@ -42,7 +45,14 @@ export function thusNote() {
             await drop.willOverwrite(innerText);
         };
 
-        moving = enableMoving(this.props);
+        whenChangedBox = (box: Partial<Box>) => {
+            beingBox.defaultize(box);
+            beingBox.roundize(box);
+            const { noteKey } = this.props;
+            this.props.onChangedBox(noteKey, box)
+        };
+
+        moving = enableMoving(this.props.box);
 
         async componentDidMount() {
 
@@ -66,10 +76,10 @@ export function thusNote() {
         }
 
         render() {
-            const { key, drop, title } = this.props;
+            const { noteKey, drop, title } = this.props;
             const { state } = this;
             const where = `${drop.dir.name}/${drop.filename}`;
-            return <Resizable key={key} refin={this.moving.whenRootElement} className="note">
+            return <Resizable key={noteKey} refin={this.moving.whenRootElement} className="note" onChanged={this.whenChangedBox}>
                 <div className="note-header" ref={this.moving.whenHandleElement} title={where}>{title}</div>
                 {(() => {
                     switch (state.kind) {
