@@ -12,8 +12,27 @@
     left: 0px;
     right: 0px;
     height: @resize-bar-area-size;
-    background-color: transparent; // red;
+    background-color: transparent;
     cursor: ns-resize;
+}
+.resizable-top-right-corner {
+    position: absolute;
+    top: -@resize-bar-area-size/2;
+    right: -@resize-bar-area-size/2;
+    width: @resize-bar-area-size;
+    height: @resize-bar-area-size;
+    background-color: red;
+    cursor: ne-resize;
+}
+
+.resizable-top-left-corner {
+    position: absolute;
+    top: -@resize-bar-area-size/2;
+    left: -@resize-bar-area-size/2;
+    width: @resize-bar-area-size;
+    height: @resize-bar-area-size;
+    background-color: green;
+    cursor: nw-resize;
 }
 
 .resizable-left-bar {
@@ -22,7 +41,7 @@
     bottom: 0px;
     left: -@resize-bar-area-size/2;
     width: @resize-bar-area-size;
-    background-color: transparent; // green;
+    background-color: transparent;
     cursor: ew-resize;
 }
 
@@ -42,6 +61,24 @@
     right: 0px;
     bottom: -@resize-bar-area-size/2;
     height: @resize-bar-area-size;
-    background-color: transparent; // orange;
+    background-color: transparent;
     cursor: ns-resize;
+}
+.resizable-bottom-right-corner {
+    position: absolute;
+    bottom: -@resize-bar-area-size/2;
+    right: -@resize-bar-area-size/2;
+    width: @resize-bar-area-size;
+    height: @resize-bar-area-size;
+    background-color: blue;
+    cursor: se-resize;
+}
+.resizable-bottom-left-corner {
+    position: absolute;
+    bottom: -@resize-bar-area-size/2;
+    left: -@resize-bar-area-size/2;
+    width: @resize-bar-area-size;
+    height: @resize-bar-area-size;
+    background-color: orange;
+    cursor:sw-resize;
 }

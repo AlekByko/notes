@@ -51,21 +51,49 @@ export interface ResizableProps {
 export class Resizable extends React.Component<ResizableProps> {
 
     private contentElement: HTMLElement | null = null;
+
     private bottomElement: HTMLDivElement | null = null;
     private topElement: HTMLDivElement | null = null;
     private leftElement: HTMLDivElement | null = null;
     private rightElement: HTMLDivElement | null = null;
 
+    private topLeftElement: HTMLDivElement | null = null;
+    private topRightElement: HTMLDivElement | null = null;
+    private bottomRightElement: HTMLDivElement | null = null;
+    private bottomLeftElement: HTMLDivElement | null = null;
+
     dispose = [] as Act[];
     componentDidMount(): void {
-        const { contentElement, topElement, rightElement, bottomElement, leftElement } = this;
+        const {
+            contentElement,
+            topElement, rightElement, bottomElement, leftElement,
+            topRightElement, topLeftElement, bottomRightElement, bottomLeftElement,
+        } = this;
         if (isNull(contentElement) || isNull(topElement) || isNull(rightElement) || isNull(bottomElement) || isNull(leftElement)) return;
-        const {x, y, width, height} = this.props.box;
+        if (isNull(topRightElement) || isNull(topLeftElement) || isNull(bottomRightElement) || isNull(bottomLeftElement)) return;
+        const { x, y, width, height } = this.props.box;
         contentElement.style.left = x + 'px';
         contentElement.style.top = y + 'px';
         contentElement.style.width = width + 'px';
         contentElement.style.height = height + 'px';
         this.dispose.push(...[
+            enableMoving(topRightElement, contentElement, {
+                readPos: element => {
+                    const { top, height, width } = element.getBoundingClientRect();
+                    return { top, height, width };
+                },
+                applyDelta: (element, { top, height, width }, dx, dy) => {
+                    element.style.top = (top + dy) + 'px';
+                    element.style.height = (height - dy) + 'px';
+                    element.style.width = (width + dx) + 'px';
+                },
+                reportPos: ({ top: y, height, width }, dx, dy) => {
+                    y += dy;
+                    height -= dy;
+                    width += dx;
+                    this.props.onChanged({ y, height, width });
+                },
+            }),
             enableMoving(topElement, contentElement, {
                 readPos: element => {
                     const { top, height } = element.getBoundingClientRect();
@@ -140,6 +168,10 @@ export class Resizable extends React.Component<ResizableProps> {
             <div draggable={false} className="resizable-left-bar" ref={el => this.leftElement = el}></div>
             <div draggable={false} className="resizable-right-bar" ref={el => this.rightElement = el}></div>
             <div draggable={false} className="resizable-bottom-bar" ref={el => this.bottomElement = el}></div>
+            <div draggable={false} className="resizable-top-left-corner" ref={el => this.topLeftElement = el}></div>
+            <div draggable={false} className="resizable-top-right-corner" ref={el => this.topRightElement = el}></div>
+            <div draggable={false} className="resizable-bottom-left-corner" ref={el => this.bottomLeftElement = el}></div>
+            <div draggable={false} className="resizable-bottom-right-corner" ref={el => this.bottomRightElement = el}></div>
         </div>
     }
 }
