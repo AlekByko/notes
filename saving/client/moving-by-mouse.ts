@@ -3,10 +3,14 @@ import { ignore, isNull } from '../shared/core';
 export function enableMouseMoving(
     handleElement: HTMLElement | null,
     rootElementOrNull: HTMLElement | null,
+    startAt: Point,
 ): () => void {
 
     if (isNull(handleElement) || isNull(rootElementOrNull)) return ignore;
     const rootElement = rootElementOrNull;
+    rootElement.style.left = startAt.x + 'px';
+    rootElement.style.top = startAt.y + 'px';
+
     const thisRect = rootElement.getBoundingClientRect();
 
     let x = thisRect.left;
@@ -49,8 +53,8 @@ export function enableMouseMoving(
     };
 }
 
-
-export function enableMoving() {
+interface Point { x: number; y: number }
+export function enableMoving(startAt = { x: 0, y: 0 }) {
     let handleElement: HTMLElement | null = null;
     let rootElement: HTMLElement | null = null;
     let stopListening = ignore;
@@ -60,14 +64,14 @@ export function enableMoving() {
             if (isNull(element)) return;
             handleElement = element;
             stopListening();
-            stopListening = enableMouseMoving(handleElement, rootElement);
+            stopListening = enableMouseMoving(handleElement, rootElement, startAt);
         },
         whenRootElement(element: HTMLElement | null): void {
             if (rootElement === element) return;
             if (isNull(element)) return;
             rootElement = element;
             stopListening();
-            stopListening = enableMouseMoving(handleElement, rootElement);
+            stopListening = enableMouseMoving(handleElement, rootElement, startAt);
         },
     };
 }

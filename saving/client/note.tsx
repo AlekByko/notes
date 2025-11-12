@@ -1,5 +1,6 @@
 import React, { FormEventHandler } from 'react';
 import { broke, fail, isNull } from '../shared/core';
+import { enableMoving } from './moving-by-mouse';
 import { Resizable } from './resizable';
 import { TextDrop } from './text-drop';
 
@@ -37,13 +38,7 @@ export function thusNote() {
             await drop.willOverwrite(innerText);
         };
 
-        takeElement = (element: HTMLDivElement | null) => {
-            if (isNull(element)) return;
-            const { x, y } = this.state;
-
-            element.style.left = x + 'px';
-            element.style.top = y + 'px';
-        };
+        moving = enableMoving({x: 20, y: 40});
 
         async componentDidMount() {
 
@@ -69,8 +64,8 @@ export function thusNote() {
         render() {
             const { key, drop } = this.props;
             const { state } = this;
-            return <Resizable key={key} refin={this.takeElement} className="note">
-                <div className="note-header">{drop.dir.name}/{drop.filename}</div>
+            return <Resizable key={key} refin={this.moving.whenRootElement} className="note">
+                <div className="note-header" ref={this.moving.whenHandleElement}>{drop.dir.name}/{drop.filename}</div>
                 {(() => {
                     switch (state.kind) {
                         case 'have-no-idea': return <div>Loading...</div>;
