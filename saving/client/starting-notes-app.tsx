@@ -1,13 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { isNonNull } from '../shared/core';
+import { isNonNull, isNull } from '../shared/core';
 import { knownNotesDirRef } from './file-system-entries';
+import { thusJsonDrop } from './json-drop';
 import { willOpenKnownDb } from './known-database';
 import { NoteProps } from './note';
 import { NotesAppProps, thusNotesApp } from './notes-app';
 import { NotesGlob } from './notes-glob';
-import { toRandKey } from './reacting';
-import { readStringFromQueryStringOr } from './reading-query-string';
+import { NotesWorkspace } from './notes-workspace';
+import { readPathFromQueryStringOr, readStringFromQueryStringOr } from './reading-query-string';
 import { willClaimDir } from './setting-up-notes-app';
 import { TextDrop } from './text-drop';
 
@@ -19,13 +20,22 @@ async function run() {
         document.title = title;
     }
 
+    const workspacePath = readPathFromQueryStringOr('workspace', null);
+    if (isNull(workspacePath)) return alert(`No workspace path.`);
+    console.log({ workspacePath });
+
     const rootElement = document.getElementById('root')!;
     const notesDir = await willClaimDir(db, rootElement, knownNotesDirRef);
+    const droppedWorkspace = await thusJsonDrop<NotesWorkspace>().willTryMake(notesDir, workspacePath);
+    if (isNull(droppedWorkspace)) return alert(`No workspace at: ${workspacePath}`);
+    const workspace = droppedWorkspace.data;
+    const notes = workspace.notes.map(config => {
+        const { path, key } = config;
+        const drop = new TextDrop(notesDir, path);
+        const note: NoteProps = { key, drop };
+        return note;
+    });
     const glob: NotesGlob = { db, notesDir };
-    const drop = new TextDrop(notesDir, 'test.txt');
-    const key = toRandKey();
-    const note: NoteProps = { key, drop };
-    const notes = [note];
     const props: NotesAppProps = { notes, glob };
     const NotesApp = thusNotesApp();
     ReactDOM.render(<NotesApp {...props} />, rootElement)
