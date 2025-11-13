@@ -6,7 +6,12 @@
 
 @resize-bar-area-size: 10px;
 
+.resizable-handle-or-bar {
+    user-select: none;
+}
+
 .resizable-top-bar {
+    .resizable-handle-or-bar();
     position: absolute;
     top: -@resize-bar-area-size/2;
     left: 0px;
@@ -15,27 +20,31 @@
     background-color: transparent;
     cursor: ns-resize;
 }
+
 .resizable-top-right-corner {
+    .resizable-handle-or-bar();
     position: absolute;
     top: -@resize-bar-area-size/2;
     right: -@resize-bar-area-size/2;
     width: @resize-bar-area-size;
     height: @resize-bar-area-size;
-    background-color: red;
+    background-color: transparent;
     cursor: ne-resize;
 }
 
 .resizable-top-left-corner {
+    .resizable-handle-or-bar();
     position: absolute;
     top: -@resize-bar-area-size/2;
     left: -@resize-bar-area-size/2;
     width: @resize-bar-area-size;
     height: @resize-bar-area-size;
-    background-color: green;
+    background-color: transparent;
     cursor: nw-resize;
 }
 
 .resizable-left-bar {
+    .resizable-handle-or-bar();
     position: absolute;
     top: 0px;
     bottom: 0px;
@@ -46,16 +55,18 @@
 }
 
 .resizable-right-bar {
+    .resizable-handle-or-bar();
     position: absolute;
     top: 0px;
     bottom: 0px;
     right: -@resize-bar-area-size/2;
     width: @resize-bar-area-size;
-    background-color: transparent; // blue;
+    background-color: transparent;;
     cursor: ew-resize;
 }
 
 .resizable-bottom-bar {
+    .resizable-handle-or-bar();
     position: absolute;
     left: 0px;
     right: 0px;
@@ -64,21 +75,25 @@
     background-color: transparent;
     cursor: ns-resize;
 }
+
 .resizable-bottom-right-corner {
+    .resizable-handle-or-bar();
     position: absolute;
     bottom: -@resize-bar-area-size/2;
     right: -@resize-bar-area-size/2;
     width: @resize-bar-area-size;
     height: @resize-bar-area-size;
-    background-color: blue;
+    background-color: transparent;
     cursor: se-resize;
 }
+
 .resizable-bottom-left-corner {
+    .resizable-handle-or-bar();
     position: absolute;
     bottom: -@resize-bar-area-size/2;
     left: -@resize-bar-area-size/2;
     width: @resize-bar-area-size;
     height: @resize-bar-area-size;
-    background-color: orange;
-    cursor:sw-resize;
+    background-color: transparent;
+    cursor: sw-resize;
 }

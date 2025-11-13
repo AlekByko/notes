@@ -94,6 +94,21 @@ export class Resizable extends React.Component<ResizableProps> {
                     this.props.onChanged({ y, height, width });
                 },
             }),
+            enableMoving(bottomRightElement, contentElement, {
+                readPos: element => {
+                    const { height, width } = element.getBoundingClientRect();
+                    return { height, width };
+                },
+                applyDelta: (element, { height, width }, dx, dy) => {
+                    element.style.height = (height + dy) + 'px';
+                    element.style.width = (width + dx) + 'px';
+                },
+                reportPos: ({ height, width }, dx, dy) => {
+                    height += dy;
+                    width += dx;
+                    this.props.onChanged({ y, height, width });
+                },
+            }),
             enableMoving(topLeftElement, contentElement, {
                 readPos: element => {
                     const { top, left, height, width } = element.getBoundingClientRect();
@@ -110,6 +125,23 @@ export class Resizable extends React.Component<ResizableProps> {
                     y += dy;
                     width -= dx;
                     height -= dy;
+                    this.props.onChanged({ x, y, height, width });
+                },
+            }),
+            enableMoving(bottomLeftElement, contentElement, {
+                readPos: element => {
+                    const { left, height, width } = element.getBoundingClientRect();
+                    return { left, height, width };
+                },
+                applyDelta: (element, { left, width, height }, dx, dy) => {
+                    element.style.left = (left + dx) + 'px';
+                    element.style.width = (width - dx) + 'px';
+                    element.style.height = (height + dy) + 'px';
+                },
+                reportPos: ({ left: x, height, width }, dx, dy) => {
+                    x += dx;
+                    width -= dx;
+                    height += dy;
                     this.props.onChanged({ x, y, height, width });
                 },
             }),
