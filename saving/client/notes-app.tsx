@@ -1,8 +1,8 @@
 import React, { MouseEventHandler } from 'react';
-import { isUndefined } from '../shared/core';
+import { isNull, isUndefined } from '../shared/core';
 import { NoteProps, thusNote } from './note';
 import { NotesGlob } from './notes-glob';
-import { normalizeNoteConfig, NoteKey, NotesWorkspace } from './notes-workspace';
+import { beingNoteBox, makeNoteKey, normalizeNoteConfig, NoteConfig, NoteKey, NotesWorkspace } from './notes-workspace';
 import { Box } from './reading-query-string';
 import { TextDrop } from './text-drop';
 
@@ -29,18 +29,41 @@ export function thusNotesApp() {
             this.props.onChangedWorkspace();
         }
         whenAddingNote: MouseEventHandler<HTMLButtonElement> = _e => {
-
+            const title = prompt('Name:');
+            if (isNull(title)) return;
+            const key = makeNoteKey();
+            const path = `${key}.txt`;
+            const box = { ...beingNoteBox.defaultBox };
+            const config: NoteConfig = {
+                key, path, box, title,
+            };
+            const { workspace } = this.props;
+            const note = this.makeNote(config);
+            this.setState(state => {
+                workspace.notes.push(config);
+                let { notes } = state;
+                notes = [...notes, note];
+                return { ...state, note };
+            }, () => this.props.onChangedWorkspace());
         };
-        private makeState({ workspace, workspaceDir }: NotesAppProps): State {
+
+        private makeState(): State {
+            const { workspace } = this.props;
             const notes = workspace.notes.map(config => {
-                const { path, key, box, title } = normalizeNoteConfig(config);
-                const drop = new TextDrop(workspaceDir, path);
-                const note: NoteProps = { noteKey: key, drop, box, title, onChangedBox: this.whenChangingBox };
-                return note;
+                return this.makeNote(config);
             });
             return { notes };
         }
-        state = this.makeState(this.props);
+
+        state = this.makeState();
+
+        private makeNote(config: NoteConfig) {
+            const { workspaceDir } = this.props;
+            const { path, key, box, title } = normalizeNoteConfig(config);
+            const drop = new TextDrop(workspaceDir, path);
+            const note: NoteProps = { noteKey: key, drop, box, title, onChangedBox: this.whenChangingBox };
+            return note;
+        }
 
         render() {
             const { notes } = this.state;

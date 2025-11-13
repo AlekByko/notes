@@ -1,6 +1,5 @@
 import { asDefinedOr } from '../shared/core';
 import { BeingBox, Box, henceBeingBox } from '../shared/shapes';
-import { makeSeed } from './randomizing';
 
 export interface NotesWorkspace {
     notes: NoteConfig[];
@@ -8,7 +7,7 @@ export interface NotesWorkspace {
 
 export type NoteKey = string & As<'note-key'>;
 export function makeNoteKey(): NoteKey {
-    return makeSeed() + "" as NoteKey;
+    return new Date().getTime() + "" as NoteKey;
 }
 
 export interface NoteConfig {
@@ -17,7 +16,7 @@ export interface NoteConfig {
     box?: Partial<Box>;
     title?: string;
 }
-const beingNoteBox: BeingBox = henceBeingBox({ x: 100, y: 100, width: 200, height: 400 });
+export const beingNoteBox: BeingBox = henceBeingBox({ x: 100, y: 100, width: 200, height: 400 });
 export function normalizeNoteConfig(config: NoteConfig) {
     let { key, path, title } = config;
     const box = config.box = asDefinedOr(config.box, beingNoteBox.defaultBox);
