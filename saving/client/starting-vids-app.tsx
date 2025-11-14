@@ -17,11 +17,7 @@ if (window.sandbox === 'starting-vids-app') {
     const vidsDirPath = readPathFromQueryStringOr('vidsDir', null);
     const promptNodeId = readNumberFromQueryString(/[?&]promptNode=([\d]+)/, null);
     const seedNodeId = readNumberFromQueryString(/[?&]seedNode=([\d]+)/, null);
-    function onSkipping(delta: number): void {
-        let url = window.location.href;
-        url = url.replaceAll(/skip=\d+/g, `skip=${skip + delta}`)
-        window.location.href = url;
-    }
+
     async function run() {
         if (isNull(vidsDirPath)) return alert(`No vidsDir.`);
         if (isNull(promptNodeId)) return alert(`No promptNode.`);
@@ -36,7 +32,13 @@ if (window.sandbox === 'starting-vids-app') {
             .filter(x => x.name.endsWith('.mp4'))
             .sort((a, b) => compareStrings(a.name, b.name));
 
-
+        function onSkipping(delta: number | 'last'): void {
+            if (delta === 'last') {
+                navigateToIndex(allVids.length - 1);
+            } else {
+                navigateToIndex(skip + delta);
+            }
+        }
         const App = thusVidApp();
         const props: VidAppProps = {
             vidsDirPath, allVids, vidsDir, seedNodeId, promptNodeId, onSkipping, skip, count,
@@ -45,3 +47,9 @@ if (window.sandbox === 'starting-vids-app') {
     }
     run();
 }
+function navigateToIndex(index: number) {
+    let url = window.location.href;
+    url = url.replaceAll(/skip=\d+/g, `skip=${index}`);
+    window.location.href = url;
+}
+

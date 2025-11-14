@@ -14,7 +14,7 @@ export interface VidAppProps {
     vidsDir: FileSystemDirectoryHandle;
     seedNodeId: number;
     promptNodeId: number;
-    onSkipping: (delta: number) => void;
+    onSkipping: (delta: number | 'last') => void;
 }
 
 interface State {
@@ -142,16 +142,16 @@ export function thusVidApp() {
             await this._willRemoveByNames(new Set([filename]));
         };
 
-        whenSkippingPlus10: MouseEventHandler<HTMLAnchorElement> = e => {
+        whenSkippingMinus10: MouseEventHandler<HTMLAnchorElement> = e => {
             e.preventDefault();
             e.stopPropagation();
-            this.props.onSkipping(10);
+            this.props.onSkipping(-10);
         };
 
-        whenSkippingPlus05: MouseEventHandler<HTMLAnchorElement> = e => {
+        whenSkipToLast: MouseEventHandler<HTMLAnchorElement> = e => {
             e.preventDefault();
             e.stopPropagation();
-            this.props.onSkipping(5);
+            this.props.onSkipping('last');
         };
 
         whenPinpointing = (filename: string) => {
@@ -188,8 +188,8 @@ export function thusVidApp() {
                     <button onClick={this.whenSelectingAll} disabled={!canSelectAll}>{canSelectAll ? `Select All` : `Selected`}</button>
                     <button onClick={this.whenDeletingSelected} disabled={!canDelete}>{canDelete ? `Delete (${selectedCount})` : 'Delete'}</button>
                     <button onClick={this.whenMovingSelected} disabled={!canMove}>{canMove ? `Move (${selectedCount})` : 'Move'}</button>
-                    <a href="#" onClick={this.whenSkippingPlus10}>+10</a>
-                    <a href="#" onClick={this.whenSkippingPlus05}>+5</a>
+                    <a href="#" onClick={this.whenSkippingMinus10}>-10</a>
+                    <a href="#" onClick={this.whenSkipToLast}>Last</a>
                 </div>
                 <div className="vid-list">
                     {items.map(item => {

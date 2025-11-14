@@ -77,8 +77,7 @@ export function thusAiApp() {
             const { template, seed, prompt, lastSeed, lastPrompt } = this.state;
             const canSchedule = true
                 && seed > 0
-                && lastSeed !== seed
-                && lastPrompt !== prompt;
+                && (lastSeed !== seed || lastPrompt !== prompt);
             return <div className="ai-inputs">
                 <div>
                     <textarea rows={20} cols={100} onChange={this.whenChangingText} value={template}></textarea>
