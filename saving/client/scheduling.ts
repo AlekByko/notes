@@ -5,3 +5,11 @@ export function keepScheduling(act: () => void, delay: number): void {
     }
     setTimeout(schedule, delay);
 }
+
+export function debounceOver(delay: number) {
+    let timer = 0;
+    return function (act: Act) {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(act, delay);
+    };
+}

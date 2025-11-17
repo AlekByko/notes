@@ -1,19 +1,19 @@
-import React, { FormEventHandler, MouseEventHandler } from 'react';
+import React, { FormEventHandler, MouseEventHandler, UIEventHandler } from 'react';
 import { isNull } from '../shared/core';
-import { NoteKey } from './notes-workspace';
-import { Box } from './reading-query-string';
+import { NoteBox, NoteKey } from './notes-workspace';
 import { Resizable } from './resizable';
+import { debounceOver } from './scheduling';
 import { TextDrop } from './text-drop';
 
 const plainTextOnly = 'plaintext-only' as never;
 
 export interface NoteProps {
-    /** cannot be just `key` because React */
+    /** cannot be named just `key` because React */
     noteKey: NoteKey;
     drop: TextDrop;
-    box: Box;
+    box: NoteBox;
     title: string;
-    onChangedBox: (key: NoteKey, box: Partial<Box>) => void;
+    onChangedBox: (key: NoteKey, box: Partial<NoteBox>) => void;
     onChangedTitle: (key: NoteKey, title: string) => void;
 }
 
@@ -77,13 +77,14 @@ export function thusNote() {
             await drop.willOverwrite(innerText);
         };
 
-        whenChangedBox = (box: Partial<Box>) => {
+        whenChangedBox = (box: Partial<NoteBox>) => {
             const { noteKey } = this.props;
             this.props.onChangedBox(noteKey, box)
         };
 
         private headerElement: HTMLDivElement | null = null;
-        private contentElement: HTMLElement | null = null;
+        private noteElement: HTMLElement | null = null;
+        private textElement: HTMLElement | null = null;
 
         dispose = [] as Act[];
 
@@ -101,16 +102,28 @@ export function thusNote() {
 
         };
 
+        /** at initilizing and mounting we don't want scroll to fire at all, we only let it fire after we set the saved scroll position */
+        private shouldIgnoreScrollEvents = true;
+        whenScrolledDebounced = debounceOver(500);
+        whenScrolled: UIEventHandler<HTMLDivElement> = e => {
+            if (this.shouldIgnoreScrollEvents) return;
+            const { scrollLeft, scrollTop } = e.currentTarget;
+            const { noteKey, onChangedBox } = this.props;
+            this.whenScrolledDebounced(() => {
+                onChangedBox(noteKey, { scrollLeft, scrollTop });
+            });
+        }
+
         async componentDidMount(): Promise<void> {
-            const { contentElement, headerElement } = this;
-            if (isNull(contentElement) || isNull(headerElement)) return;
-            const { x, y, width, height } = this.props.box;
-            contentElement.style.left = x + 'px';
-            contentElement.style.top = y + 'px';
-            contentElement.style.width = width + 'px';
-            contentElement.style.height = height + 'px';
+            const { noteElement, headerElement, textElement } = this;
+            if (isNull(noteElement) || isNull(headerElement) || isNull(textElement)) return;
+            const { x, y, width, height, scrollLeft, scrollTop } = this.props.box;
+            noteElement.style.left = x + 'px';
+            noteElement.style.top = y + 'px';
+            noteElement.style.width = width + 'px';
+            noteElement.style.height = height + 'px';
             this.dispose.push(...[
-                enableMoving(headerElement, contentElement, {
+                enableMoving(headerElement, noteElement, {
                     readPos: element => {
                         const { top, left } = element.getBoundingClientRect();
                         return { top, left };
@@ -134,7 +147,10 @@ export function thusNote() {
             if (isNull(text)) {
                 this.setState({ text: 'Not there...' });
             } else {
-                this.setState({ text });
+                this.setState({ text }, () => {
+                    textElement.scrollTo({ top: scrollTop, left: scrollLeft, behavior: 'instant' });
+                    this.shouldIgnoreScrollEvents = false;
+                });
             }
         }
 
@@ -146,11 +162,13 @@ export function thusNote() {
             const { noteKey, drop, box } = this.props;
             const { title, text } = this.state;
             const where = `${drop.dir.name}/${drop.filename}`;
-            return <Resizable key={noteKey} refin={el => this.contentElement = el} className="note" onChanged={this.whenChangedBox} box={box}>
+            return <Resizable key={noteKey} refin={el => this.noteElement = el} className="note" onChanged={this.whenChangedBox} box={box}>
                 <div className="note-header" ref={el => this.headerElement = el} title={where} onDoubleClick={this.whenChangingTitle}>{title}</div>
                 <div
                     className="note-content"
+                    ref={el => this.textElement = el}
                     contentEditable={plainTextOnly}
+                    onScroll={this.whenScrolled}
                     onInput={this.whenChangedContent}>{text}</div>
             </Resizable>;
         }

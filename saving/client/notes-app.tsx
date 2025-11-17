@@ -2,7 +2,7 @@ import React, { MouseEventHandler } from 'react';
 import { isNull, isUndefined } from '../shared/core';
 import { NoteProps, thusNote } from './note';
 import { NotesGlob } from './notes-glob';
-import { beingNoteBox, makeNoteKey, normalizeNoteConfig, NoteConfig, NoteKey, NotesWorkspace } from './notes-workspace';
+import { makeDefaultNoteBox, makeNoteKey, normalizeNoteConfig, NoteConfig, NoteKey, NotesWorkspace } from './notes-workspace';
 import { Box } from './reading-query-string';
 import { TextDrop } from './text-drop';
 
@@ -40,7 +40,7 @@ export function thusNotesApp() {
             if (isNull(title)) return;
             const key = makeNoteKey();
             const path = `${key}.txt`;
-            const box = { ...beingNoteBox.defaultBox };
+            const box = makeDefaultNoteBox();
             const config: NoteConfig = {
                 key, path, box, title,
             };
@@ -50,7 +50,7 @@ export function thusNotesApp() {
                 workspace.notes.push(config);
                 let { notes } = state;
                 notes = [...notes, note];
-                return { ...state, note };
+                return { ...state, notes } satisfies State;
             }, () => this.props.onChangedWorkspace());
         };
 
@@ -68,7 +68,11 @@ export function thusNotesApp() {
             const { workspaceDir } = this.props;
             const { path, key, box, title } = normalizeNoteConfig(config);
             const drop = new TextDrop(workspaceDir, path);
-            const note: NoteProps = { noteKey: key, drop, box, title, onChangedBox: this.whenChangingBox, onChangedTitle: this.whenChangingTitle };
+            const note: NoteProps = {
+                noteKey: key, drop, box, title,
+                onChangedBox: this.whenChangingBox,
+                onChangedTitle: this.whenChangingTitle,
+            };
             return note;
         }
 
