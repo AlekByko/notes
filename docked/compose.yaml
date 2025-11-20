@@ -1,0 +1,29 @@
+services:
+  mongo:
+    container_name: notesdb
+    restart: always
+    image: mongo:8.0
+    ports:
+      - "27017:27017"
+    # expose:
+     # - 27017
+
+    # environment:
+      # MONGO_INITDB_ROOT_USERNAME: me
+      # MONGO_INITDB_ROOT_PASSWORD: password
+      # MONGO_INITDB_DATABASE: notes
+
+    volumes:
+      - ./notes_db:/data/db
+      - ./mongo-init-scripts:/docker-entrypoint-initdb.d
+
+    networks:
+      - express-mongo
+
+networks:
+  express-mongo:
+  react-express:
+
+volumes:
+  notes_db:
+
