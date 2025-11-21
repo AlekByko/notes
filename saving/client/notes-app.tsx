@@ -1,5 +1,6 @@
 import React, { MouseEventHandler } from 'react';
 import { isNull, isUndefined } from '../shared/core';
+import { startListening } from './eventing';
 import { enableMoving, NoteProps, thusNote } from './note';
 import { NotesGlob } from './notes-glob';
 import { makeDefaultNoteBox, makeNoteKey, normalizeNoteConfig, NoteConfig, NoteKey, NotesWorkspace } from './notes-workspace';
@@ -38,9 +39,15 @@ export function thusNotesApp() {
         whenAddingNote: MouseEventHandler<HTMLButtonElement> = _e => {
             const title = prompt('Name:');
             if (isNull(title)) return;
+            this.createNote(0, 0, title);
+        };
+
+        createNote(x: number, y: number, title: string) {
             const key = makeNoteKey();
             const path = `${key}.txt`;
             const box = makeDefaultNoteBox();
+            box.x = x;
+            box.y = y;
             const config: NoteConfig = {
                 key, path, box, title,
             };
@@ -52,7 +59,7 @@ export function thusNotesApp() {
                 notes = [...notes, note];
                 return { ...state, notes } satisfies State;
             }, () => this.props.onChangedWorkspace());
-        };
+        }
         whenDeleting = (key: NoteKey) => {
             const { workspace } = this.props;
             const foundAt = workspace.notes.findIndex(x => x.key === key);
@@ -71,7 +78,20 @@ export function thusNotesApp() {
         componentDidMount(): void {
             const { notesElement, notesCanvasElement } = this;
             if (isNull(notesElement) || isNull(notesCanvasElement)) return;
-            const {workspace} = this.props;
+
+            this.nomores.push(startListening(notesElement, 'dblclick', e => {
+                e.preventDefault();
+                e.stopPropagation();
+                const title = prompt();
+                if (isNull(title)) return;
+                const { left: canvasX, top: canvasY } = notesCanvasElement.getBoundingClientRect();
+                const { clientX, clientY } = e;
+                const x = clientX - canvasX;
+                const y = clientY - canvasY;
+                this.createNote(x, y, title);
+            }));
+
+            const { workspace } = this.props;
             notesCanvasElement.style.left = workspace.x + 'px';
             notesCanvasElement.style.top = workspace.y + 'px';
             const nomore = enableMoving(notesElement, notesCanvasElement, {
@@ -131,7 +151,7 @@ export function thusNotesApp() {
             return <div className="notes" ref={el => this.notesElement = el}>
                 <div className="notes-canvas" ref={el => this.notesCanvasElement = el}>
                     {notes.map(note => {
-                        return <Note {...note} />;
+                        return <Note key={note.noteKey} {...note} />;
                     })}
                 </div>
                 <div className="notes-toolbar">
