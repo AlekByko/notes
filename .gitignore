@@ -9,7 +9,6 @@ tmp/*
 *.css
 *.reg
 *.log
-package-lock.json
 sketches
 configs
 browser

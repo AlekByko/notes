@@ -9,6 +9,17 @@ services:
       - ./notes_db:/data/db
       - ./mongo-init-scripts:/docker-entrypoint-initdb.d
 
+  api:
+    container_name: api
+    restart: always
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+
 volumes:
   notes_db:
 
