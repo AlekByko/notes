@@ -1,5 +1,6 @@
 import React, { FormEventHandler, MouseEventHandler, UIEventHandler } from 'react';
-import { isNull } from '../shared/core';
+import { isNonNull, isNull } from '../shared/core';
+import { startListening } from './eventing';
 import { NoteBox, NoteKey } from './notes-workspace';
 import { Resizable } from './resizable';
 import { debounceOver } from './scheduling';
@@ -71,7 +72,10 @@ export function enableMoving<Pos>(
     };
 }
 
-export function thusNote() {
+export interface NoteDefaults {
+    makeInsert: (e: KeyboardEvent) => Node | null;
+}
+export function thusNote(defaults: NoteDefaults) {
     return class Note extends React.Component<NoteProps, State> {
 
         state = makeState(this.props);
@@ -135,10 +139,34 @@ export function thusNote() {
             noteElement.style.width = width + 'px';
             noteElement.style.height = height + 'px';
 
-            textElement.addEventListener('mousedown', e => {
+            this.dispose.push(startListening(textElement, 'mousedown', e => {
                 e.stopPropagation();
                 console.log('stopped');
-            });
+            }));
+
+            this.dispose.push(startListening(textElement, 'keydown', e => {
+
+                const node = defaults.makeInsert(e);
+                if (isNonNull(node)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const selection = window.getSelection();
+                    if (isNull(selection)) return;
+                    if (selection.rangeCount > 0) {
+                        const olderRange = selection.getRangeAt(0);
+
+                        olderRange.deleteContents();
+                        olderRange.insertNode(node);
+
+                        const newerRange = olderRange.cloneRange();
+                        newerRange.setStartAfter(node);
+                        newerRange.collapse(true);
+                        selection.removeAllRanges();
+                        selection.addRange(newerRange);
+                    }
+                }
+            }));
 
             const nomoreMoving = enableMoving(headerElement, noteElement, {
                 readPos: element => {

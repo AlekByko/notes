@@ -1,7 +1,7 @@
 import React, { MouseEventHandler } from 'react';
 import { isNull, isUndefined } from '../shared/core';
 import { startListening } from './eventing';
-import { enableMoving, NoteProps, thusNote } from './note';
+import { enableMoving, NoteDefaults, NoteProps, thusNote } from './note';
 import { NotesGlob } from './notes-glob';
 import { makeDefaultNoteBox, makeNoteKey, normalizeNoteConfig, NoteConfig, NoteKey, NotesWorkspace } from './notes-workspace';
 import { Box } from './reading-query-string';
@@ -19,8 +19,8 @@ interface State {
 }
 
 const grabbingClassName = 'as-grabbing';
-export function thusNotesApp() {
-    const Note = thusNote();
+export function thusNotesApp(defaults: NoteDefaults) {
+    const Note = thusNote(defaults);
     return class NotesApp extends React.Component<NotesAppProps, State> {
         whenChangingBox = (key: NoteKey, box: Partial<Box>) => {
             const { workspace } = this.props;

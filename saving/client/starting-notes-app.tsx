@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { isNull } from '../shared/core';
+import { isNull, isUndefined } from '../shared/core';
+import { makeChordOfKeyboardEvent } from './chording-keyboard-events';
 import { knownNotesDirRef } from './file-system-entries';
 import { thusJsonDrop } from './json-drop';
 import { willOpenKnownDb } from './known-database';
@@ -25,7 +26,7 @@ async function run() {
 
     const droppedWorkspaceOrNot = await thusJsonDrop<Partial<NotesWorkspace>>({
         makeDefault: () => {
-            return { notes: [], x: 0, y: 0 } satisfies NotesWorkspace;
+            return { notes: [], x: 0, y: 0, keybindings: [] } satisfies NotesWorkspace;
         }
     }).willTryMake(notesDir, workspacePath);
     if (isNull(droppedWorkspaceOrNot)) return alert(`No workspace at: ${workspacePath}`);
@@ -33,6 +34,7 @@ async function run() {
 
     const workspace = droppedWorkspace.data;
     defaultizeNotesWorkspace(workspace);
+    const payloadByChord = workspace.keybindings.toMap(x => x.chord, x => x.payload, newer => newer);
 
     const workspaceDir = droppedWorkspace.dir;
     async function onChangedWorkspace() {
@@ -41,7 +43,17 @@ async function run() {
 
     const glob: NotesGlob = { db };
     const props: NotesAppProps = { workspace, workspaceDir, glob, onChangedWorkspace };
-    const NotesApp = thusNotesApp();
+    const NotesApp = thusNotesApp({
+        makeInsert: e => {
+            const chord = makeChordOfKeyboardEvent(e);
+            const payload = payloadByChord.get(chord);
+            if (isUndefined(payload)) return null;
+            e.preventDefault();
+            e.stopPropagation();
+            const node = document.createTextNode(payload.text);
+            return node;
+        }
+    });
     ReactDOM.render(<NotesApp {...props} />, rootElement)
 }
 

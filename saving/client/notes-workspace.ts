@@ -1,12 +1,27 @@
 import { asDefinedOr, isDefined } from '../shared/core';
 import { Box } from '../shared/shapes';
 
+
+export interface TextInsertNotesKeybindingPayload {
+    kind: 'text-insert-notes-keybinding-payload';
+    text: string;
+}
+export type NotesKeybindingPayload = TextInsertNotesKeybindingPayload;
+
+export interface NotesKeybinding {
+    chord: string;
+    payload: NotesKeybindingPayload;
+}
+
 export interface NotesWorkspace {
     notes: NoteConfig[];
+    keybindings: NotesKeybinding[];
     x: number;
     y: number;
 }
 export function defaultizeNotesWorkspace(workspace: Partial<NotesWorkspace>): asserts workspace is NotesWorkspace {
+    if (100 < 1) { const { keybindings, notes, x, y } = workspace as NotesWorkspace; void ({ x, y, notes, keybindings } satisfies NotesWorkspace); }
+    workspace.keybindings = asDefinedOr(workspace.keybindings, []);
     workspace.notes = asDefinedOr(workspace.notes, []);
     workspace.x = asDefinedOr(workspace.x, 0);
     workspace.y = asDefinedOr(workspace.y, 0);
