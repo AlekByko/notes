@@ -1,8 +1,8 @@
-import React, { FormEventHandler, MouseEventHandler, UIEventHandler } from 'react';
+import React, { FormEventHandler, UIEventHandler } from 'react';
 import { isNonNull, isNull } from '../shared/core';
+import { thusBoxed } from './boxed';
 import { startListening } from './eventing';
 import { NoteBox, NoteKey } from './notes-workspace';
-import { Resizable } from './resizable';
 import { debounceOver } from './scheduling';
 import { TextDrop } from './text-drop';
 
@@ -76,6 +76,15 @@ export interface NoteDefaults {
     makeInsert: (e: KeyboardEvent) => Node | null;
 }
 export function thusNote(defaults: NoteDefaults) {
+
+    const Boxed = thusBoxed({
+        boxOf: (props: NoteProps) => props.box,
+        titleOf: props => props.title,
+        onChangedBox: (props, box) => props.onChangedBox(props.noteKey, box),
+        onChangedTitle: (props, title) => props.onChangedTitle(props.noteKey, title),
+        onDeleting: props => props.onDeleting(props.noteKey),
+    });
+
     return class Note extends React.Component<NoteProps, State> {
 
         state = makeState(this.props);
@@ -87,13 +96,6 @@ export function thusNote(defaults: NoteDefaults) {
             await drop.willOverwrite(innerText);
         };
 
-        whenChangedBox = (box: Partial<NoteBox>) => {
-            const { noteKey } = this.props;
-            this.props.onChangedBox(noteKey, box)
-        };
-
-        private headerElement: HTMLDivElement | null = null;
-        private noteElement: HTMLElement | null = null;
         private textElement: HTMLElement | null = null;
 
         dispose = [] as Act[];
@@ -109,19 +111,11 @@ export function thusNote(defaults: NoteDefaults) {
                 onChangedBox(noteKey, { scrollLeft, scrollTop });
             });
         };
-        whenDeleting: MouseEventHandler<HTMLButtonElement> = _e => {
-            this.props.onDeleting(this.props.noteKey);
-        }
-
 
         async componentDidMount(): Promise<void> {
-            const { noteElement, headerElement, textElement } = this;
-            if (isNull(noteElement) || isNull(headerElement) || isNull(textElement)) return;
-            const { x, y, width, height, scrollLeft, scrollTop } = this.props.box;
-            noteElement.style.left = x + 'px';
-            noteElement.style.top = y + 'px';
-            noteElement.style.width = width + 'px';
-            noteElement.style.height = height + 'px';
+            const { textElement } = this;
+            if (isNull(textElement)) return;
+            const { scrollLeft, scrollTop } = this.props.box;
 
             this.dispose.push(startListening(textElement, 'mousedown', e => {
                 e.stopPropagation();
@@ -155,42 +149,6 @@ export function thusNote(defaults: NoteDefaults) {
                 }
             }));
 
-            this.dispose.push(enableMoving(headerElement, noteElement, {
-                readPos: element => {
-                    const childAt = element.getBoundingClientRect();
-                    const parentAt = element.parentElement!.getBoundingClientRect();
-                    const x = childAt.left - parentAt.left;
-                    const y = childAt.top - parentAt.top;
-                    return { x, y };
-                },
-                applyDelta: (element, { x, y }, dx, dy) => {
-                    element.style.left = (x + dx) + 'px';
-                    element.style.top = (y + dy) + 'px';
-                },
-                reportPos: ({ x, y }, dx, dy) => {
-                    x += dx;
-                    y += dy;
-                    const { noteKey } = this.props;
-                    this.props.onChangedBox(noteKey, { y, x });
-                },
-            }));
-
-            this.dispose.push(startListening(headerElement, 'dblclick', e => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.setState(state => {
-                    const { title: olderTitle } = state;
-                    const newerTitle = prompt('Title', olderTitle);
-                    if (isNull(newerTitle)) return null;
-                    return { ...state, title: newerTitle } satisfies State;
-                }, () => {
-                    const { noteKey, onChangedTitle } = this.props;
-                    const { title } = this.state;
-                    onChangedTitle(noteKey, title);
-                });
-            }));
-
-
             const { drop } = this.props;
             const text = await drop.willLoad();
             if (isNull(text)) {
@@ -208,18 +166,15 @@ export function thusNote(defaults: NoteDefaults) {
         }
 
         render() {
-            const { noteKey, drop, box } = this.props;
-            const { title, text } = this.state;
-            const where = `${drop.dir.name}/${drop.filename}`;
-            return <Resizable key={noteKey} refin={el => this.noteElement = el} className="note" onChanged={this.whenChangedBox} box={box}>
-                <div className="note-header" ref={el => this.headerElement = el} title={where}>{title}<button onClick={this.whenDeleting}>X</button></div>
+            const { text } = this.state;
+            return <Boxed {...this.props}>
                 <div
                     className="note-content"
                     ref={el => this.textElement = el}
                     contentEditable={plainTextOnly}
                     onScroll={this.whenScrolled}
                     onInput={this.whenChangedContent}>{text}</div>
-            </Resizable>;
+            </Boxed>;
         }
     };
 }
