@@ -95,12 +95,12 @@ export function tryDefaultizeNoteConfig(config: DeepPartial<NoteConfig>): config
 
 
 function defaultizeNoteBox(box: DeepPartial<NoteBox>): asserts box is NoteBox {
-    box.x = asDefinedOr(box.x, defaultBox.x);
-    box.y = asDefinedOr(box.y, defaultBox.y);
-    box.height = asDefinedOr(box.height, defaultBox.height);
-    box.width = asDefinedOr(box.width, defaultBox.width);
-    box.scrollLeft = asDefinedOr(box.scrollLeft, defaultBox.scrollLeft);
-    box.scrollTop = asDefinedOr(box.scrollTop, defaultBox.scrollTop);
+    box.x = asDefinedOr(box.x, defaultNoteBox.x);
+    box.y = asDefinedOr(box.y, defaultNoteBox.y);
+    box.height = asDefinedOr(box.height, defaultNoteBox.height);
+    box.width = asDefinedOr(box.width, defaultNoteBox.width);
+    box.scrollLeft = asDefinedOr(box.scrollLeft, defaultNoteBox.scrollLeft);
+    box.scrollTop = asDefinedOr(box.scrollTop, defaultNoteBox.scrollTop);
     if (100 < 1) {
         void ({
             x: box.x, y: box.y,

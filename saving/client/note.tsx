@@ -98,22 +98,6 @@ export function thusNote(defaults: NoteDefaults) {
 
         dispose = [] as Act[];
 
-        whenChangingTitle: MouseEventHandler<HTMLDivElement> = e => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.setState(state => {
-                const { title: olderTitle } = state;
-                const newerTitle = prompt('Title', olderTitle);
-                if (isNull(newerTitle)) return null;
-                return { ...state, title: newerTitle } satisfies State;
-            }, () => {
-                const { noteKey, onChangedTitle } = this.props;
-                const { title } = this.state;
-                onChangedTitle(noteKey, title);
-            });
-
-        };
-
         /** at initilizing and mounting we don't want scroll to fire at all, we only let it fire after we set the saved scroll position */
         private shouldIgnoreScrollEvents = true;
         whenScrolledDebounced = debounceOver(500);
@@ -141,7 +125,10 @@ export function thusNote(defaults: NoteDefaults) {
 
             this.dispose.push(startListening(textElement, 'mousedown', e => {
                 e.stopPropagation();
-                console.log('stopped');
+            }));
+
+            this.dispose.push(startListening(textElement, 'dblclick', e => {
+                e.stopPropagation();
             }));
 
             this.dispose.push(startListening(textElement, 'keydown', e => {
@@ -168,7 +155,7 @@ export function thusNote(defaults: NoteDefaults) {
                 }
             }));
 
-            const nomoreMoving = enableMoving(headerElement, noteElement, {
+            this.dispose.push(enableMoving(headerElement, noteElement, {
                 readPos: element => {
                     const childAt = element.getBoundingClientRect();
                     const parentAt = element.parentElement!.getBoundingClientRect();
@@ -186,9 +173,22 @@ export function thusNote(defaults: NoteDefaults) {
                     const { noteKey } = this.props;
                     this.props.onChangedBox(noteKey, { y, x });
                 },
-            });
+            }));
 
-            this.dispose.push(nomoreMoving);
+            this.dispose.push(startListening(headerElement, 'dblclick', e => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.setState(state => {
+                    const { title: olderTitle } = state;
+                    const newerTitle = prompt('Title', olderTitle);
+                    if (isNull(newerTitle)) return null;
+                    return { ...state, title: newerTitle } satisfies State;
+                }, () => {
+                    const { noteKey, onChangedTitle } = this.props;
+                    const { title } = this.state;
+                    onChangedTitle(noteKey, title);
+                });
+            }));
 
 
             const { drop } = this.props;
@@ -212,7 +212,7 @@ export function thusNote(defaults: NoteDefaults) {
             const { title, text } = this.state;
             const where = `${drop.dir.name}/${drop.filename}`;
             return <Resizable key={noteKey} refin={el => this.noteElement = el} className="note" onChanged={this.whenChangedBox} box={box}>
-                <div className="note-header" ref={el => this.headerElement = el} title={where} onDoubleClick={this.whenChangingTitle}>{title}<button onClick={this.whenDeleting}>X</button></div>
+                <div className="note-header" ref={el => this.headerElement = el} title={where}>{title}<button onClick={this.whenDeleting}>X</button></div>
                 <div
                     className="note-content"
                     ref={el => this.textElement = el}
