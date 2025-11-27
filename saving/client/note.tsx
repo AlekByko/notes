@@ -9,8 +9,9 @@ import { TextDrop } from './text-drop';
 const plainTextOnly = 'plaintext-only' as never;
 
 export interface NoteProps {
+    kind: 'note';
     /** cannot be named just `key` because React */
-    noteKey: CardKey;
+    cardKey: CardKey;
     drop: TextDrop;
     box: NoteBox;
     title: string;
@@ -80,9 +81,9 @@ export function thusNote(defaults: NoteDefaults) {
     const Boxed = thusBoxed({
         boxOf: (props: NoteProps) => props.box,
         titleOf: props => props.title,
-        onChangedBox: (props, box) => props.onChangedBox(props.noteKey, box),
-        onChangedTitle: (props, title) => props.onChangedTitle(props.noteKey, title),
-        onDeleting: props => props.onDeleting(props.noteKey),
+        onChangedBox: (props, box) => props.onChangedBox(props.cardKey, box),
+        onChangedTitle: (props, title) => props.onChangedTitle(props.cardKey, title),
+        onDeleting: props => props.onDeleting(props.cardKey),
     });
 
     return class Note extends React.Component<NoteProps, State> {
@@ -106,9 +107,9 @@ export function thusNote(defaults: NoteDefaults) {
         whenScrolled: UIEventHandler<HTMLDivElement> = e => {
             if (this.shouldIgnoreScrollEvents) return;
             const { scrollLeft, scrollTop } = e.currentTarget;
-            const { noteKey, onChangedBox } = this.props;
+            const { cardKey, onChangedBox } = this.props;
             this.whenScrolledDebounced(() => {
-                onChangedBox(noteKey, { scrollLeft, scrollTop });
+                onChangedBox(cardKey, { scrollLeft, scrollTop });
             });
         };
 
