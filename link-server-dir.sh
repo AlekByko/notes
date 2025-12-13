@@ -3,6 +3,6 @@
 cd ./built
 npm link
 cd ../
-npm link saving-server
+npm link noting
 
 

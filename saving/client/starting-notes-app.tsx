@@ -22,6 +22,7 @@ async function run() {
     console.log({ workspacePath });
 
     const rootElement = document.getElementById('root')!;
+
     const notesDir = await willClaimDir(db, rootElement, knownNotesDirRef);
 
     const droppedWorkspaceOrNot = await thusJsonDrop<Partial<NotesWorkspaceConfig>>({
