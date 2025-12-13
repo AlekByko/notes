@@ -7,7 +7,7 @@ export class TextDrop {
     constructor(
         public dir: FileSystemDirectoryHandle,
         public filename: string,
-        private lastText = '',
+        public lastText = '',
     ) { }
     async willOverwrite(text: string) {
         const wasSaved = await willTrySaveFile(

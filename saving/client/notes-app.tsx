@@ -1,9 +1,11 @@
 import React, { MouseEventHandler } from 'react';
-import { broke, isNull, isUndefined } from '../shared/core';
-import { AreaProps, thusArea } from './area';
+import { broke, escapePlainTextForRegExp, isNull, isUndefined } from '../shared/core';
+import { CardProps } from './cards';
+import { thusCardLister } from './cards-lister';
 import { startListening } from './eventing';
-import { enableMoving, NoteDefaults, NoteProps, thusNote } from './note';
+import { enableMoving, NoteDefaults, NoteProps } from './note';
 import { NotesGlob } from './notes-glob';
+import { thusNotesSearch } from './notes-search';
 import { CardKey, defaultNoteBox, makeCardKey, NoteConfig, NotesWorkspaceConfig } from './notes-workspace';
 import { Box } from './reading-query-string';
 import { TextDrop } from './text-drop';
@@ -15,16 +17,17 @@ export interface NotesAppProps {
     onChangedWorkspace(): void;
 }
 
-type CardProps = AreaProps | NoteProps;
+
 
 interface State {
     cards: CardProps[];
+    shouldSearch: boolean;
 }
 
 const grabbingClassName = 'as-grabbing';
 export function thusNotesApp(defaults: NoteDefaults) {
-    const Note = thusNote(defaults);
-    const Area = thusArea();
+    const Lister = thusCardLister(defaults);
+    const Search = thusNotesSearch(500);
     return class NotesApp extends React.Component<NotesAppProps, State> {
         whenChangingBox = (key: CardKey, box: Partial<Box>) => {
             const { workspace } = this.props;
@@ -40,11 +43,10 @@ export function thusNotesApp(defaults: NoteDefaults) {
             found.title = title;
             this.props.onChangedWorkspace();
         }
-        whenAddingNote: MouseEventHandler<HTMLButtonElement> = _e => {
-            const title = prompt('Name:');
-            if (isNull(title)) return;
-            this.createNote(0, 0, title);
-        };
+
+        whenShowingSearch: MouseEventHandler<HTMLButtonElement> = _e => {
+            this.setState({ shouldSearch: true });
+        }
 
         createNote(x: number, y: number, title: string) {
             const cardKey = makeCardKey();
@@ -73,19 +75,19 @@ export function thusNotesApp(defaults: NoteDefaults) {
                 return { ...state, cards } satisfies State;
             }, () => this.props.onChangedWorkspace());
         }
+        notesCanvasPinnacleElement: HTMLDivElement | null = null;
         notesCanvasElement: HTMLDivElement | null = null;
-        notesElement: HTMLDivElement | null = null;
         nomores: Act[] = [];
         componentDidMount(): void {
-            const { notesElement, notesCanvasElement } = this;
-            if (isNull(notesElement) || isNull(notesCanvasElement)) return;
+            const { notesCanvasElement, notesCanvasPinnacleElement } = this;
+            if (isNull(notesCanvasElement) || isNull(notesCanvasPinnacleElement)) return;
 
-            this.nomores.push(startListening(notesElement, 'dblclick', e => {
+            this.nomores.push(startListening(notesCanvasElement, 'dblclick', e => {
                 e.preventDefault();
                 e.stopPropagation();
                 const title = prompt();
                 if (isNull(title)) return;
-                const { left: canvasX, top: canvasY } = notesCanvasElement.getBoundingClientRect();
+                const { left: canvasX, top: canvasY } = notesCanvasPinnacleElement.getBoundingClientRect();
                 const { clientX, clientY } = e;
                 const x = clientX - canvasX;
                 const y = clientY - canvasY;
@@ -93,12 +95,12 @@ export function thusNotesApp(defaults: NoteDefaults) {
             }));
 
             const { workspace } = this.props;
-            notesCanvasElement.style.left = workspace.x + 'px';
-            notesCanvasElement.style.top = workspace.y + 'px';
-            const nomore = enableMoving(notesElement, notesCanvasElement, {
+            notesCanvasPinnacleElement.style.left = workspace.x + 'px';
+            notesCanvasPinnacleElement.style.top = workspace.y + 'px';
+            const nomore = enableMoving(notesCanvasElement, notesCanvasPinnacleElement, {
                 readPos: element => {
                     const { top: y, left: x } = element.getBoundingClientRect();
-                    notesElement.classList.add(grabbingClassName);
+                    notesCanvasElement.classList.add(grabbingClassName);
                     const pos = { x, y };
                     // console.log({ x, y });
                     return pos;
@@ -109,7 +111,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
                 },
                 reportPos: (pos, dx, dy) => {
                     console.log({ pos, dx, dy });
-                    notesElement.classList.remove(grabbingClassName);
+                    notesCanvasElement.classList.remove(grabbingClassName);
                     const { workspace } = this.props;
                     workspace.x = pos.x + dx;
                     workspace.y = pos.y + dy;
@@ -129,7 +131,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
             const cards = workspace.notes.map(config => {
                 return this.makeNoteProps(config);
             });
-            return { cards };
+            return { cards, shouldSearch: false };
         }
 
         state = this.makeState();
@@ -148,21 +150,33 @@ export function thusNotesApp(defaults: NoteDefaults) {
             return note;
         }
 
+        private search = (text: string) => {
+            return this.state.cards.filter(x => {
+                switch (x.kind) {
+                    case 'area': return false;
+                    case 'note': {
+                        const escaped = escapePlainTextForRegExp(text);
+                        const reg = new RegExp(escaped, 'ig');
+                        const hasIt = reg.test(x.drop.lastText);
+                        return hasIt;
+                    }
+                    default: return broke(x);
+                }
+            });
+        }
+
         render() {
-            const { cards } = this.state;
-            return <div className="notes" ref={el => this.notesElement = el}>
+            const { cards, shouldSearch } = this.state;
+            return <div className="notes">
                 <div className="notes-canvas" ref={el => this.notesCanvasElement = el}>
-                    {cards.map(card => {
-                        switch(card.kind) {
-                            case 'note': return <Note key={card.cardKey} {...card} />
-                            case 'area': return <Area key={card.cardKey} {...card} />
-                            default: return broke(card);
-                        }
-                    })}
+                    <div className="notes-canvas-pinnacle" ref={el => this.notesCanvasPinnacleElement = el}>
+                        <Lister cards={cards} />
+                    </div>
                 </div>
                 <div className="notes-toolbar">
-                    <button onClick={this.whenAddingNote}>Add</button>
+                    <button onClick={this.whenShowingSearch}>Search</button>
                 </div>
+                {shouldSearch && <Search search={this.search} />}
             </div>;
         }
     };

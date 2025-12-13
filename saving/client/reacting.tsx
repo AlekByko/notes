@@ -92,3 +92,10 @@ export function reFocus(element: HTMLElement | null): void {
 export function reflowUI(element: HTMLDivElement) {
     void element.offsetWidth;
 }
+
+/** forever same identity AND never stale closures */
+export function useEvent(act: (...args: any[]) => void) {
+  const ref = React.useRef(act);
+  React.useLayoutEffect(() => { ref.current = act; });
+  return React.useCallback((...args: any[]) => ref.current(...args), []);
+}

@@ -650,3 +650,7 @@ export type DeepPartial<T> = {
        // T[P] extends any[] ? DeepPartial<T[P][number]>[] :
         DeepPartial<T[P]>;
 }
+
+export function escapePlainTextForRegExp(plain: string): string {
+  return plain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
