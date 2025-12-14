@@ -10,10 +10,12 @@ import { CardKey, defaultNoteBox, makeCardKey, NoteConfig, NotesWorkspaceConfig 
 import { Box } from './reading-query-string';
 import { TextDrop } from './text-drop';
 
+export type NotesExec = (command: string) => void;
 export interface NotesAppProps {
     workspace: NotesWorkspaceConfig;
     workspaceDir: FileSystemDirectoryHandle;
     glob: NotesGlob;
+    execs: NotesExec[];
     onChangedWorkspace(): void;
 }
 
@@ -29,6 +31,8 @@ export function thusNotesApp(defaults: NoteDefaults) {
     const Lister = thusCardLister(defaults);
     const Search = thusNotesSearch(500);
     return class NotesApp extends React.Component<NotesAppProps, State> {
+
+
 
         whenChangingBox = (key: CardKey, box: Partial<Box>) => {
             const { workspace } = this.props;
@@ -157,6 +161,13 @@ export function thusNotesApp(defaults: NoteDefaults) {
                 }
             });
             this.nomores.push(nomore);
+
+            const { execs } = this.props;
+            execs.push(text => {
+                if (text === 'find') {
+                    this.setState({ shouldShowSearch: true });
+                }
+            });
         }
         componentWillUnmount(): void {
             this.nomores.forEach(nomore => {

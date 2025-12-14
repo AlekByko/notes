@@ -5,7 +5,7 @@ import { makeChordOfKeyboardEvent } from './chording-keyboard-events';
 import { knownNotesDirRef } from './file-system-entries';
 import { thusJsonDrop } from './json-drop';
 import { willOpenKnownDb } from './known-database';
-import { NotesAppProps, thusNotesApp } from './notes-app';
+import { NotesAppProps, NotesExec, thusNotesApp } from './notes-app';
 import { NotesGlob } from './notes-glob';
 import { defaultizeNotesWorkspaceConfig, NotesWorkspaceConfig } from './notes-workspace';
 import { readAndSetAppTitle } from './reading-and-setting-app-title';
@@ -41,9 +41,9 @@ async function run() {
     async function onChangedWorkspace() {
         droppedWorkspace.willSave(workspace);
     }
-
+    const execs: NotesExec[] = [];
     const glob: NotesGlob = { db };
-    const props: NotesAppProps = { workspace, workspaceDir, glob, onChangedWorkspace };
+    const props: NotesAppProps = { workspace, workspaceDir, glob, onChangedWorkspace, execs };
     const NotesApp = thusNotesApp({
         makeInsert: e => {
             const chord = makeChordOfKeyboardEvent(e);
@@ -55,7 +55,16 @@ async function run() {
             return node;
         }
     });
-    ReactDOM.render(<NotesApp {...props} />, rootElement)
+    window.addEventListener('keydown', e => {
+        if (e.code === 'KeyF' && e.ctrlKey) {
+            e.preventDefault();
+            e.stopPropagation();
+            props.execs.forEach(exec => {
+                exec('find');
+            });
+        }
+    });
+    ReactDOM.render(<NotesApp {...props} />, rootElement);
 }
 
 if (window.sandbox === 'starting-notes-app') {
