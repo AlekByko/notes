@@ -48,6 +48,21 @@ export function thusNotesApp(defaults: NoteDefaults) {
             this.setState({ shouldSearch: true });
         }
 
+        whenLookingAtCard = (cardKey: CardKey) => {
+            const { notesCanvasPinnacleElement } = this;
+            if (isNull(notesCanvasPinnacleElement)) return;
+            const card = this.state.cards.find(x => x.cardKey === cardKey);
+            if (isUndefined(card)) return;
+            const { x: cx, y: cy } = card.box;
+            // const { x: wx, y: wy } = this.props.workspace;
+            // console.log({ wx, wy, cx, cy });
+            const [dx, dy] = [100, 100];
+            const x = -cx + dx;
+            const y = -cy + dy;
+            notesCanvasPinnacleElement.style.top = y + 'px';
+            notesCanvasPinnacleElement.style.left = x + 'px';
+        }
+
         createNote(x: number, y: number, title: string) {
             const cardKey = makeCardKey();
             const path = `${cardKey}.txt`;
@@ -176,7 +191,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
                 <div className="notes-toolbar">
                     <button onClick={this.whenShowingSearch}>Search</button>
                 </div>
-                {shouldSearch && <Search search={this.search} />}
+                {shouldSearch && <Search search={this.search} onPreview={this.whenLookingAtCard} />}
             </div>;
         }
     };

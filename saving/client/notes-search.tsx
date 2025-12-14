@@ -4,6 +4,7 @@ import { CardKey } from './notes-workspace';
 
 export interface NotesSearchProps {
     search: (text: string) => CardProps[];
+    onPreview: (cardKey: CardKey) => void;
 }
 export function thusNotesSearch(delay: number) {
     return function NotesSearch(props: NotesSearchProps) {
@@ -31,9 +32,11 @@ export function thusNotesSearch(delay: number) {
             <div>
                 <input className="notes-search-input" value={text} onChange={onChange} />
             </div>
-            <div>
+            <div className="notes-search-results">
                 {found.map(x => {
-                    return <div key={x}>{x}</div>;
+                    return <div key={x} className="notes-search-result" onMouseOver={() => {
+                        props.onPreview(x);
+                    }}>{x}</div>;
                 })}
             </div>
         </div>;
