@@ -2,10 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { isNull, isUndefined } from '../shared/core';
 import { makeChordOfKeyboardEvent } from './chording-keyboard-events';
+import { ExecRegistry } from './exec-registry';
 import { knownNotesDirRef } from './file-system-entries';
 import { thusJsonDrop } from './json-drop';
 import { willOpenKnownDb } from './known-database';
-import { NotesAppProps, NotesExec, thusNotesApp } from './notes-app';
+import { NotesAppProps, thusNotesApp } from './notes-app';
 import { NotesGlob } from './notes-glob';
 import { defaultizeNotesWorkspaceConfig, NotesWorkspaceConfig } from './notes-workspace';
 import { readAndSetAppTitle } from './reading-and-setting-app-title';
@@ -41,7 +42,7 @@ async function run() {
     async function onChangedWorkspace() {
         droppedWorkspace.willSave(workspace);
     }
-    const execs: NotesExec[] = [];
+    const execs = new ExecRegistry();
     const glob: NotesGlob = { db };
     const props: NotesAppProps = { workspace, workspaceDir, glob, onChangedWorkspace, execs };
     const NotesApp = thusNotesApp({

@@ -3,6 +3,7 @@ import { broke, escapePlainTextForRegExp, isNull, isUndefined } from '../shared/
 import { CardProps } from './cards';
 import { thusCardLister } from './cards-lister';
 import { startListening } from './eventing';
+import { ExecRegistry } from './exec-registry';
 import { enableMoving, NoteDefaults, NoteProps } from './note';
 import { NotesGlob } from './notes-glob';
 import { thusNotesSearch } from './notes-search';
@@ -15,7 +16,7 @@ export interface NotesAppProps {
     workspace: NotesWorkspaceConfig;
     workspaceDir: FileSystemDirectoryHandle;
     glob: NotesGlob;
-    execs: NotesExec[];
+    execs: ExecRegistry;
     onChangedWorkspace(): void;
 }
 
@@ -163,13 +164,19 @@ export function thusNotesApp(defaults: NoteDefaults) {
             this.nomores.push(nomore);
 
             const { execs } = this.props;
-            execs.push(text => {
-                if (text === 'find') {
-                    this.setState({ shouldShowSearch: true });
-                }
-            });
+            execs.add(this.exec);
         }
+
+        exec = (text: string) => {
+            if (text === 'find') {
+                this.setState({ shouldShowSearch: true });
+            }
+        }
+
         componentWillUnmount(): void {
+            const { execs } = this.props;
+            execs.remove(this.exec);
+
             this.nomores.forEach(nomore => {
                 nomore();
             });
