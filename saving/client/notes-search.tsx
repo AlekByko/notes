@@ -10,7 +10,7 @@ export function thusNotesSearch(delay: number) {
     return function NotesSearch(props: NotesSearchProps) {
         const lastSearchTextRef = useRef('');
         const timerRef = useRef(0);
-        const [found, setFound] = useState([] as CardKey[]);
+        const [found, setFound] = useState([] as CardProps[]);
 
 
         const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,8 +22,7 @@ export function thusNotesSearch(delay: number) {
             window.clearTimeout(timerRef.current);
             timerRef.current = window.setTimeout(() => {
                 const found = props.search(searchText);
-                const xxx = found.map(x => x.cardKey);
-                setFound(xxx);
+                setFound(found);
             }, delay);
         };
 
@@ -33,10 +32,10 @@ export function thusNotesSearch(delay: number) {
                 <input className="notes-search-input" value={text} onChange={onChange} />
             </div>
             <div className="notes-search-results">
-                {found.map(x => {
-                    return <div key={x} className="notes-search-result" onMouseOver={() => {
-                        props.onPreview(x);
-                    }}>{x}</div>;
+                {found.map(card => {
+                    return <div key={card.cardKey} className="notes-search-result" onMouseOver={() => {
+                        props.onPreview(card.cardKey);
+                    }}>{card.title}</div>;
                 })}
             </div>
         </div>;
