@@ -21,7 +21,7 @@ export function thusNotesSearch(delay: number) {
         const lastSearchTextRef = useRef('');
         const timerRef = useRef(0);
         const [found, setFound] = useState([] as CardProps[]);
-
+        const lastOveredRef = useRef(null as null | CardKey);
 
         const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             let text = e.currentTarget.value;
@@ -39,6 +39,7 @@ export function thusNotesSearch(delay: number) {
         const whenMouseOver = (e: React.MouseEvent<HTMLElement>) => {
             const cardKey = pullCardKey(e.target);
             if (isNull(cardKey)) return;
+            lastOveredRef.current = cardKey;
             props.onPreview(cardKey);
         }
 
