@@ -21,7 +21,7 @@ export interface NotesAppProps {
 
 interface State {
     cards: CardProps[];
-    shouldSearch: boolean;
+    shouldShowSearch: boolean;
 }
 
 const grabbingClassName = 'as-grabbing';
@@ -29,6 +29,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
     const Lister = thusCardLister(defaults);
     const Search = thusNotesSearch(500);
     return class NotesApp extends React.Component<NotesAppProps, State> {
+
         whenChangingBox = (key: CardKey, box: Partial<Box>) => {
             const { workspace } = this.props;
             const found = workspace.notes.find(x => x.key === key);
@@ -36,6 +37,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
             found.box = { ...found.box, ...box };
             this.props.onChangedWorkspace();
         }
+
         whenChangingTitle = (key: CardKey, title: string) => {
             const { workspace } = this.props;
             const found = workspace.notes.find(x => x.key === key);
@@ -45,7 +47,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
         }
 
         whenShowingSearch: MouseEventHandler<HTMLButtonElement> = _e => {
-            this.setState({ shouldSearch: true });
+            this.setState({ shouldShowSearch: true });
         }
 
         whenLookingAtCard = (cardKey: CardKey) => {
@@ -71,11 +73,15 @@ export function thusNotesApp(defaults: NoteDefaults) {
             const y = -cy + dy;
             notesCanvasPinnacleElement.style.top = y + 'px';
             notesCanvasPinnacleElement.style.left = x + 'px';
-            const { workspace } = this.props;
-            workspace.x = x;
-            workspace.y = y;
-            this.props.onChangedWorkspace();
-            this.setState({ shouldSearch: false });
+            this.setState({ shouldShowSearch: false }, () => {
+                const { workspace } = this.props;
+                workspace.x = x;
+                workspace.y = y;
+                this.props.onChangedWorkspace();
+            });
+        };
+        whenHidingSearch = () => {
+            this.setState({ shouldShowSearch: false });
         };
 
         createNote(x: number, y: number, title: string) {
@@ -91,7 +97,9 @@ export function thusNotesApp(defaults: NoteDefaults) {
                 let { cards } = state;
                 cards = [...cards, note];
                 return { ...state, cards } satisfies State;
-            }, () => this.props.onChangedWorkspace());
+            }, () => {
+                this.props.onChangedWorkspace();
+            });
         }
         whenDeleting = (key: CardKey) => {
             const { workspace } = this.props;
@@ -161,7 +169,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
             const cards = workspace.notes.map(config => {
                 return this.makeNoteProps(config);
             });
-            return { cards, shouldSearch: false };
+            return { cards, shouldShowSearch: false };
         }
 
         state = this.makeState();
@@ -196,7 +204,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
         }
 
         render() {
-            const { cards, shouldSearch } = this.state;
+            const { cards, shouldShowSearch } = this.state;
             return <div className="notes">
                 <div className="notes-canvas" ref={el => this.notesCanvasElement = el}>
                     <div className="notes-canvas-pinnacle" ref={el => this.notesCanvasPinnacleElement = el}>
@@ -206,7 +214,14 @@ export function thusNotesApp(defaults: NoteDefaults) {
                 <div className="notes-toolbar">
                     <button onClick={this.whenShowingSearch}>Search</button>
                 </div>
-                {shouldSearch && <Search search={this.search} onPreview={this.whenLookingAtCard} onSelect={this.whenSelectingCard} />}
+                {shouldShowSearch &&
+                    <Search
+                        search={this.search}
+                        onPreview={this.whenLookingAtCard}
+                        onSelect={this.whenSelectingCard}
+                        onHide={this.whenHidingSearch}
+                    />
+                }
             </div>;
         }
     };

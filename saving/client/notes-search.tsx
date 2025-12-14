@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { isNull } from '../shared/core';
 import { CardProps } from './cards';
 import { seeIfElement } from './doming';
@@ -8,6 +8,7 @@ export interface NotesSearchProps {
     search: (text: string) => CardProps[];
     onPreview: (cardKey: CardKey) => void;
     onSelect: (cardKey: CardKey) => void;
+    onHide: () => void;
 }
 
 function pullCardKey(target: EventTarget) {
@@ -48,9 +49,20 @@ export function thusNotesSearch(delay: number) {
             props.onSelect(cardKey);
         };
 
+        const onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+            if (e.nativeEvent.code === 'Escape') props.onHide();
+        };
+
+        const inputRef = useRef(null as HTMLInputElement | null);
+
+        useEffect(() => {
+            if (isNull(inputRef.current)) return;
+            inputRef.current.focus();
+        }, []);
+
         return <div className="notes-search">
             <div>
-                <input className="notes-search-input" value={text} onChange={onChange} />
+                <input className="notes-search-input" value={text} onChange={onChange} onKeyDown={onKeyDown} ref={inputRef} />
             </div>
             <div className="notes-search-results" onMouseOver={whenMouseOver} onClick={whenMouseClick}>
                 {found.map(card => {
