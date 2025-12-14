@@ -54,14 +54,29 @@ export function thusNotesApp(defaults: NoteDefaults) {
             const card = this.state.cards.find(x => x.cardKey === cardKey);
             if (isUndefined(card)) return;
             const { x: cx, y: cy } = card.box;
-            // const { x: wx, y: wy } = this.props.workspace;
-            // console.log({ wx, wy, cx, cy });
             const [dx, dy] = [100, 100];
             const x = -cx + dx;
             const y = -cy + dy;
             notesCanvasPinnacleElement.style.top = y + 'px';
             notesCanvasPinnacleElement.style.left = x + 'px';
         }
+        whenSelectingCard = (cardKey: CardKey) => {
+            const { notesCanvasPinnacleElement } = this;
+            if (isNull(notesCanvasPinnacleElement)) return;
+            const card = this.state.cards.find(x => x.cardKey === cardKey);
+            if (isUndefined(card)) return;
+            const { x: cx, y: cy } = card.box;
+            const [dx, dy] = [100, 100];
+            const x = -cx + dx;
+            const y = -cy + dy;
+            notesCanvasPinnacleElement.style.top = y + 'px';
+            notesCanvasPinnacleElement.style.left = x + 'px';
+            const { workspace } = this.props;
+            workspace.x = x;
+            workspace.y = y;
+            this.props.onChangedWorkspace();
+            this.setState({ shouldSearch: false });
+        };
 
         createNote(x: number, y: number, title: string) {
             const cardKey = makeCardKey();
@@ -191,7 +206,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
                 <div className="notes-toolbar">
                     <button onClick={this.whenShowingSearch}>Search</button>
                 </div>
-                {shouldSearch && <Search search={this.search} onPreview={this.whenLookingAtCard} />}
+                {shouldSearch && <Search search={this.search} onPreview={this.whenLookingAtCard} onSelect={this.whenSelectingCard} />}
             </div>;
         }
     };

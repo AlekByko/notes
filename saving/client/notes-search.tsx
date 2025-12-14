@@ -1,10 +1,19 @@
 import React, { useRef, useState } from 'react';
+import { isNull } from '../shared/core';
 import { CardProps } from './cards';
+import { seeIfElement } from './doming';
 import { CardKey } from './notes-workspace';
 
 export interface NotesSearchProps {
     search: (text: string) => CardProps[];
     onPreview: (cardKey: CardKey) => void;
+    onSelect: (cardKey: CardKey) => void;
+}
+
+function pullCardKey(target: EventTarget) {
+    if (!seeIfElement(target)) return null;
+    const cardKey = target.getAttribute('data-card-key');
+    return cardKey as CardKey;
 }
 export function thusNotesSearch(delay: number) {
     return function NotesSearch(props: NotesSearchProps) {
@@ -26,16 +35,26 @@ export function thusNotesSearch(delay: number) {
             }, delay);
         };
 
+        const whenMouseOver = (e: React.MouseEvent<HTMLElement>) => {
+            const cardKey = pullCardKey(e.target);
+            if (isNull(cardKey)) return;
+            props.onPreview(cardKey);
+        }
+
         const [text, setText] = useState('');
+        const whenMouseClick = (e: React.MouseEvent<HTMLElement>) => {
+            const cardKey = pullCardKey(e.target);
+            if (isNull(cardKey)) return;
+            props.onSelect(cardKey);
+        };
+
         return <div className="notes-search">
             <div>
                 <input className="notes-search-input" value={text} onChange={onChange} />
             </div>
-            <div className="notes-search-results">
+            <div className="notes-search-results" onMouseOver={whenMouseOver} onClick={whenMouseClick}>
                 {found.map(card => {
-                    return <div key={card.cardKey} className="notes-search-result" onMouseOver={() => {
-                        props.onPreview(card.cardKey);
-                    }}>{card.title}</div>;
+                    return <div key={card.cardKey} data-card-key={card.cardKey} className="notes-search-result">{card.title}</div>;
                 })}
             </div>
         </div>;
