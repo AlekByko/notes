@@ -209,7 +209,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
                     case 'note': {
                         const escaped = escapePlainTextForRegExp(text);
                         const reg = new RegExp(escaped, 'ig');
-                        const hasIt = reg.test(x.drop.lastText);
+                        const hasIt = reg.test(x.title) || reg.test(x.drop.lastText);
                         return hasIt;
                     }
                     default: return broke(x);
