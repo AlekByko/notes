@@ -1,4 +1,4 @@
-import React, { MouseEventHandler } from 'react';
+import React from 'react';
 import { broke, escapePlainTextForRegExp, isNull, isUndefined } from '../shared/core';
 import { CardProps } from './cards';
 import { thusCardLister } from './cards-lister';
@@ -35,7 +35,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
 
 
 
-        whenChangingBox = (key: CardKey, box: Partial<Box>) => {
+        private whenChangingBox = (key: CardKey, box: Partial<Box>) => {
             const { workspace } = this.props;
             const found = workspace.notes.find(x => x.key === key);
             if (isUndefined(found)) return;
@@ -43,7 +43,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
             this.props.onChangedWorkspace();
         }
 
-        whenChangingTitle = (key: CardKey, title: string) => {
+        private whenChangingTitle = (key: CardKey, title: string) => {
             const { workspace } = this.props;
             const found = workspace.notes.find(x => x.key === key);
             if (isUndefined(found)) return;
@@ -51,11 +51,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
             this.props.onChangedWorkspace();
         }
 
-        whenShowingSearch: MouseEventHandler<HTMLButtonElement> = _e => {
-            this.setState({ shouldShowSearch: true });
-        }
-
-        whenLookingAtCard = (cardKey: CardKey) => {
+        private whenLookingAtCard = (cardKey: CardKey) => {
             const { notesCanvasPinnacleElement } = this;
             if (isNull(notesCanvasPinnacleElement)) return;
             const card = this.state.cards.find(x => x.cardKey === cardKey);
@@ -67,7 +63,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
             notesCanvasPinnacleElement.style.top = y + 'px';
             notesCanvasPinnacleElement.style.left = x + 'px';
         }
-        whenSelectingCard = (cardKey: CardKey) => {
+        private whenSelectingCard = (cardKey: CardKey) => {
             const { notesCanvasPinnacleElement } = this;
             if (isNull(notesCanvasPinnacleElement)) return;
             const card = this.state.cards.find(x => x.cardKey === cardKey);
@@ -85,11 +81,11 @@ export function thusNotesApp(defaults: NoteDefaults) {
                 this.props.onChangedWorkspace();
             });
         };
-        whenHidingSearch = () => {
+        private whenHidingSearch = () => {
             this.setState({ shouldShowSearch: false });
         };
 
-        createNote(x: number, y: number, title: string) {
+        private createNote(x: number, y: number, title: string) {
             const cardKey = makeCardKey();
             const path = `${cardKey}.txt`;
             const config: NoteConfig = {
@@ -106,7 +102,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
                 this.props.onChangedWorkspace();
             });
         }
-        whenDeleting = (key: CardKey) => {
+        private whenDeleting = (key: CardKey) => {
             const { workspace } = this.props;
             const foundAt = workspace.notes.findIndex(x => x.key === key);
             if (foundAt < 0) return console.log('No note to delete: ' + key);
@@ -118,9 +114,9 @@ export function thusNotesApp(defaults: NoteDefaults) {
                 return { ...state, cards } satisfies State;
             }, () => this.props.onChangedWorkspace());
         }
-        notesCanvasPinnacleElement: HTMLDivElement | null = null;
-        notesCanvasElement: HTMLDivElement | null = null;
-        nomores: Act[] = [];
+        private notesCanvasPinnacleElement: HTMLDivElement | null = null;
+        private notesCanvasElement: HTMLDivElement | null = null;
+        private nomores: Act[] = [];
         componentDidMount(): void {
             const { notesCanvasElement, notesCanvasPinnacleElement } = this;
             if (isNull(notesCanvasElement) || isNull(notesCanvasPinnacleElement)) return;
@@ -167,7 +163,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
             execs.add(this.exec);
         }
 
-        exec = (text: string) => {
+        private exec = (text: string) => {
             if (text === 'find') {
                 this.setState({ shouldShowSearch: true });
             }
@@ -229,9 +225,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
                         <Lister cards={cards} />
                     </div>
                 </div>
-                <div className="notes-toolbar">
-                    <button onClick={this.whenShowingSearch}>Search</button>
-                </div>
+                {/* <div className="notes-toolbar"></div> */}
                 {shouldShowSearch &&
                     <Search
                         search={this.search}
