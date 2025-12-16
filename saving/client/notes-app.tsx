@@ -1,6 +1,6 @@
 import React from 'react';
 import { broke, escapePlainTextForRegExp, isNull, isUndefined } from '../shared/core';
-import { CardProps } from './cards';
+import { boxOf, CardProps, titleOf } from './cards';
 import { thusCardLister } from './cards-lister';
 import { startListening } from './eventing';
 import { ExecRegistry } from './exec-registry';
@@ -56,7 +56,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
             if (isNull(notesCanvasPinnacleElement)) return;
             const card = this.state.cards.find(x => x.cardKey === cardKey);
             if (isUndefined(card)) return;
-            const { x: cx, y: cy } = card.box;
+            const { x: cx, y: cy } = boxOf(card);
             const [dx, dy] = [100, 100];
             const x = -cx + dx;
             const y = -cy + dy;
@@ -68,7 +68,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
             if (isNull(notesCanvasPinnacleElement)) return;
             const card = this.state.cards.find(x => x.cardKey === cardKey);
             if (isUndefined(card)) return;
-            const { x: cx, y: cy } = card.box;
+            const { x: cx, y: cy } = boxOf(card);
             const [dx, dy] = [100, 100];
             const x = -cx + dx;
             const y = -cy + dy;
@@ -190,11 +190,11 @@ export function thusNotesApp(defaults: NoteDefaults) {
 
         private makeNoteProps(config: NoteConfig) {
             const { workspaceDir } = this.props;
-            const { path, key, box, title } = config;
+            const { path, key } = config;
             const drop = new TextDrop(workspaceDir, path);
             const note: NoteProps = {
                 kind: 'note',
-                cardKey: key, drop, box, title,
+                cardKey: key, drop, config,
                 onChangedBox: this.whenChangingBox,
                 onChangedTitle: this.whenChangingTitle,
                 onDeleting: this.whenDeleting,
@@ -209,7 +209,7 @@ export function thusNotesApp(defaults: NoteDefaults) {
                     case 'note': {
                         const escaped = escapePlainTextForRegExp(text);
                         const reg = new RegExp(escaped, 'ig');
-                        const hasIt = reg.test(x.title) || reg.test(x.drop.lastText);
+                        const hasIt = reg.test(titleOf(x)) || reg.test(x.drop.lastText);
                         return hasIt;
                     }
                     default: return broke(x);

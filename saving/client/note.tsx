@@ -2,7 +2,7 @@ import React, { FormEventHandler, UIEventHandler } from 'react';
 import { isNonNull, isNull } from '../shared/core';
 import { thusBoxed } from './boxed';
 import { startListening } from './eventing';
-import { CardKey, NoteBox } from './notes-workspace';
+import { CardKey, NoteBox, NoteConfig } from './notes-workspace';
 import { debounceOver } from './scheduling';
 import { TextDrop } from './text-drop';
 
@@ -13,8 +13,7 @@ export interface NoteProps {
     /** cannot be named just `key` because React */
     cardKey: CardKey;
     drop: TextDrop;
-    box: NoteBox;
-    title: string;
+    config: NoteConfig;
     onChangedBox: (key: CardKey, box: Partial<NoteBox>) => void;
     onChangedTitle: (key: CardKey, title: string) => void;
     onDeleting: (key: CardKey) => void;
@@ -24,7 +23,7 @@ export interface NoteProps {
 interface State { text: string; title: string; }
 
 function makeState(props: NoteProps): State {
-    const { title } = props;
+    const { title } = props.config;
     return { text: 'Loading...', title };
 }
 
@@ -79,8 +78,8 @@ export interface NoteDefaults {
 export function thusNote(defaults: NoteDefaults) {
 
     const Boxed = thusBoxed({
-        boxOf: (props: NoteProps) => props.box,
-        titleOf: props => props.title,
+        boxOf: (props: NoteProps) => props.config.box,
+        titleOf: props => props.config.title,
         onChangedBox: (props, box) => props.onChangedBox(props.cardKey, box),
         onChangedTitle: (props, title) => props.onChangedTitle(props.cardKey, title),
         onDeleting: props => props.onDeleting(props.cardKey),
@@ -116,7 +115,7 @@ export function thusNote(defaults: NoteDefaults) {
         async componentDidMount(): Promise<void> {
             const { textElement } = this;
             if (isNull(textElement)) return;
-            const { scrollLeft, scrollTop } = this.props.box;
+            const { scrollLeft, scrollTop } = this.props.config.box;
 
             this.dispose.push(startListening(textElement, 'mousedown', e => {
                 e.stopPropagation();

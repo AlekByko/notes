@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { cast, isNonNull, isNull } from '../shared/core';
-import { CardProps } from './cards';
+import { CardProps, titleOf } from './cards';
 import { seeIfElement, seeIfHTMLElement } from './doming';
 import { CardKey } from './notes-workspace';
 
@@ -153,7 +153,7 @@ export function thusNotesSearch(delay: number) {
             </div>
             <div className="notes-search-results" ref={resultListElementRef} onMouseOver={whenMouseOver} onClick={whenMouseClick}>
                 {found.map(card => {
-                    return <div key={card.cardKey} data-card-key={card.cardKey} className="notes-search-result">{card.title}</div>;
+                    return <div key={card.cardKey} data-card-key={card.cardKey} className="notes-search-result">{titleOf(card)}</div>;
                 })}
             </div>
         </div>;
